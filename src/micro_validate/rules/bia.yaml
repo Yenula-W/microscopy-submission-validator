@@ -1,0 +1,241 @@
+target: bia
+name: BioImage Archive (EMBL-EBI)
+description: >
+  Pre-submission checks for a BioImage Archive deposition: REMBI 1.5 study-level metadata
+  (entered in the BioStudies web form; here read from submission.yaml), file list rules,
+  allowed file-name characters, size limits, and image readability.
+retrieved: 2026-11-02
+sources:
+  rembi-model:
+    title: REMBI Model Reference (v1.5)
+    url: https://www.ebi.ac.uk/bioimage-archive/rembi-model-reference/
+  rembi-overview:
+    title: REMBI Overview
+    url: https://www.ebi.ac.uk/bioimage-archive/rembi-help-overview/
+  file-list:
+    title: BioImage Archive File List Guide
+    url: https://www.ebi.ac.uk/bioimage-archive/help-file-list
+  submit:
+    title: Submitting data to the BioImage Archive
+    url: https://www.ebi.ac.uk/bioimage-archive/submit
+  annotations:
+    title: Submitting Annotations to the BioImage Archive
+    url: https://www.ebi.ac.uk/bioimage-archive/submit-annotations
+
+rules:
+  # ---------------- metadata (REMBI 1.5, Required: true fields)
+  - id: BIA-META-001
+    title: Submission metadata file present
+    check: metadata_present
+    fix: Create submission.yaml in the dataset root (run `micro-validate --template bia > submission.yaml`).
+    sources: [rembi-model, submit]
+  - id: BIA-STUDY-001
+    title: Study title
+    check: field_present
+    params: {path: study.title}
+    fix: Add study.title.
+    sources: [rembi-model]
+  - id: BIA-STUDY-002
+    title: Study description
+    check: field_present
+    params: {path: study.description}
+    fix: Add study.description (an abstract-length summary).
+    sources: [rembi-model]
+  - id: BIA-STUDY-003
+    title: Study keywords
+    check: field_present
+    params: {path: study.keywords}
+    fix: Add a list under study.keywords.
+    sources: [rembi-model]
+  - id: BIA-STUDY-004
+    title: Release date (private_until_date)
+    check: field_present
+    params: {path: study.private_until_date, pattern: '^\d{4}-\d{2}-\d{2}$'}
+    fix: Set study.private_until_date as YYYY-MM-DD (today for immediate release).
+    sources: [rembi-model]
+  - id: BIA-STUDY-005
+    title: Licence stated
+    check: field_present
+    severity: warn
+    params: {path: study.license}
+    fix: Set study.license (BIA default is CC0; state it explicitly).
+    sources: [rembi-model]
+  - id: BIA-AUTH-001
+    title: Authors with first and last names
+    check: field_present
+    params: {path: 'study.authors[*].last_name'}
+    fix: Every entry in study.authors needs last_name and first_name.
+    sources: [rembi-model]
+  - id: BIA-AUTH-002
+    title: Author first names
+    check: field_present
+    params: {path: 'study.authors[*].first_name'}
+    fix: Every entry in study.authors needs first_name.
+    sources: [rembi-model]
+  - id: BIA-AUTH-003
+    title: Author affiliations
+    check: field_present
+    params: {path: 'study.authors[*].affiliation.name'}
+    fix: Add affiliation.name (and ROR url if known) to each author.
+    sources: [rembi-model]
+  - id: BIA-AUTH-004
+    title: Author ORCIDs (recommended)
+    check: field_present
+    severity: warn
+    params: {path: 'study.authors[*].orcid'}
+    fix: Add ORCID iDs to authors.
+    sources: [rembi-model]
+  - id: BIA-PUB-001
+    title: Publication titles (when publications listed)
+    check: field_present
+    params: {path: 'study.publications[*].title', if_present: study.publications}
+    fix: Each listed publication needs a title.
+    sources: [rembi-model]
+  - id: BIA-FUND-001
+    title: Funding statement (when funding listed)
+    check: field_present
+    params: {path: 'study.funding[*].funding_statement', if_present: study.funding}
+    fix: Each funding entry needs funding_statement.
+    sources: [rembi-model]
+  - id: BIA-COMP-001
+    title: Study component name and description
+    check: field_present
+    params: {path: 'study_components[*].name'}
+    fix: Add at least one study_components entry with name and description.
+    sources: [rembi-model, rembi-overview]
+  - id: BIA-COMP-002
+    title: Study component description
+    check: field_present
+    params: {path: 'study_components[*].description'}
+    fix: Describe each study component.
+    sources: [rembi-model]
+  - id: BIA-BIOS-001
+    title: Biosample organism (scientific name)
+    check: field_present
+    params: {path: 'biosample.organism[*].scientific_name'}
+    fix: Set biosample.organism scientific_name (e.g. Homo sapiens).
+    sources: [rembi-model]
+  - id: BIA-BIOS-002
+    title: Biosample organism NCBI taxon
+    check: field_present
+    params: {path: 'biosample.organism[*].ncbi_taxon', pattern: '^(NCBITaxon_)?\d+$'}
+    fix: Set organism ncbi_taxon (e.g. NCBITaxon_9606); look up at https://www.ncbi.nlm.nih.gov/taxonomy.
+    sources: [rembi-model]
+  - id: BIA-BIOS-003
+    title: Biological entity
+    check: field_present
+    params: {path: biosample.biological_entity}
+    fix: Set biosample.biological_entity (what is being imaged, e.g. HeLa cells).
+    sources: [rembi-model]
+  - id: BIA-SPEC-001
+    title: Specimen sample preparation
+    check: field_present
+    params: {path: specimen.sample_preparation}
+    fix: Describe specimen.sample_preparation (fixation, staining, mounting).
+    sources: [rembi-model]
+  - id: BIA-ACQ-001
+    title: Imaging method
+    check: field_present
+    params: {path: image_acquisition.imaging_method}
+    fix: Set image_acquisition.imaging_method, ideally an FBbi term (https://www.ebi.ac.uk/ols4/ontologies/fbbi).
+    sources: [rembi-model]
+  - id: BIA-ACQ-002
+    title: Imaging instrument
+    check: field_present
+    params: {path: image_acquisition.imaging_instrument}
+    fix: Describe the microscope (make, model, objective, detector).
+    sources: [rembi-model]
+  - id: BIA-ACQ-003
+    title: Image acquisition parameters
+    check: field_present
+    params: {path: image_acquisition.image_acquisition_parameters}
+    fix: Describe acquisition parameters (pixel size, exposure, channels, laser lines).
+    sources: [rembi-model]
+  - id: BIA-ANA-001
+    title: Image analysis overview (when analysis included)
+    check: field_present
+    params: {path: image_analysis.analysis_overview, if_present: image_analysis}
+    fix: Give image_analysis.analysis_overview.
+    sources: [rembi-model]
+  - id: BIA-ANN-001
+    title: Annotation overview and method (when annotations included)
+    check: field_present
+    params: {path: annotations.annotation_method, if_present: annotations}
+    fix: Give annotations.annotation_overview and annotation_method.
+    sources: [rembi-model, annotations]
+
+  # ---------------- file list
+  - id: BIA-FL-001
+    title: File list present
+    check: file_list_present
+    fix: Add a tab-separated file list named like file_list.tsv (one per study component).
+    sources: [file-list, submit]
+  - id: BIA-FL-002
+    title: File list first column is "Files"
+    check: file_list_header
+    params: {first_column: Files}
+    fix: Rename the first column header to exactly "Files".
+    sources: [file-list]
+  - id: BIA-FL-003
+    title: File list rows well-formed
+    check: file_list_format
+    fix: Remove blank lines; use '/' separators; no ./, ../ or trailing slashes; fill every attribute cell.
+    sources: [file-list]
+  - id: BIA-FL-004
+    title: File list matches files on disk (no missing, no orphans)
+    check: file_list_matches
+    params: {check_orphans: true}
+    fix: List every uploaded file exactly once with exact case; remove entries for files you will not upload.
+    sources: [file-list]
+  - id: BIA-FL-005
+    title: Annotation file lists have source_image
+    check: annotation_source_image
+    params: {column: source_image}
+    fix: Add a source_image column pointing to the annotated image's path.
+    sources: [file-list, annotations]
+  - id: BIA-NAME-001
+    title: File names use allowed characters
+    check: filename_chars
+    params: {pattern: "^[A-Za-z0-9!\\-_.*'() /]+$"}
+    fix: Rename files to use only a-z A-Z 0-9 ! - _ . * ' ( ) and space.
+    sources: [file-list, submit]
+  - id: BIA-SIZE-001
+    title: File sizes within limits
+    check: file_size
+    params: {max_bytes: 2000000000000, warn_bytes: 100000000000}
+    fix: Split files >100 GB where possible; files >2 TB cannot be accepted.
+    sources: [submit]
+
+  # ---------------- images
+  - id: BIA-FMT-001
+    title: Image formats
+    check: formats_accepted
+    params:
+      levels: {ome-tiff: pass, ome-zarr-zip: pass, ome-zarr: warn, tiff: pass, vendor: warn, raster: warn}
+      messages:
+        ome-zarr: "OME-Zarr must be zipped and uploaded as .ome.zarr.zip"
+        vendor: "accepted, but convert to OME-TIFF/OME-Zarr (e.g. bioformats2raw, BatchConvert) for reuse and BIA viewers"
+        raster: "lossy/8-bit formats lose microscopy metadata; prefer the original acquisition files"
+    fix: Zip OME-Zarr folders (.ome.zarr.zip); prefer open OME formats over vendor files.
+    sources: [file-list, submit]
+  - id: BIA-IMG-001
+    title: Image files readable
+    check: images_readable
+    params: {unverified: warn}
+    fix: Re-export or replace unreadable files; install micro-validate[vendor] to verify vendor formats.
+    sources: [submit]
+  - id: BIA-IMG-002
+    title: Images carry OME metadata with pixel sizes
+    check: ome_metadata
+    severity: warn
+    params: {pixel_size_axes: [x, y]}
+    fix: Convert plain TIFFs to OME-TIFF and set PhysicalSizeX/Y (e.g. with microscopy-metadata-repair or bfconvert).
+    sources: [rembi-model]
+  - id: BIA-IMG-003
+    title: Consistent dimensions/channels/pixel sizes within a series
+    check: series_consistent
+    params:
+      group_by: directory
+      fields: {channels: problem, pixel_size: problem, dtype: warning, xy: warning}
+    fix: Check images in the same folder (series) were acquired with identical settings, or split them into separate study components.
+    sources: [rembi-model]

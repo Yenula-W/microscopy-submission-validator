@@ -1,0 +1,47 @@
+# REMBI 1.5 submission metadata for micro-validate (targets: bia, rembi).
+# Field names follow https://www.ebi.ac.uk/bioimage-archive/rembi-model-reference/
+# Replace every "# fill in" value. For BioImage Archive, copy these into the BioStudies form.
+study:
+  title: "# fill in"
+  description: "# fill in"
+  keywords: []
+  private_until_date: "# YYYY-MM-DD"
+  license: CC0
+  authors:
+    - first_name: "# fill in"
+      last_name: "# fill in"
+      email: ""
+      orcid: ""
+      affiliation:
+        name: "# fill in"
+        url: ""            # ROR URL recommended
+  publications: []         # - {title: ..., doi: ..., pubmed_id: ...}
+  funding: []              # - {funding_statement: ..., grant_references: [{identifier: ..., funder: ...}]}
+study_components:
+  - name: "# fill in"
+    description: "# fill in"
+biosample:
+  organism:
+    - scientific_name: "# e.g. Homo sapiens"
+      common_name: ""
+      ncbi_taxon: "# e.g. NCBITaxon_9606"
+  biological_entity: "# what is imaged, e.g. HeLa cells"
+  description: ""
+  intrinsic_variables: ""
+  extrinsic_variables: ""
+  experimental_variables: ""
+specimen:
+  sample_preparation: "# fill in"
+  growth_protocol: ""
+image_acquisition:
+  imaging_method:
+    value: "# e.g. confocal microscopy"
+    ontology_name: FBbi
+    ontology_id: "# e.g. FBbi_00000251"
+  imaging_instrument: "# make/model, objective, detector"
+  image_acquisition_parameters: "# pixel size, exposure, channels"
+# image_analysis:
+#   analysis_overview: ""
+# annotations:
+#   annotation_overview: ""
+#   annotation_method: ""

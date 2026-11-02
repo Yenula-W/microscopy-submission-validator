@@ -1,0 +1,153 @@
+target: idr
+name: Image Data Resource (IDR)
+description: >
+  Pre-submission checks for an IDR non-screen (experiment) or screen submission:
+  study file mandatory fields, assay/library table columns, image files referenced
+  by the assay table, and IDR's OME-Zarr image requirement.
+retrieved: 2026-11-02
+sources:
+  idr-submission:
+    title: IDR - Submitting data
+    url: https://idr.openmicroscopy.org/about/submission.html
+  idr-experiments:
+    title: IDR - Experiment (non-screen) submission files
+    url: https://idr.openmicroscopy.org/about/experiments.html
+  idr-screens:
+    title: IDR - Screen submission files
+    url: https://idr.openmicroscopy.org/about/screens.html
+  idr-templates:
+    title: IDR example submission templates (idr0000-lastname-example)
+    url: https://github.com/IDR/idr0000-lastname-example
+
+rules:
+  # ---------------- study file
+  - id: IDR-STUDY-001
+    title: Study file present
+    check: idr_study_present
+    fix: Copy idr0000-study_nonHCS.txt (or _HCS) from the IDR template repo to the dataset root and fill it in.
+    sources: [idr-submission, idr-templates]
+  - id: IDR-STUDY-002
+    title: Mandatory study description fields
+    check: idr_study_fields
+    params:
+      fields:
+        - Study Title
+        - Study Description
+        - Study Key Words
+        - Study Organism
+    fix: Fill in the Study Title, Study Description, Study Key Words and Study Organism lines (replace '#' hints).
+    sources: [idr-experiments, idr-templates]
+  - id: IDR-STUDY-003
+    title: Primary contact
+    check: idr_study_fields
+    params:
+      fields: [Study Person Last Name, Study Person First Name, Study Person Email]
+    fix: Fill in the Study Person Last Name / First Name / Email lines for the submitter.
+    sources: [idr-experiments, idr-templates]
+  - id: IDR-STUDY-004
+    title: Licence stated
+    check: idr_study_fields
+    severity: warn
+    params: {fields: [Study License]}
+    fix: Set 'Study License' (CC BY 4.0 strongly recommended by IDR).
+    sources: [idr-submission, idr-templates]
+  - id: IDR-STUDY-005
+    title: Publication reference
+    check: idr_study_fields
+    severity: warn
+    params: {fields: [[Study PubMed ID, Study DOI, Study Publication Title]]}
+    fix: Add the publication (PubMed ID or DOI); IDR prioritises datasets linked to publications.
+    sources: [idr-submission]
+  - id: IDR-EXP-001
+    title: Experiment/screen description
+    check: idr_study_fields
+    params:
+      fields: [[Experiment Description, Screen Description]]
+    fix: Fill in 'Experiment Description' (or 'Screen Description' for HCS) for every experiment.
+    sources: [idr-experiments, idr-screens]
+  - id: IDR-EXP-002
+    title: Imaging method stated
+    check: idr_study_fields
+    params:
+      fields: [[Experiment Imaging Method, Screen Imaging Method]]
+    fix: Fill in the imaging method (FBbi term, https://www.ebi.ac.uk/ols4/ontologies/fbbi).
+    sources: [idr-templates]
+  - id: IDR-EXP-003
+    title: Protocols described
+    check: idr_study_fields
+    severity: warn
+    params: {fields: [Protocol Description]}
+    fix: Describe growth, treatment, image acquisition and analysis protocols.
+    sources: [idr-experiments]
+  - id: IDR-EXP-004
+    title: Processed data file declared
+    check: idr_processed_data
+    fix: Declare and include the processed data file (summary results / hit list) and describe its columns.
+    sources: [idr-submission, idr-experiments]
+
+  # ---------------- assay / library table
+  - id: IDR-ASSAY-001
+    title: Assay or library file present and linked from study file
+    check: idr_assay_present
+    fix: Add the assay (non-screen) or library (screen) file and name it in 'Experiment Assay File'.
+    sources: [idr-submission, idr-experiments]
+  - id: IDR-ASSAY-002
+    title: Assay file has required annotation columns
+    check: idr_assay_columns
+    params:
+      require_values: true
+      columns:
+        - Characteristics [Organism]
+        - [Assay Name, Plate]
+        - [Dataset Name, Plate]
+        - [Image File, Well]
+        - Channels
+    fix: Use the IDR assay template columns; fill organism, assay/dataset names, image file and channels for every row.
+    sources: [idr-experiments, idr-templates]
+  - id: IDR-ASSAY-003
+    title: Every image described by an assay row, every row resolves to an image
+    check: idr_assay_matches_files
+    params: {file_column: Image File, path_column: "Comment [Image File Path]"}
+    fix: Add a row per image (exact file name) and remove rows for images not submitted.
+    sources: [idr-experiments]
+  - id: IDR-ASSAY-004
+    title: Channels column agrees with image channel count
+    check: idr_channels_match
+    fix: List one label:target pair per channel, separated by ';'.
+    sources: [idr-experiments]
+
+  # ---------------- images
+  - id: IDR-FMT-001
+    title: Images are OME-Zarr
+    check: formats_accepted
+    params:
+      levels: {ome-zarr: pass, ome-zarr-zip: warn, ome-tiff: fail, tiff: fail, vendor: fail, raster: fail}
+      messages:
+        ome-zarr-zip: "IDR serves OME-Zarr from object storage; unzip before upload"
+        ome-tiff: "IDR requires OME-Zarr; convert with bioformats2raw"
+        tiff: "IDR requires OME-Zarr; convert with bioformats2raw"
+        vendor: "IDR requires OME-Zarr; convert with bioformats2raw"
+        raster: "IDR requires OME-Zarr"
+    fix: Convert images to OME-Zarr (bioformats2raw / ome-zarr-py) and send IDR a small sample for testing first.
+    sources: [idr-submission]
+  - id: IDR-IMG-001
+    title: Image files readable
+    check: images_readable
+    params: {unverified: warn}
+    fix: Replace unreadable files before conversion.
+    sources: [idr-submission]
+  - id: IDR-IMG-002
+    title: Images carry physical pixel sizes
+    check: ome_metadata
+    severity: warn
+    params: {pixel_size_axes: [x, y]}
+    fix: Add axis units and scale (OME-Zarr) or PhysicalSize (OME-TIFF) before conversion.
+    sources: [idr-submission]
+  - id: IDR-IMG-003
+    title: Consistent dimensions/channels/pixel sizes within a dataset
+    check: series_consistent
+    params:
+      group_by: directory
+      fields: {channels: problem, pixel_size: warning, dtype: warning, xy: warning}
+    fix: Images in one dataset should share channel layout; split heterogeneous images into separate datasets.
+    sources: [idr-experiments]
