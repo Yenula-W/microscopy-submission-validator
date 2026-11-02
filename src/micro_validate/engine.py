@@ -154,4 +154,5 @@ def run_rules(ruleset: RuleSet, ctx: Any, max_messages: int = 20) -> list[Result
 
 
 def overall_status(results: list[Result]) -> str:
-    return max((r.status for r in results), key=STATUS_RANK.__getitem__, default="pass")
+    """Worst status; skipped rules do not count against the dataset."""
+    return max((r.status for r in results if r.status != "skip"), key=STATUS_RANK.__getitem__, default="pass")
