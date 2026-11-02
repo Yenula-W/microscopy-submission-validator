@@ -89,7 +89,7 @@ def load_ruleset(target_or_path: str | Path) -> RuleSet:
     if p.suffix in (".yaml", ".yml") and p.exists():
         text = p.read_text()
     else:
-        f = resources.files("micro_validate").joinpath("rules", f"{target_or_path}.yaml")
+        f = resources.files("micro_validate").joinpath("rules").joinpath(f"{target_or_path}.yaml")
         if not f.is_file():
             raise ValueError(f"unknown target {target_or_path!r}; known: {', '.join(list_targets())}")
         text = f.read_text()

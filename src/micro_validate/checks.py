@@ -85,7 +85,8 @@ def field_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
         issues.extend(Issue("problem", f"missing or empty: {p}") for p in missing)
     if not found_any:
         if len(paths) > 1:
-            return [Issue("problem", f"none of these is filled in: {', '.join(paths)}")]
+            first_missing = [i.message.split(": ", 1)[1] for i in issues][:5]
+            return [Issue("problem", f"none of these is filled in: {', '.join(paths)} (missing: {', '.join(first_missing)})")]
         return issues
     pattern = params.get("pattern")
     allowed = params.get("allowed")
@@ -309,7 +310,7 @@ def file_list_matches(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
         for n, f in enumerate(t.column(t.header[0] if t.header else "Files"), start=2):
             f = f.strip()
             listed.add(f)
-            if f not in present:
+            if f not in present and not ds.partial:
                 hint = f" (case differs: on disk as {lower[f.lower()]})" if f.lower() in lower else ""
                 issues.append(Issue("problem", f"{t.path}: listed but not found: {f}{hint}"))
     dupes = [f for t in lists for f in set(t.column("Files")) if t.column("Files").count(f) > 1]
@@ -322,20 +323,25 @@ def file_list_matches(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     return issues
 
 
+def _norm_col(name: str) -> str:
+    return re.sub(r"[\s_-]+", "_", name.strip().lower())
+
+
 @check("annotation_source_image")
 def annotation_source_image(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
-    col = params.get("column", "source_image")
+    want = params.get("column", "source_image")
     ann = [t for t in ds.file_lists if "annotation" in t.path.lower()]
     if not ann:
         raise SkipCheck("no annotation file list (file name containing 'annotation')")
     issues = []
     present = set(ds.data_files)
     for t in ann:
-        if col not in t.header:
-            issues.append(Issue("problem", f"{t.path}: missing required column {col!r}"))
+        col = next((h for h in t.header if _norm_col(h) == _norm_col(want)), None)
+        if col is None:
+            issues.append(Issue("problem", f"{t.path}: missing required column {want!r}"))
             continue
         for v in t.column(col):
-            if v.strip() and v.strip() not in present:
+            if v.strip() and v.strip() not in present and not ds.partial:
                 issues.append(Issue("problem", f"{t.path}: {col} {v!r} not found in dataset"))
             elif not v.strip():
                 issues.append(Issue("problem", f"{t.path}: empty {col} value"))
@@ -352,6 +358,8 @@ def _study_value(ds: Dataset, key: str) -> list[str]:
 
 @check("idr_study_present")
 def idr_study_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
+    if ds.idr_study_error:
+        return [Issue("problem", f"{ds.idr_study_path}: {ds.idr_study_error}")]
     if ds.idr_study is None:
         return [Issue("problem", "no IDR study file (*study*.txt) in dataset root")]
     return []
@@ -463,7 +471,7 @@ def idr_assay_matches_files(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
             if hit:
                 referenced.add(hit)
                 by_stem += stem_only
-            else:
+            elif not ds.partial:
                 missing.append(Issue("problem", f"{t.path}: Image File {name!r} not found in dataset"))
     issues = [Issue("problem", f"image not described in any assay file: {f}") for f in ds.image_files if f not in referenced]
     if by_stem:

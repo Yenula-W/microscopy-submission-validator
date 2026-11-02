@@ -50,7 +50,7 @@ rules:
   - id: REMBI-STUDY-005
     title: Author last names
     check: field_present
-    params: {path: 'study.authors[*].last_name'}
+    params: {any_of: ['study.authors[*].last_name', 'study.authors[*].name']}
     fix: Every author needs last_name and first_name.
     sources: [rembi-model]
   - id: REMBI-STUDY-006
@@ -85,79 +85,80 @@ rules:
   - id: REMBI-BIOS-001
     title: Organism scientific name
     check: field_present
-    params: {path: 'biosample.organism[*].scientific_name'}
+    params: {path: 'biosample[*].organism[*].scientific_name'}
     fix: Set organism scientific_name.
     sources: [rembi-model]
   - id: REMBI-BIOS-002
     title: Organism NCBI taxon
     check: field_present
-    params: {path: 'biosample.organism[*].ncbi_taxon', pattern: '^(NCBITaxon_)?\d+$'}
+    severity: warn
+    params: {path: 'biosample[*].organism[*].ncbi_taxon', pattern: '^(NCBITaxon_)?\d+$'}
     fix: Set ncbi_taxon (e.g. NCBITaxon_10090).
     sources: [rembi-model]
   - id: REMBI-BIOS-003
     title: Biological entity
     check: field_present
-    params: {path: biosample.biological_entity}
+    params: {path: 'biosample[*].biological_entity'}
     fix: Set biosample.biological_entity.
     sources: [rembi-model]
   - id: REMBI-BIOS-004
     title: Variables described (recommended)
     check: field_present
     severity: warn
-    params: {any_of: [biosample.intrinsic_variables, biosample.extrinsic_variables, biosample.experimental_variables]}
+    params: {any_of: ['biosample[*].intrinsic_variables', 'biosample[*].extrinsic_variables', 'biosample[*].experimental_variables']}
     fix: Describe intrinsic (genotype), extrinsic (treatment) or experimental variables.
     sources: [rembi-model, rembi-paper]
   # Specimen
   - id: REMBI-SPEC-001
     title: Sample preparation
     check: field_present
-    params: {path: specimen.sample_preparation}
+    params: {path: 'specimen[*].sample_preparation'}
     fix: Describe sample preparation.
     sources: [rembi-model]
   - id: REMBI-SPEC-002
     title: Growth protocol (recommended)
     check: field_present
     severity: warn
-    params: {path: specimen.growth_protocol}
+    params: {path: 'specimen[*].growth_protocol'}
     fix: Describe the growth protocol.
     sources: [rembi-model]
   # Image acquisition
   - id: REMBI-ACQ-001
     title: Imaging method
     check: field_present
-    params: {path: image_acquisition.imaging_method}
+    params: {path: 'image_acquisition[*].imaging_method'}
     fix: Set imaging_method (FBbi term).
     sources: [rembi-model]
   - id: REMBI-ACQ-002
     title: Imaging method as ontology term (recommended)
     check: field_present
     severity: warn
-    params: {path: image_acquisition.imaging_method.ontology_id, pattern: 'FBbi[_:]\d+'}
+    params: {path: 'image_acquisition[*].imaging_method.ontology_id', pattern: 'FBbi[_:]\d+'}
     fix: Use an FBbi ontology id for imaging_method (e.g. FBbi_00000246 for fluorescence microscopy).
     sources: [rembi-model]
   - id: REMBI-ACQ-003
     title: Imaging instrument
     check: field_present
-    params: {path: image_acquisition.imaging_instrument}
+    params: {path: 'image_acquisition[*].imaging_instrument'}
     fix: Describe the instrument.
     sources: [rembi-model]
   - id: REMBI-ACQ-004
     title: Acquisition parameters
     check: field_present
-    params: {path: image_acquisition.image_acquisition_parameters}
+    params: {path: 'image_acquisition[*].image_acquisition_parameters'}
     fix: Describe acquisition parameters.
     sources: [rembi-model]
   # Analysis / correlation (conditional)
   - id: REMBI-ANA-001
     title: Analysis overview (when analysis included)
     check: field_present
-    params: {path: image_analysis.analysis_overview, if_present: image_analysis}
+    params: {path: 'image_analysis[*].analysis_overview', if_present: image_analysis}
     fix: Give analysis_overview.
     sources: [rembi-model]
   - id: REMBI-CORR-001
     title: Correlation alignment (when correlation included)
     check: field_present
-    params: {path: image_correlation.spatial_and_temporal_alignment, if_present: image_correlation}
+    params: {path: 'image_correlation[*].spatial_and_temporal_alignment', if_present: image_correlation}
     fix: Describe spatial_and_temporal_alignment, fiducials_used and transformation_matrix.
     sources: [rembi-model]
   # Image data (REMBI image-level component, checked from files)

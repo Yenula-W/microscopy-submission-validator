@@ -13,6 +13,7 @@ VENDOR_EXTS = {
     ".stk", ".nd", ".lof", ".lifext", ".mvd2", ".obf", ".msr", ".ome", ".xdce", ".flex",
     ".mrxs", ".bif", ".tf2", ".tf8", ".btf", ".ets", ".spe", ".fli", ".oir", ".lsr",
 }
+TIFF_BASED_VENDOR = {".lsm", ".stk"}
 RASTER_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".jp2"}
 TABLE_EXTS = {".tsv", ".csv", ".txt", ".xlsx", ".xls", ".json", ".yaml", ".yml", ".md", ".pdf"}
 
@@ -80,6 +81,8 @@ def read_info(path: Path, rel: str, verify_pixels: bool = True) -> ImageInfo:
             _read_zarr_dir(path, info, verify_pixels)
         elif fmt == "ome-zarr-zip":
             _read_zarr_zip(path, info)
+        elif fmt == "vendor" and path.suffix.lower() in TIFF_BASED_VENDOR:
+            _read_tiff(path, info, verify_pixels)  # Zeiss LSM, MetaMorph STK, Olympus FluoView TIFFs
         elif fmt == "vendor":
             _read_bioio(path, info)
         else:
@@ -109,6 +112,12 @@ def _read_tiff(path: Path, info: ImageInfo, verify_pixels: bool) -> None:
             for k in "XYZCT":
                 info.sizes.setdefault(k, 1)
             info.pixel_size_um = _tiff_resolution(tif)
+            if tif.is_lsm and tif.lsm_metadata:
+                lsm = tif.lsm_metadata  # voxel sizes in metres
+                for ax in "xyz":
+                    v = lsm.get(f"VoxelSize{ax.upper()}")
+                    if v:
+                        info.pixel_size_um[ax] = float(v) * 1e6
             if info.format == "ome-tiff":
                 info.notes.append("file named .ome.tif but contains no OME-XML")
         if verify_pixels:
@@ -223,8 +232,11 @@ def _read_zarr_dir(path: Path, info: ImageInfo, verify_pixels: bool) -> None:
     if verify_pixels:
         import zarr
 
-        arr = zarr.open_array(str(level0), mode="r")
-        arr[(0,) * arr.ndim]
+        if (level0 / "zarr.json").exists() and int(zarr.__version__.split(".")[0]) < 3:
+            info.notes.append("zarr v3 array: pixel decode needs zarr>=3 (Python>=3.11); metadata checked only")
+        else:
+            arr = zarr.open_array(str(level0), mode="r")
+            arr[(0,) * arr.ndim]
     info.readable = True
 
 

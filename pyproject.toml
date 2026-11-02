@@ -7,7 +7,7 @@ name = "micro-validate"
 version = "0.1.0"
 description = "Pre-submission validator for microscopy datasets (BioImage Archive, IDR, REMBI)"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 dependencies = [
   "pyyaml>=6",

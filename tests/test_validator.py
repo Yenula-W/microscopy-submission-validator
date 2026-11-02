@@ -82,7 +82,7 @@ def test_bia_missing_metadata_fields(bia_dataset):
     (bia_dataset / "submission.yaml").write_text(yaml.safe_dump(meta))
     res = run(bia_dataset, "bia")
     assert res["BIA-STUDY-001"].status == "fail"
-    assert res["BIA-BIOS-002"].status == "fail"
+    assert res["BIA-BIOS-002"].status == "warn"  # recommended: accepted BIA studies give organism as text only
     assert res["BIA-AUTH-001"].status == "fail"
     assert "study.authors[1].last_name" in res["BIA-AUTH-001"].messages[0]
 
@@ -278,3 +278,95 @@ def test_cli_json_and_errors(bia_dataset, capsys):
     assert json.loads(capsys.readouterr().out)["target"]["id"] == "rembi"
     assert main([str(bia_dataset / "nope"), "-t", "bia"]) == 2
     assert main([str(bia_dataset), "-t", "nope"]) == 2
+
+
+# ------------------------------------------------------------- regressions from the held-out real-data run
+
+
+PAGETAB = {
+    "accno": "S-BIAD9999",
+    "attributes": [{"name": "Title", "value": "T"}, {"name": "ReleaseDate", "value": "2023-03-07"}],
+    "section": {"type": "Study", "attributes": [
+        {"name": "Title", "value": "Accepted study"}, {"name": "Description", "value": "D"},
+        {"name": "Keywords", "value": "AI"}, {"name": "Keywords", "value": "nucleus"}, {"name": "License", "value": "CC0"}],
+        "subsections": [
+            {"type": "author", "attributes": [{"name": "Name", "value": "Ada M. Lovelace"},
+                                              {"name": "affiliation", "value": "o1", "reference": True}]},
+            {"type": "organisation", "accno": "o1", "attributes": [{"name": "Name", "value": "EBI"}]},
+            [{"type": "Biosample", "attributes": [{"name": "Organism", "value": "Homo sapiens (human)"},
+                                                 {"name": "Biological entity", "value": "HeLa"}]},
+             {"type": "Biosample", "attributes": [{"name": "Organism", "value": "Mus musculus (mouse)"},
+                                                 {"name": "Biological entity", "value": "ESC"}]}],
+            {"type": "Specimen", "attributes": [{"name": "Sample preparation protocol", "value": "PFA"}]},
+            {"type": "Image acquisition", "attributes": [{"name": "Imaging method", "value": "confocal"},
+                                                         {"name": "Imaging instrument", "value": "LSM 780"},
+                                                         {"name": "Image acquisition parameters", "value": "63x"}]},
+            {"type": "Study Component", "attributes": [{"name": "Name", "value": "c"},
+                                                       {"name": "Description", "value": "d"}]},
+        ]},
+}
+
+
+def test_biostudies_pagetab_metadata(bia_dataset):
+    """Accepted BIA studies: list-valued sections, single author Name, organism as text (S-BIAD634)."""
+    (bia_dataset / "submission.yaml").unlink()
+    (bia_dataset / "S-BIAD9999.json").write_text(json.dumps(PAGETAB))
+    ds = load_dataset(bia_dataset)
+    assert ds.metadata["biosample"][1]["organism"][0] == {
+        "scientific_name": "Mus musculus", "common_name": "mouse", "ncbi_taxon": None}
+    assert ds.metadata["study"]["authors"][0]["affiliation"] == {"name": "EBI"}
+    res = run(bia_dataset, "bia")
+    assert not [k for k, v in res.items() if v.status == "fail"], {k: v.messages for k, v in res.items() if v.status == "fail"}
+    assert res["BIA-BIOS-002"].status == "warn"
+    assert "S-BIAD9999.json" not in load_dataset(bia_dataset).data_files
+
+
+def test_annotation_source_image_column_spelling(bia_dataset):
+    """S-BIAD634's accepted annotation list uses a 'source image' header."""
+    (bia_dataset / "masks").mkdir()
+    (bia_dataset / "masks" / "m1.png").write_bytes(b"\x89PNG")
+    (bia_dataset / "file_list_annotations.tsv").write_text("Files\tsource image\nmasks/m1.png\tseries1/img_01.ome.tif\n")
+    assert run(bia_dataset, "bia")["BIA-FL-005"].status == "pass"
+
+
+def test_partial_mode_skips_absent_listed_files(bia_dataset):
+    write_file_list(bia_dataset, ["series1/img_01.ome.tif", "series1/img_02.ome.tif", "series2/not_downloaded.tif"])
+    assert run(bia_dataset, "bia")["BIA-FL-004"].status == "fail"
+    res = run_rules(load_ruleset("bia"), load_dataset(bia_dataset, partial=True))
+    assert next(r for r in res if r.rule_id == "BIA-FL-004").status == "pass"
+
+
+def test_idr_singular_assay_file_name(idr_dataset):
+    """idr0052 publishes experimentA/MitoSys_assay_file.txt."""
+    (idr_dataset / "idrtest-assays.txt").rename(idr_dataset / "MitoSys_assay_file.txt")
+    s = idr_dataset / "idrtest-study.txt"
+    s.write_text(s.read_text().replace("idrtest-assays.txt", "MitoSys_assay_file.txt"))
+    res = run(idr_dataset, "idr")
+    assert res["IDR-ASSAY-001"].status == "pass" and res["IDR-ASSAY-003"].status == "pass"
+
+
+def test_ngff_v05_zarr3_image(tmp_path):
+    """NGFF 0.5 (zarr v3, attributes under 'ome'), e.g. IDR's v0.5 samples."""
+    import numpy as np
+    import zarr
+
+    from micro_validate.imageinfo import read_info
+
+    z = tmp_path / "img.ome.zarr"
+    z.mkdir()
+    attrs = {"ome": {"version": "0.5", "multiscales": [{
+        "axes": [{"name": "c", "type": "channel"}, {"name": "y", "type": "space", "unit": "micrometer"},
+                 {"name": "x", "type": "space", "unit": "micrometer"}],
+        "datasets": [{"path": "0", "coordinateTransformations": [{"type": "scale", "scale": [1, 0.5, 0.5]}]}]}]}}
+    (z / "zarr.json").write_text(json.dumps({"zarr_format": 3, "node_type": "group", "attributes": attrs}))
+    meta = {"zarr_format": 3, "node_type": "array", "shape": [2, 8, 8], "data_type": "uint8",
+            "chunk_grid": {"name": "regular", "configuration": {"chunk_shape": [2, 8, 8]}},
+            "chunk_key_encoding": {"name": "default", "configuration": {"separator": "/"}},
+            "fill_value": 0, "codecs": [{"name": "bytes"}], "attributes": {}}
+    (z / "0").mkdir()
+    (z / "0" / "zarr.json").write_text(json.dumps(meta))
+    info = read_info(z, "img.ome.zarr")
+    assert info.readable, info.error
+    assert info.sizes["C"] == 2 and info.dtype == "uint8" and info.pixel_size_um["x"] == 0.5
+    if int(zarr.__version__.split(".")[0]) < 3:
+        assert any("zarr v3" in n for n in info.notes)

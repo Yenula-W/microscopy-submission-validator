@@ -4,12 +4,14 @@ from __future__ import annotations
 import csv
 import json
 import os
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from .biostudies import is_pagetab, to_rembi
 from .imageinfo import IMAGE_FORMATS, ImageInfo, classify, read_info
 
 METADATA_NAMES = ("submission.yaml", "submission.yml", "submission.json", "rembi.yaml", "rembi.json")
@@ -42,10 +44,12 @@ class Dataset:
     file_lists: list[Table] = field(default_factory=list)
     idr_study: dict[str, list[str]] | None = None
     idr_study_path: str = ""
+    idr_study_error: str = ""
     idr_assays: list[Table] = field(default_factory=list)
     data_files: list[str] = field(default_factory=list)  # relative posix paths, zarr dirs as one entry
     sizes: dict[str, int] = field(default_factory=dict)
     read_pixels: bool = True
+    partial: bool = False  # dataset is a sample of the submission: skip "listed but not on disk" findings
     _images: dict[str, ImageInfo] = field(default_factory=dict)
 
     @property
@@ -72,8 +76,11 @@ def read_table(path: Path, root: Path) -> Table:
     rel = path.relative_to(root).as_posix()
     if path.suffix.lower() in (".xlsx", ".xls"):
         return Table(rel, [], [], error="Excel file lists are not parsed yet; export as TSV to validate")
-    text = path.read_text(encoding="utf-8-sig", errors="replace")
-    rows = list(csv.reader(text.splitlines(), delimiter="\t"))
+    try:
+        text = path.read_text(encoding="utf-8-sig", errors="replace")
+    except OSError as e:
+        return Table(rel, [], [], error=f"cannot read: {type(e).__name__}: {e.strerror or e}")
+    rows = list(csv.reader(text.replace("\x00", "").splitlines(), delimiter="\t"))
     while rows and not any(c.strip() for c in rows[-1]):
         rows.pop()  # trailing newline(s) are harmless
     header = [h.strip() for h in rows[0]] if rows else []
@@ -104,14 +111,19 @@ def _is_idr_study(name: str) -> bool:
 
 def _is_idr_assay(name: str) -> bool:
     n = name.lower()
-    return ("assays" in n or "library" in n) and n.endswith((".txt", ".tsv"))
+    # IDR templates say *-assays.txt, but accepted studies also use e.g. MitoSys_assay_file.txt
+    return ("assay" in n or "library" in n) and n.endswith((".txt", ".tsv")) and not _is_file_list(name)
 
 
-def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixels: bool = True) -> Dataset:
+PAGETAB_NAME = re.compile(r"^S-B(IAD|SST|IAS)?\d+\.json$", re.I)
+
+
+def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixels: bool = True,
+                 partial: bool = False) -> Dataset:
     root = Path(root).resolve()
     if not root.is_dir():
         raise NotADirectoryError(root)
-    ds = Dataset(root=root, read_pixels=read_pixels)
+    ds = Dataset(root=root, read_pixels=read_pixels, partial=partial)
     meta_path = Path(metadata).resolve() if metadata else None
     for dirpath, dirnames, filenames in os.walk(root):
         d = Path(dirpath)
@@ -128,7 +140,7 @@ def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixe
             rel = p.relative_to(root).as_posix()
             if fn in IGNORED_NAMES or fn.startswith("."):
                 continue
-            if meta_path is None and d == root and fn in METADATA_NAMES:
+            if meta_path is None and d == root and (fn in METADATA_NAMES or PAGETAB_NAME.match(fn)):
                 meta_path = p
                 continue
             if meta_path is not None and p == meta_path:
@@ -137,8 +149,11 @@ def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixe
                 ds.file_lists.append(read_table(p, root))
                 continue
             if _is_idr_study(fn) and d == root:
-                ds.idr_study = read_idr_study(p)
                 ds.idr_study_path = rel
+                try:
+                    ds.idr_study = read_idr_study(p)
+                except OSError as e:
+                    ds.idr_study_error = f"cannot read: {type(e).__name__}: {e.strerror or e}"
                 continue
             if _is_idr_assay(fn):
                 ds.idr_assays.append(read_table(p, root))
@@ -154,6 +169,8 @@ def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixe
         try:
             text = meta_path.read_text()
             ds.metadata = json.loads(text) if meta_path.suffix == ".json" else yaml.safe_load(text)
+            if is_pagetab(ds.metadata):
+                ds.metadata = to_rembi(ds.metadata)
             if not isinstance(ds.metadata, dict):
                 raise ValueError("top level must be a mapping")
         except Exception as e:

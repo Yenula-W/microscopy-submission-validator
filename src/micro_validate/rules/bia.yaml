@@ -61,17 +61,11 @@ rules:
     fix: Set study.license (BIA default is CC0; state it explicitly).
     sources: [rembi-model]
   - id: BIA-AUTH-001
-    title: Authors with first and last names
+    title: Author names
     check: field_present
-    params: {path: 'study.authors[*].last_name'}
-    fix: Every entry in study.authors needs last_name and first_name.
-    sources: [rembi-model]
-  - id: BIA-AUTH-002
-    title: Author first names
-    check: field_present
-    params: {path: 'study.authors[*].first_name'}
-    fix: Every entry in study.authors needs first_name.
-    sources: [rembi-model]
+    params: {any_of: ['study.authors[*].last_name', 'study.authors[*].name']}
+    fix: Every entry in study.authors needs a name (BIA form) or first_name + last_name (REMBI model).
+    sources: [rembi-model, submit]
   - id: BIA-AUTH-003
     title: Author affiliations
     check: field_present
@@ -112,55 +106,56 @@ rules:
   - id: BIA-BIOS-001
     title: Biosample organism (scientific name)
     check: field_present
-    params: {path: 'biosample.organism[*].scientific_name'}
+    params: {path: 'biosample[*].organism[*].scientific_name'}
     fix: Set biosample.organism scientific_name (e.g. Homo sapiens).
     sources: [rembi-model]
   - id: BIA-BIOS-002
-    title: Biosample organism NCBI taxon
+    title: Biosample organism NCBI taxon (recommended)
     check: field_present
-    params: {path: 'biosample.organism[*].ncbi_taxon', pattern: '^(NCBITaxon_)?\d+$'}
+    severity: warn
+    params: {path: 'biosample[*].organism[*].ncbi_taxon', pattern: '^(NCBITaxon_)?\d+$'}
     fix: Set organism ncbi_taxon (e.g. NCBITaxon_9606); look up at https://www.ncbi.nlm.nih.gov/taxonomy.
     sources: [rembi-model]
   - id: BIA-BIOS-003
     title: Biological entity
     check: field_present
-    params: {path: biosample.biological_entity}
+    params: {path: 'biosample[*].biological_entity'}
     fix: Set biosample.biological_entity (what is being imaged, e.g. HeLa cells).
     sources: [rembi-model]
   - id: BIA-SPEC-001
     title: Specimen sample preparation
     check: field_present
-    params: {path: specimen.sample_preparation}
+    params: {path: 'specimen[*].sample_preparation'}
     fix: Describe specimen.sample_preparation (fixation, staining, mounting).
     sources: [rembi-model]
   - id: BIA-ACQ-001
     title: Imaging method
     check: field_present
-    params: {path: image_acquisition.imaging_method}
+    params: {path: 'image_acquisition[*].imaging_method'}
     fix: Set image_acquisition.imaging_method, ideally an FBbi term (https://www.ebi.ac.uk/ols4/ontologies/fbbi).
     sources: [rembi-model]
   - id: BIA-ACQ-002
     title: Imaging instrument
     check: field_present
-    params: {path: image_acquisition.imaging_instrument}
+    params: {path: 'image_acquisition[*].imaging_instrument'}
     fix: Describe the microscope (make, model, objective, detector).
     sources: [rembi-model]
   - id: BIA-ACQ-003
     title: Image acquisition parameters
     check: field_present
-    params: {path: image_acquisition.image_acquisition_parameters}
+    params: {path: 'image_acquisition[*].image_acquisition_parameters'}
     fix: Describe acquisition parameters (pixel size, exposure, channels, laser lines).
     sources: [rembi-model]
   - id: BIA-ANA-001
     title: Image analysis overview (when analysis included)
     check: field_present
-    params: {path: image_analysis.analysis_overview, if_present: image_analysis}
+    params: {path: 'image_analysis[*].analysis_overview', if_present: image_analysis}
     fix: Give image_analysis.analysis_overview.
     sources: [rembi-model]
   - id: BIA-ANN-001
     title: Annotation overview and method (when annotations included)
     check: field_present
-    params: {path: annotations.annotation_method, if_present: annotations}
+    params: {path: 'annotations[*].annotation_method', if_present: annotations}
     fix: Give annotations.annotation_overview and annotation_method.
     sources: [rembi-model, annotations]
 

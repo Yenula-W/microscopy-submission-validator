@@ -21,7 +21,7 @@ def _template(target: str) -> str:
             "# (idr0000-study_nonHCS.txt, experimentB/idr0000-experimentB-assays.txt) and place them\n"
             "# in the dataset root as <name>-study.txt and <name>-assays.txt.\n"
         )
-    return resources.files("micro_validate").joinpath("templates", "submission.yaml").read_text()
+    return resources.files("micro_validate").joinpath("templates").joinpath("submission.yaml").read_text()
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -35,6 +35,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("-o", "--out", help="write <out>.md and <out>.json report files")
     p.add_argument("--json", action="store_true", help="print JSON instead of Markdown to stdout")
     p.add_argument("--no-pixels", action="store_true", help="read headers only, do not decode a pixel block per image")
+    p.add_argument("--partial", action="store_true",
+                   help="dataset is a sample of the submission: don't report files listed in tables but absent on disk")
     p.add_argument("--strict", action="store_true", help="exit non-zero on warnings too")
     p.add_argument("--list-targets", action="store_true", help="list built-in targets and exit")
     p.add_argument("--template", metavar="TARGET", help="print a metadata template for TARGET and exit")
@@ -54,7 +56,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         ruleset = load_ruleset(a.target)
-        ds = load_dataset(a.dataset, metadata=a.metadata, read_pixels=not a.no_pixels)
+        ds = load_dataset(a.dataset, metadata=a.metadata, read_pixels=not a.no_pixels, partial=a.partial)
     except (ValueError, NotADirectoryError, FileNotFoundError) as e:
         print(f"micro-validate: error: {e}", file=sys.stderr)
         return 2
