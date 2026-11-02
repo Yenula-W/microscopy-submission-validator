@@ -224,7 +224,20 @@ def test_idr_assay_problems(idr_dataset):
     res = run(idr_dataset, "idr")
     msgs = " ".join(res["IDR-ASSAY-003"].messages)
     assert "missing.ome.zarr" in msgs and "images/b.ome.zarr" in msgs
-    assert res["IDR-ASSAY-004"].status == "fail"
+    assert res["IDR-ASSAY-004"].status == "warn"
+
+
+def test_idr_stem_match_and_comma_assay_list(idr_dataset):
+    # real IDR files list the original .tif name and comma-join assay files in one cell
+    p = idr_dataset / "idrtest-assays.txt"
+    p.write_text(p.read_text().replace("a.ome.zarr\timages", "a.tif\t/images"))
+    s = idr_dataset / "idrtest-study.txt"
+    s.write_text(s.read_text().replace("Experiment Assay File\tidrtest-assays.txt",
+                                       "Experiment Assay File\tidrtest-assays.txt, other-assays.txt"))
+    res = run(idr_dataset, "idr")
+    assert res["IDR-ASSAY-003"].status == "warn"
+    assert "matched only by name stem" in res["IDR-ASSAY-003"].messages[0]
+    assert res["IDR-ASSAY-001"].messages == ["study file names assay file 'other-assays.txt' but it is not in the dataset"]
 
 
 def test_idr_missing_tables(tmp_path):

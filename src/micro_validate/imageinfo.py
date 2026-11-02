@@ -173,7 +173,13 @@ def _apply_ngff(attrs: dict[str, Any], array_meta: dict[str, Any], info: ImageIn
     info.sizes = {k: 1 for k in "XYZCT"}
     for name, n in zip(axes, shape):
         info.sizes[name.upper()] = n
-    info.dtype = str(array_meta.get("dtype") or array_meta.get("data_type"))
+    raw = array_meta.get("dtype") or array_meta.get("data_type")
+    try:
+        import numpy as np
+
+        info.dtype = str(np.dtype(raw))  # '<u2' -> 'uint16'
+    except TypeError:
+        info.dtype = str(raw)
     info.is_ome = True
     scale = None
     for ct in ms["datasets"][0].get("coordinateTransformations", []):

@@ -1,0 +1,19 @@
+study:
+  title: "tubhiswt-4D: S. cerevisiae tubulin and histone time-lapse (OME sample data)"
+  description: "4D (XYZT, 2-channel) multi-file OME-TIFF sample dataset distributed by the OME Consortium."
+  keywords: [OME-TIFF, yeast, time-lapse]
+  private_until_date: "2026-11-02"
+  license: CC BY 4.0
+  authors:
+    - {first_name: OME, last_name: Consortium, affiliation: {name: Open Microscopy Environment}}
+study_components:
+  - {name: tubhiswt-4D, description: "One 512x512x10 2-channel series, 43 timepoints, one file per C/T"}
+biosample:
+  organism: [{scientific_name: Saccharomyces cerevisiae, ncbi_taxon: NCBITaxon_4932}]
+  biological_entity: "yeast cells expressing tagged tubulin and histone"
+specimen:
+  sample_preparation: "live cells"
+image_acquisition:
+  imaging_method: {value: fluorescence microscopy, ontology_name: FBbi, ontology_id: FBbi_00000246}
+  imaging_instrument: "not recorded in sample data"
+  image_acquisition_parameters: "512x512 px, 10 z-slices, 2 channels, 43 timepoints"

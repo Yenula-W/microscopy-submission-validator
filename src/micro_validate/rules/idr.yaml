@@ -82,7 +82,8 @@ rules:
   - id: IDR-EXP-004
     title: Processed data file declared
     check: idr_processed_data
-    fix: Declare and include the processed data file (summary results / hit list) and describe its columns.
+    severity: warn
+    fix: Listed as mandatory on the IDR experiments page, though IDR has accepted datasets without one. Declare and include the processed data file (summary results / hit list) and describe its columns.
     sources: [idr-submission, idr-experiments]
 
   # ---------------- assay / library table
@@ -113,6 +114,7 @@ rules:
   - id: IDR-ASSAY-004
     title: Channels column agrees with image channel count
     check: idr_channels_match
+    severity: warn
     fix: List one label:target pair per channel, separated by ';'.
     sources: [idr-experiments]
 

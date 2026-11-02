@@ -375,7 +375,8 @@ def idr_assay_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     if not ds.idr_assays:
         issues.append(Issue("problem", "no IDR assay/library file (*assays*.txt or *library*.txt)"))
     if ds.idr_study is not None:
-        named = _study_value(ds, "Experiment Assay File") + _study_value(ds, "Screen Library File")
+        cells = _study_value(ds, "Experiment Assay File") + _study_value(ds, "Screen Library File")
+        named = [n.strip() for c in cells for n in c.split(",") if n.strip()]  # IDR files often comma-join
         have = {PurePosixPath(t.path).name for t in ds.idr_assays}
         for n in named:
             if PurePosixPath(n).name not in have:
@@ -402,6 +403,44 @@ def idr_assay_columns(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     return issues
 
 
+COMPOUND_EXTS = (".ome.zarr.zip", ".zarr.zip", ".ome.zarr", ".zarr", ".ome.tiff", ".ome.tif", ".ome.btf")
+
+
+def stem(name: str) -> str:
+    """File name without image extensions, so 'B1_C1.tif' and 'B1_C1.ome.zarr' compare equal."""
+    base = PurePosixPath(name).name
+    for ext in COMPOUND_EXTS:
+        if base.lower().endswith(ext):
+            return base[: -len(ext)]
+    return PurePosixPath(base).stem
+
+
+class _ImageIndex:
+    """Resolve assay 'Image File' (+ optional path) values to dataset images."""
+
+    def __init__(self, images: list[str]):
+        self.images = set(images)
+        self.by_name: dict[str, list[str]] = defaultdict(list)
+        self.by_stem: dict[str, list[str]] = defaultdict(list)
+        for f in images:
+            self.by_name[PurePosixPath(f).name].append(f)
+            self.by_stem[stem(f)].append(f)
+
+    def match(self, name: str, rel_dir: str = "", use_stem: bool = True) -> tuple[str | None, bool]:
+        """Return (image, matched_by_stem_only)."""
+        rel_dir = rel_dir.strip().strip("/")
+        for f in (f"{rel_dir}/{name}" if rel_dir else name, name):
+            if f in self.images:
+                return f, False
+        hits = self.by_name.get(PurePosixPath(name).name, [])
+        if len(hits) == 1:
+            return hits[0], False
+        hits = self.by_stem.get(stem(name), []) if use_stem else []
+        if len(hits) == 1:
+            return hits[0], True  # e.g. original .tif listed, converted .ome.zarr on disk
+        return None, False
+
+
 @check("idr_assay_matches_files")
 def idr_assay_matches_files(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     """Every 'Image File' row resolves to a dataset image; every image is described by a row."""
@@ -409,12 +448,10 @@ def idr_assay_matches_files(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
         raise SkipCheck("no IDR assay file")
     file_col = params.get("file_column", "Image File")
     path_col = params.get("path_column", "Comment [Image File Path]")
-    images = ds.image_files
-    by_name: dict[str, list[str]] = defaultdict(list)
-    for f in images:
-        by_name[PurePosixPath(f).name].append(f)
+    index = _ImageIndex(ds.image_files)
+    by_stem = 0
     referenced: set[str] = set()
-    issues = []
+    missing: list[Issue] = []
     for t in ds.idr_assays:
         if file_col not in t.header:
             continue  # reported by idr_assay_columns
@@ -422,18 +459,17 @@ def idr_assay_matches_files(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
             name = rec.get(file_col, "").strip()
             if is_missing(name):
                 continue
-            rel_dir = rec.get(path_col, "").strip().strip("/")
-            candidates = [f for f in (f"{rel_dir}/{name}" if rel_dir else name, name) if f in images]
-            if not candidates and len(by_name.get(PurePosixPath(name).name, [])) == 1:
-                candidates = by_name[PurePosixPath(name).name]
-            if candidates:
-                referenced.add(candidates[0])
+            hit, stem_only = index.match(name, rec.get(path_col, ""), params.get("match_stem", True))
+            if hit:
+                referenced.add(hit)
+                by_stem += stem_only
             else:
-                issues.append(Issue("problem", f"{t.path}: Image File {name!r} not found in dataset"))
-    for f in images:
-        if f not in referenced:
-            issues.append(Issue("problem", f"image not described in any assay file: {f}"))
-    return issues
+                missing.append(Issue("problem", f"{t.path}: Image File {name!r} not found in dataset"))
+    issues = [Issue("problem", f"image not described in any assay file: {f}") for f in ds.image_files if f not in referenced]
+    if by_stem:
+        issues.append(Issue("warning", f"{by_stem} row(s) matched only by name stem (different extension); "
+                                       "update 'Image File' to the submitted file names"))
+    return issues + missing
 
 
 @check("idr_processed_data")
@@ -453,7 +489,7 @@ def idr_channels_match(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     """'Channels' column (label:target;...) should list as many channels as the image has."""
     if not ds.idr_assays:
         raise SkipCheck("no IDR assay file")
-    images = set(ds.image_files)
+    index = _ImageIndex(ds.image_files)
     issues = []
     compared = 0
     for t in ds.idr_assays:
@@ -461,10 +497,10 @@ def idr_channels_match(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
             continue
         for rec in t.records():
             ch, name = rec.get("Channels", ""), rec.get("Image File", "").strip()
-            matches = [f for f in images if PurePosixPath(f).name == PurePosixPath(name).name]
-            if is_missing(ch) or len(matches) != 1:
+            hit, _ = index.match(name, rec.get("Comment [Image File Path]", ""))
+            if is_missing(ch) or hit is None:
                 continue
-            info = ds.image_info(matches[0])
+            info = ds.image_info(hit)
             if not info.readable or "C" not in info.sizes:
                 continue
             compared += 1
