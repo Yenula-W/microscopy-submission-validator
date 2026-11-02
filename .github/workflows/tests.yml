@@ -12,17 +12,20 @@ jobs:
         python: ["3.9", "3.12", "3.13"]
         include:
           - os: macos-latest
+            python: "3.9"
+          - os: macos-latest
             python: "3.12"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # setup-python has no 3.9 build for current Ubuntu images; uv's standalone builds do
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install --upgrade pip
-      - run: pip install '.[dev]'
-      - run: pytest -q
+      - run: uv venv --python ${{ matrix.python }} .venv
+      - run: uv pip install '.[dev]'
+      - run: .venv/bin/python -V && .venv/bin/pytest -q
       - name: CLI smoke test
         run: |
-          micro-validate --version
-          micro-validate --list-targets
-          micro-validate --template bia > /dev/null
+          .venv/bin/micro-validate --version
+          .venv/bin/micro-validate --list-targets
+          .venv/bin/micro-validate --template bia > /dev/null
