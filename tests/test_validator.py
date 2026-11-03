@@ -703,3 +703,51 @@ def _write_png(path: Path, w: int, h: int) -> None:
         return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xFFFFFFFF)
     path.write_bytes(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">2I5B", w, h, 8, 0, 0, 0, 0))
                      + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))
+
+
+# ------------------------------------------------------------- regressions from ship-bar round 4
+
+
+def test_ome_tiff_in_older_schema_is_readable(tmp_path):
+    """Micro-Manager 1.4 writes OME 2015-01, Olympus exports 2016-DEV0; ome-types refuses both, the files are fine."""
+    import numpy as np
+    import tifffile
+
+    from micro_validate.imageinfo import read_info
+
+    for schema in ("2015-01", "2016-DEV0"):
+        xml = (f'<?xml version="1.0"?><OME xmlns="http://www.openmicroscopy.org/Schemas/OME/{schema}">'
+               '<Image ID="Image:0"><Pixels ID="Pixels:0" DimensionOrder="XYCZT" Type="uint16" SizeX="4" SizeY="6" '
+               'SizeZ="1" SizeC="2" SizeT="1" PhysicalSizeX="0.2" PhysicalSizeY="0.2"><Channel ID="Channel:0:0" '
+               'Name="FITC"/><Channel ID="Channel:0:1" Name="Rhodamine"/><TiffData/></Pixels></Image></OME>')
+        f = tmp_path / f"mm_{schema}.ome.tif"
+        tifffile.imwrite(f, np.zeros((2, 6, 4), "uint16"), description=xml, metadata=None)
+        info = read_info(f, f.name)
+        assert info.readable and info.is_ome, info.error
+        assert info.sizes["C"] == 2 and info.pixel_size_um["x"] == 0.2 and info.channel_names == ["FITC", "Rhodamine"]
+        assert schema in info.notes[-1]
+
+
+def test_klb_and_fits_are_images(tmp_path):
+    from micro_validate.imageinfo import classify
+
+    for n in ("img.klb", "frame.fits"):
+        (tmp_path / n).write_bytes(b"\0" * 64)
+        assert classify(tmp_path / n) == "vendor"
+
+
+def test_only_zipped_images_is_a_warning_not_no_images(tmp_path):
+    """S-BIAD3450 submits every image inside .zip archives."""
+    (tmp_path / "CTX_DIFF2_GCASE.zip").write_bytes(b"PK\x05\x06" + b"\0" * 18)
+    res = run(tmp_path, "bia")["BIA-FMT-001"]
+    assert res.status == "warn" and "1 archive(s) not inspected" in res.messages[0], res.messages
+
+
+def test_series_consistent_compares_one_format(tmp_path):
+    """Olympus folder: a 1920x1080 screen capture (.tif) beside the OME-TIFF stack is not part of the series."""
+    root = tmp_path / "ds"
+    write_ome_tiff(root / "stack.ome.tif", shape=(2, 16, 16))
+    write_ome_tiff(root / "capture.tif", shape=(2, 40, 60), dtype="uint8", ome=False)
+    assert run(root, "rembi")["REMBI-IMG-004"].status == "skip"
+    write_ome_tiff(root / "stack2.ome.tif", shape=(2, 16, 16), dtype="uint8")
+    assert run(root, "rembi")["REMBI-IMG-004"].status == "warn"

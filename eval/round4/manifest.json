@@ -1,0 +1,123 @@
+{
+ "R4-01-leica-lif": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Leica-LIF/michael/PR2729_frameOrderCombinedScanTypes.lif"
+  ]
+ },
+ "R4-02-klb": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/KLB/samples/img.klb"
+  ]
+ },
+ "R4-03-cellprofiler-pattern": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/TIFF/cellprofiler/fruit-fly-cells/POS002.pattern/POS002.pattern",
+   "https://downloads.openmicroscopy.org/images/TIFF/cellprofiler/fruit-fly-cells/POS002.pattern/01_POS002_Z00_T00_D.TIF",
+   "https://downloads.openmicroscopy.org/images/TIFF/cellprofiler/fruit-fly-cells/POS002.pattern/01_POS002_Z00_T00_F.TIF",
+   "https://downloads.openmicroscopy.org/images/TIFF/cellprofiler/fruit-fly-cells/POS002.pattern/01_POS002_Z00_T00_R.TIF"
+  ]
+ },
+ "R4-04-olympus-mixed-folder": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Olympus-OIR/etienne/Clipboard-venus%20stack.tif",
+   "https://downloads.openmicroscopy.org/images/Olympus-OIR/etienne/amy%20slice%20z%20stack_0001.oir",
+   "https://downloads.openmicroscopy.org/images/Olympus-OIR/etienne/amy%20slice%20z%20stack_0001.ome.tif"
+  ]
+ },
+ "R4-05-vectra-qptiff": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Vectra-QPTIFF/perkinelmer/PKI_fields/HnE_3_1x1component_data.tif"
+  ]
+ },
+ "R4-06-png-dataset": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/PNG/user-1/dataset-user-1/user-1%2001%20TEST.png",
+   "https://downloads.openmicroscopy.org/images/PNG/user-1/dataset-user-1/user-1%2002%20TEST.png",
+   "https://downloads.openmicroscopy.org/images/PNG/user-1/dataset-user-1/user-1%2003%20TEST.png",
+   "https://downloads.openmicroscopy.org/images/PNG/user-1/dataset-user-1/user-1%2004%20TEST.png"
+  ]
+ },
+ "R4-07-olympus-oir": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Olympus-OIR/imagesc-105684/1202-interval_10sec_sequence_frame.oir"
+  ]
+ },
+ "R4-09-idr0016": {
+  "kind": "idrmeta",
+  "spec": "idr0016-wawer-bioactivecompoundprofiling"
+ },
+ "R4-10-S-BIAD3891": {
+  "kind": "bia",
+  "spec": "S-BIAD3891"
+ },
+ "R4-11-S-BIAD2499": {
+  "kind": "bia",
+  "spec": "S-BIAD2499"
+ },
+ "R4-12-S-BIAD3727": {
+  "kind": "bia",
+  "spec": "S-BIAD3727"
+ },
+ "R4-13-S-BIAD3375": {
+  "kind": "bia",
+  "spec": "S-BIAD3375"
+ },
+ "R4-14-S-BIAD3578": {
+  "kind": "bia",
+  "spec": "S-BIAD3578"
+ },
+ "R4-15-S-BIAD3613": {
+  "kind": "bia",
+  "spec": "S-BIAD3613"
+ },
+ "R4-16-S-BIAD3710": {
+  "kind": "names",
+  "spec": "S-BIAD3710"
+ },
+ "R4-17-S-BIAD3732": {
+  "kind": "names",
+  "spec": "S-BIAD3732"
+ },
+ "R4-24-S-BIAD4043": {
+  "kind": "names",
+  "spec": "S-BIAD4043"
+ },
+ "R4-30-S-BIAD3450": {
+  "kind": "names",
+  "spec": "S-BIAD3450"
+ },
+ "R4-32-micromanager-stack": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_stack/test_stack_MMStack_Pos0.ome.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_stack/test_stack_MMStack_Pos0_metadata.txt"
+  ]
+ },
+ "R4-33-micromanager-separate": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/img_000000000_FITC_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/img_000000000_Rhodamine_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/img_000000001_FITC_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/img_000000001_Rhodamine_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/img_000000002_FITC_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/img_000000002_Rhodamine_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/img_000000003_FITC_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/img_000000003_Rhodamine_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.22/thomas/test/test_sep/Pos0/metadata.txt"
+  ]
+ },
+ "R4-34-olympus-ome-export": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Olympus-OIR/etienne/coupe%20shg%20stack_0001.ome.tif"
+  ]
+ }
+}

@@ -1,0 +1,465 @@
+input	kind	target	rule	check	status	message	verdict	note
+R4-01-leica-lif	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-01-leica-lif	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-01-leica-lif	files	bia	BIA-FMT-001	formats_accepted	warn	1 vendor file(s): accepted, but convert to OME-TIFF/OME-Zarr (e.g. bioformats2raw, BatchConvert) for reuse and BIA viewers: PR2729_frameOrderCombinedScanTypes.lif	correct	
+R4-01-leica-lif	files	bia	BIA-IMG-001	images_readable	warn	PR2729_frameOrderCombinedScanTypes.lif: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-01-leica-lif	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-01-leica-lif	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-01-leica-lif	files	idr	IDR-FMT-001	formats_accepted	fail	1 vendor file(s): IDR requires OME-Zarr; convert with bioformats2raw: PR2729_frameOrderCombinedScanTypes.lif	correct	
+R4-01-leica-lif	files	idr	IDR-IMG-001	images_readable	warn	PR2729_frameOrderCombinedScanTypes.lif: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-01-leica-lif	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-01-leica-lif	files	rembi	REMBI-IMG-001	images_readable	warn	PR2729_frameOrderCombinedScanTypes.lif: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-01-leica-lif	files	rembi	REMBI-IMG-002	formats_accepted	warn	1 vendor file(s): proprietary format; also provide OME-TIFF/OME-Zarr for long-term reuse: PR2729_frameOrderCombinedScanTypes.lif	correct	
+R4-02-klb	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-02-klb	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-02-klb	files	bia	BIA-FMT-001	formats_accepted	fail	no image files found in dataset	wrong	img.klb is a KLB volume (Keller lab block, used by IDR idr0044); not recognised as an image
+R4-02-klb	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-02-klb	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-02-klb	files	idr	IDR-FMT-001	formats_accepted	fail	no image files found in dataset	wrong	img.klb is a KLB volume (Keller lab block, used by IDR idr0044); not recognised as an image
+R4-02-klb	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-02-klb	files	rembi	REMBI-IMG-002	formats_accepted	fail	no image files found in dataset	wrong	img.klb is a KLB volume (Keller lab block, used by IDR idr0044); not recognised as an image
+R4-03-cellprofiler-pattern	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-03-cellprofiler-pattern	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-03-cellprofiler-pattern	files	bia	BIA-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_D.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	bia	BIA-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_D.TIF: physical pixel size missing for axis x, y	correct	
+R4-03-cellprofiler-pattern	files	bia	BIA-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_F.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	bia	BIA-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_F.TIF: physical pixel size missing for axis x, y	correct	
+R4-03-cellprofiler-pattern	files	bia	BIA-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_R.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	bia	BIA-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_R.TIF: physical pixel size missing for axis x, y	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-FMT-001	formats_accepted	fail	3 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: 01_POS002_Z00_T00_D.TIF, 01_POS002_Z00_T00_F.TIF, 01_POS002_Z00_T00_R.TIF	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_D.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_D.TIF: physical pixel size missing for axis x, y	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_F.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_F.TIF: physical pixel size missing for axis x, y	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_R.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	idr	IDR-IMG-002	ome_metadata	warn	01_POS002_Z00_T00_R.TIF: physical pixel size missing for axis x, y	correct	
+R4-03-cellprofiler-pattern	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-03-cellprofiler-pattern	files	rembi	REMBI-IMG-002	formats_accepted	warn	3 tiff file(s): plain TIFF lacks structured metadata; prefer OME-TIFF: 01_POS002_Z00_T00_D.TIF, 01_POS002_Z00_T00_F.TIF, 01_POS002_Z00_T00_R.TIF	correct	
+R4-03-cellprofiler-pattern	files	rembi	REMBI-IMG-003	ome_metadata	warn	01_POS002_Z00_T00_D.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	rembi	REMBI-IMG-003	ome_metadata	warn	01_POS002_Z00_T00_D.TIF: physical pixel size missing for axis x, y	correct	
+R4-03-cellprofiler-pattern	files	rembi	REMBI-IMG-003	ome_metadata	warn	01_POS002_Z00_T00_F.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	rembi	REMBI-IMG-003	ome_metadata	warn	01_POS002_Z00_T00_F.TIF: physical pixel size missing for axis x, y	correct	
+R4-03-cellprofiler-pattern	files	rembi	REMBI-IMG-003	ome_metadata	warn	01_POS002_Z00_T00_R.TIF: no OME-XML header (plain TIFF)	correct	
+R4-03-cellprofiler-pattern	files	rembi	REMBI-IMG-003	ome_metadata	warn	01_POS002_Z00_T00_R.TIF: physical pixel size missing for axis x, y	correct	
+R4-04-olympus-mixed-folder	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-04-olympus-mixed-folder	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-04-olympus-mixed-folder	files	bia	BIA-FMT-001	formats_accepted	warn	1 vendor file(s): accepted, but convert to OME-TIFF/OME-Zarr (e.g. bioformats2raw, BatchConvert) for reuse and BIA viewers: amy slice z stack_0001.oir	correct	
+R4-04-olympus-mixed-folder	files	bia	BIA-IMG-001	images_readable	fail	amy slice z stack_0001.oir: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-04-olympus-mixed-folder	files	bia	BIA-IMG-001	images_readable	fail	amy slice z stack_0001.ome.tif: unreadable: ValueError: Unsupported document namespace 'http://www.openmicroscopy.org/Schemas/OME/2016-DEV0'	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it
+R4-04-olympus-mixed-folder	files	bia	BIA-IMG-002	ome_metadata	warn	Clipboard-venus stack.tif: no OME-XML header (plain TIFF)	correct	
+R4-04-olympus-mixed-folder	files	bia	BIA-IMG-002	ome_metadata	warn	Clipboard-venus stack.tif: physical pixel size missing for axis x, y	correct	
+R4-04-olympus-mixed-folder	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-04-olympus-mixed-folder	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-04-olympus-mixed-folder	files	idr	IDR-FMT-001	formats_accepted	fail	1 ome-tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: amy slice z stack_0001.ome.tif	correct	
+R4-04-olympus-mixed-folder	files	idr	IDR-FMT-001	formats_accepted	fail	1 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: Clipboard-venus stack.tif	correct	
+R4-04-olympus-mixed-folder	files	idr	IDR-FMT-001	formats_accepted	fail	1 vendor file(s): IDR requires OME-Zarr; convert with bioformats2raw: amy slice z stack_0001.oir	correct	
+R4-04-olympus-mixed-folder	files	idr	IDR-IMG-001	images_readable	fail	amy slice z stack_0001.oir: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-04-olympus-mixed-folder	files	idr	IDR-IMG-001	images_readable	fail	amy slice z stack_0001.ome.tif: unreadable: ValueError: Unsupported document namespace 'http://www.openmicroscopy.org/Schemas/OME/2016-DEV0'	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it
+R4-04-olympus-mixed-folder	files	idr	IDR-IMG-002	ome_metadata	warn	Clipboard-venus stack.tif: no OME-XML header (plain TIFF)	correct	
+R4-04-olympus-mixed-folder	files	idr	IDR-IMG-002	ome_metadata	warn	Clipboard-venus stack.tif: physical pixel size missing for axis x, y	correct	
+R4-04-olympus-mixed-folder	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-04-olympus-mixed-folder	files	rembi	REMBI-IMG-001	images_readable	fail	amy slice z stack_0001.oir: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-04-olympus-mixed-folder	files	rembi	REMBI-IMG-001	images_readable	fail	amy slice z stack_0001.ome.tif: unreadable: ValueError: Unsupported document namespace 'http://www.openmicroscopy.org/Schemas/OME/2016-DEV0'	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it
+R4-04-olympus-mixed-folder	files	rembi	REMBI-IMG-002	formats_accepted	warn	1 tiff file(s): plain TIFF lacks structured metadata; prefer OME-TIFF: Clipboard-venus stack.tif	correct	
+R4-04-olympus-mixed-folder	files	rembi	REMBI-IMG-002	formats_accepted	warn	1 vendor file(s): proprietary format; also provide OME-TIFF/OME-Zarr for long-term reuse: amy slice z stack_0001.oir	correct	
+R4-04-olympus-mixed-folder	files	rembi	REMBI-IMG-003	ome_metadata	warn	Clipboard-venus stack.tif: no OME-XML header (plain TIFF)	correct	
+R4-04-olympus-mixed-folder	files	rembi	REMBI-IMG-003	ome_metadata	warn	Clipboard-venus stack.tif: physical pixel size missing for axis x, y	correct	
+R4-05-vectra-qptiff	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-05-vectra-qptiff	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-05-vectra-qptiff	files	bia	BIA-IMG-002	ome_metadata	warn	HnE_3_1x1component_data.tif: no OME-XML header (plain TIFF)	correct	
+R4-05-vectra-qptiff	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-05-vectra-qptiff	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-05-vectra-qptiff	files	idr	IDR-FMT-001	formats_accepted	fail	1 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: HnE_3_1x1component_data.tif	correct	
+R4-05-vectra-qptiff	files	idr	IDR-IMG-002	ome_metadata	warn	HnE_3_1x1component_data.tif: no OME-XML header (plain TIFF)	correct	
+R4-05-vectra-qptiff	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-05-vectra-qptiff	files	rembi	REMBI-IMG-002	formats_accepted	warn	1 tiff file(s): plain TIFF lacks structured metadata; prefer OME-TIFF: HnE_3_1x1component_data.tif	correct	
+R4-05-vectra-qptiff	files	rembi	REMBI-IMG-003	ome_metadata	warn	HnE_3_1x1component_data.tif: no OME-XML header (plain TIFF)	correct	
+R4-06-png-dataset	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-06-png-dataset	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-06-png-dataset	files	bia	BIA-FMT-001	formats_accepted	warn	4 raster file(s): PNG/JPEG hold no microscopy metadata; fine for masks and figures, but submit raw acquisitions in their original or OME format: user-1 01 TEST.png, user-1 02 TEST.png, user-1 03 TEST.png (+1 more)	correct	
+R4-06-png-dataset	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-06-png-dataset	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-06-png-dataset	files	idr	IDR-FMT-001	formats_accepted	fail	4 raster file(s): IDR requires OME-Zarr: user-1 01 TEST.png, user-1 02 TEST.png, user-1 03 TEST.png (+1 more)	correct	
+R4-06-png-dataset	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-06-png-dataset	files	rembi	REMBI-IMG-002	formats_accepted	warn	4 raster file(s): PNG/JPEG hold no microscopy metadata; fine for masks and figures, not for raw acquisitions: user-1 01 TEST.png, user-1 02 TEST.png, user-1 03 TEST.png (+1 more)	correct	
+R4-07-olympus-oir	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-07-olympus-oir	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-07-olympus-oir	files	bia	BIA-FMT-001	formats_accepted	warn	1 vendor file(s): accepted, but convert to OME-TIFF/OME-Zarr (e.g. bioformats2raw, BatchConvert) for reuse and BIA viewers: 1202-interval_10sec_sequence_frame.oir	correct	
+R4-07-olympus-oir	files	bia	BIA-IMG-001	images_readable	warn	1202-interval_10sec_sequence_frame.oir: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-07-olympus-oir	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-07-olympus-oir	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-07-olympus-oir	files	idr	IDR-FMT-001	formats_accepted	fail	1 vendor file(s): IDR requires OME-Zarr; convert with bioformats2raw: 1202-interval_10sec_sequence_frame.oir	correct	
+R4-07-olympus-oir	files	idr	IDR-IMG-001	images_readable	warn	1202-interval_10sec_sequence_frame.oir: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-07-olympus-oir	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-07-olympus-oir	files	rembi	REMBI-IMG-001	images_readable	warn	1202-interval_10sec_sequence_frame.oir: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	correct	
+R4-07-olympus-oir	files	rembi	REMBI-IMG-002	formats_accepted	warn	1 vendor file(s): proprietary format; also provide OME-TIFF/OME-Zarr for long-term reuse: 1202-interval_10sec_sequence_frame.oir	correct	
+R4-09-idr0016	idrmeta	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	n/a	tables-only input is not a BIA/REMBI submission
+R4-09-idr0016	idrmeta	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	n/a	harness subset holds no images / FTP crawl returned no files
+R4-09-idr0016	idrmeta	bia	BIA-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-09-idr0016	idrmeta	idr	IDR-STUDY-006	idr_study_fields	warn	idr0016-study.txt: 'Study Key Words' missing or still a template hint	correct	
+R4-09-idr0016	idrmeta	idr	IDR-EXP-004	idr_processed_data	warn	study file declares no 'Processed Data File Name'	correct	
+R4-09-idr0016	idrmeta	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-09-idr0016	idrmeta	idr	IDR-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-09-idr0016	idrmeta	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	n/a	tables-only input is not a BIA/REMBI submission
+R4-09-idr0016	idrmeta	rembi	REMBI-IMG-002	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-10-S-BIAD3891	bia	bia	BIA-AUTH-004	field_present	warn	missing or empty: study.authors[0].orcid	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-AUTH-004	field_present	warn	missing or empty: study.authors[1].orcid	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-002	file_list_header	warn	Figure4.tsv: unnamed column(s) at position [2]	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-002	file_list_header	warn	Figure5.tsv: unnamed column(s) at position [2]	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-002	file_list_header	warn	Figure7.tsv: unnamed column(s) at position [2]	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-002	file_list_header	warn	Figure6.tsv: unnamed column(s) at position [2]	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-002	file_list_header	warn	Figure2.tsv: unnamed column(s) at position [2]	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-002	file_list_header	warn	Figure3.tsv: unnamed column(s) at position [2]	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-002	file_list_header	warn	Figure1.tsv: unnamed column(s) at position [2]	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:2: empty attribute(s) [''] for Figure4/.DS_Store	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:3: empty attribute(s) [''] for Figure4/GSHD_fixed/.DS_Store	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:4: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos0.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:5: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos1.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:6: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos10.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:7: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos11.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:8: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos12.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:9: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos13.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:10: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos14.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:11: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos15.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:12: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos16.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:13: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos17.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:14: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos18.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:15: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos19.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:16: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos2.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:17: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos20.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:18: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos21.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:19: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos22.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:20: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos23.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	Figure4.tsv:21: empty attribute(s) [''] for Figure4/GSHD_fixed/ctrl_HCTGSHDJFX549_1_MMStack_Pos24.ome_cmle.ome.tiff	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-FL-003	file_list_format	warn	... and 447 more	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-IMG-002	ome_metadata	warn	Figure2/SON_ES/WF13_1.tif: no OME-XML header (plain TIFF)	correct	
+R4-10-S-BIAD3891	bia	bia	BIA-IMG-002	ome_metadata	warn	Figure2/SON_ES/WF13_2.tif: no OME-XML header (plain TIFF)	correct	
+R4-10-S-BIAD3891	bia	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-10-S-BIAD3891	bia	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-10-S-BIAD3891	bia	idr	IDR-FMT-001	formats_accepted	fail	2 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: Figure2/SON_ES/WF13_1.tif, Figure2/SON_ES/WF13_2.tif	correct	
+R4-10-S-BIAD3891	bia	idr	IDR-IMG-002	ome_metadata	warn	Figure2/SON_ES/WF13_1.tif: no OME-XML header (plain TIFF)	correct	
+R4-10-S-BIAD3891	bia	idr	IDR-IMG-002	ome_metadata	warn	Figure2/SON_ES/WF13_2.tif: no OME-XML header (plain TIFF)	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-STUDY-007	field_present	warn	missing or empty: study.funding	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-STUDY-008	field_present	warn	none of these is filled in: study.publications[*].doi, study.publications[*].pubmed_id (missing: study.publications[0].doi, study.publications[0].pubmed_id)	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-BIOS-004	field_present	warn	none of these is filled in: biosample[*].intrinsic_variables, biosample[*].extrinsic_variables, biosample[*].experimental_variables (missing: biosample[0].intrinsic_variables, biosample[1].intrinsic_variables, biosample[2].intrinsic_variables, biosample[3].intrinsic_variables, biosample[4].intrinsic_variables)	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-SPEC-002	field_present	warn	missing or empty: specimen[0].growth_protocol	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-SPEC-002	field_present	warn	missing or empty: specimen[1].growth_protocol	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[1].imaging_method.ontology_id	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-IMG-002	formats_accepted	warn	2 tiff file(s): plain TIFF lacks structured metadata; prefer OME-TIFF: Figure2/SON_ES/WF13_1.tif, Figure2/SON_ES/WF13_2.tif	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-IMG-003	ome_metadata	warn	Figure2/SON_ES/WF13_1.tif: no OME-XML header (plain TIFF)	correct	
+R4-10-S-BIAD3891	bia	rembi	REMBI-IMG-003	ome_metadata	warn	Figure2/SON_ES/WF13_2.tif: no OME-XML header (plain TIFF)	correct	
+R4-11-S-BIAD2499	bia	bia	BIA-BIOS-002	field_present	warn	missing or empty: biosample[0].organism[0].ncbi_taxon	correct	
+R4-11-S-BIAD2499	bia	bia	BIA-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-11-S-BIAD2499	bia	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-11-S-BIAD2499	bia	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-11-S-BIAD2499	bia	idr	IDR-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-11-S-BIAD2499	bia	rembi	REMBI-STUDY-007	field_present	warn	missing or empty: study.funding	correct	
+R4-11-S-BIAD2499	bia	rembi	REMBI-STUDY-008	field_present	warn	none of these is filled in: study.publications[*].doi, study.publications[*].pubmed_id (missing: study.publications, study.publications)	correct	
+R4-11-S-BIAD2499	bia	rembi	REMBI-BIOS-002	field_present	warn	missing or empty: biosample[0].organism[0].ncbi_taxon	correct	
+R4-11-S-BIAD2499	bia	rembi	REMBI-BIOS-004	field_present	warn	none of these is filled in: biosample[*].intrinsic_variables, biosample[*].extrinsic_variables, biosample[*].experimental_variables (missing: biosample[0].intrinsic_variables, biosample[0].extrinsic_variables, biosample[0].experimental_variables)	correct	
+R4-11-S-BIAD2499	bia	rembi	REMBI-SPEC-002	field_present	warn	missing or empty: specimen[0].growth_protocol	correct	
+R4-11-S-BIAD2499	bia	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-11-S-BIAD2499	bia	rembi	REMBI-IMG-002	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-12-S-BIAD3727	bia	bia	BIA-FMT-001	formats_accepted	warn	2 raster file(s): PNG/JPEG hold no microscopy metadata; fine for masks and figures, but submit raw acquisitions in their original or OME format: WeiskirchenGRX/GRX/698-21-13_09.jpg, WeiskirchenGRX/GRX/698-21-13_33.jpg	correct	
+R4-12-S-BIAD3727	bia	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-12-S-BIAD3727	bia	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-12-S-BIAD3727	bia	idr	IDR-FMT-001	formats_accepted	fail	2 raster file(s): IDR requires OME-Zarr: WeiskirchenGRX/GRX/698-21-13_09.jpg, WeiskirchenGRX/GRX/698-21-13_33.jpg	correct	
+R4-12-S-BIAD3727	bia	rembi	REMBI-STUDY-007	field_present	warn	missing or empty: study.funding	correct	
+R4-12-S-BIAD3727	bia	rembi	REMBI-BIOS-004	field_present	warn	none of these is filled in: biosample[*].intrinsic_variables, biosample[*].extrinsic_variables, biosample[*].experimental_variables (missing: biosample[0].intrinsic_variables, biosample[0].extrinsic_variables, biosample[0].experimental_variables)	correct	
+R4-12-S-BIAD3727	bia	rembi	REMBI-SPEC-002	field_present	warn	missing or empty: specimen[0].growth_protocol	correct	
+R4-12-S-BIAD3727	bia	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-12-S-BIAD3727	bia	rembi	REMBI-IMG-002	formats_accepted	warn	2 raster file(s): PNG/JPEG hold no microscopy metadata; fine for masks and figures, not for raw acquisitions: WeiskirchenGRX/GRX/698-21-13_09.jpg, WeiskirchenGRX/GRX/698-21-13_33.jpg	correct	
+R4-13-S-BIAD3375	bia	bia	BIA-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-13-S-BIAD3375	bia	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-13-S-BIAD3375	bia	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-13-S-BIAD3375	bia	idr	IDR-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-13-S-BIAD3375	bia	rembi	REMBI-STUDY-008	field_present	warn	none of these is filled in: study.publications[*].doi, study.publications[*].pubmed_id (missing: study.publications, study.publications)	correct	
+R4-13-S-BIAD3375	bia	rembi	REMBI-BIOS-004	field_present	warn	none of these is filled in: biosample[*].intrinsic_variables, biosample[*].extrinsic_variables, biosample[*].experimental_variables (missing: biosample[0].intrinsic_variables, biosample[0].extrinsic_variables, biosample[0].experimental_variables)	correct	
+R4-13-S-BIAD3375	bia	rembi	REMBI-SPEC-002	field_present	warn	missing or empty: specimen[0].growth_protocol	correct	
+R4-13-S-BIAD3375	bia	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-13-S-BIAD3375	bia	rembi	REMBI-IMG-002	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-14-S-BIAD3578	bia	bia	BIA-FUND-001	field_present	fail	missing or empty: study.funding[0].funding_statement	correct	
+R4-14-S-BIAD3578	bia	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	n/a	harness subset holds no images / FTP crawl returned no files
+R4-14-S-BIAD3578	bia	bia	BIA-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-14-S-BIAD3578	bia	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-14-S-BIAD3578	bia	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-14-S-BIAD3578	bia	idr	IDR-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-14-S-BIAD3578	bia	rembi	REMBI-STUDY-007	field_present	warn	missing or empty: study.funding[0].funding_statement	correct	
+R4-14-S-BIAD3578	bia	rembi	REMBI-STUDY-008	field_present	warn	none of these is filled in: study.publications[*].doi, study.publications[*].pubmed_id (missing: study.publications, study.publications)	correct	
+R4-14-S-BIAD3578	bia	rembi	REMBI-BIOS-004	field_present	warn	none of these is filled in: biosample[*].intrinsic_variables, biosample[*].extrinsic_variables, biosample[*].experimental_variables (missing: biosample[0].intrinsic_variables, biosample[0].extrinsic_variables, biosample[0].experimental_variables)	correct	
+R4-14-S-BIAD3578	bia	rembi	REMBI-SPEC-002	field_present	warn	missing or empty: specimen[0].growth_protocol	correct	
+R4-14-S-BIAD3578	bia	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-14-S-BIAD3578	bia	rembi	REMBI-IMG-002	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-15-S-BIAD3613	bia	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	n/a	harness subset holds no images / FTP crawl returned no files
+R4-15-S-BIAD3613	bia	bia	BIA-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-15-S-BIAD3613	bia	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-15-S-BIAD3613	bia	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-15-S-BIAD3613	bia	idr	IDR-FMT-001	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-15-S-BIAD3613	bia	rembi	REMBI-STUDY-007	field_present	warn	missing or empty: study.funding	correct	
+R4-15-S-BIAD3613	bia	rembi	REMBI-STUDY-008	field_present	warn	none of these is filled in: study.publications[*].doi, study.publications[*].pubmed_id (missing: study.publications, study.publications)	correct	
+R4-15-S-BIAD3613	bia	rembi	REMBI-BIOS-004	field_present	warn	none of these is filled in: biosample[*].intrinsic_variables, biosample[*].extrinsic_variables, biosample[*].experimental_variables (missing: biosample[0].intrinsic_variables, biosample[0].extrinsic_variables, biosample[0].experimental_variables)	correct	
+R4-15-S-BIAD3613	bia	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-15-S-BIAD3613	bia	rembi	REMBI-IMG-002	formats_accepted	fail	no image files found in dataset	n/a	harness subset holds no images / FTP crawl returned no files
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2012_Obesity_Rev/VERY EARLY ALVEOL STRUCT IN PREG MOUSE WILEY OBES REV 2012.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2021_REMD/REMD 2021.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/14 19000X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/16 7900X.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/16_13.000XMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/19 19000X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/22_34.000XMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/26_130.000X.jMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/31_13.500X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/32_13.500X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/AM J PHYSIOL 2009/Fig 2 .tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/AM J PHYSIOL 2009/Fig 4 .tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/7003 2025 OBENDO OXFORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/7004 2025 OBENDO OXPORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/Veleta-2012-34 copia OBENDO 2025 OXFORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	bia	BIA-IMG-001	images_readable	fail	CintiSaverio_EM_data/STEM CELLS 2009/MAMM ALV CELL STEM CELLS 2009.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-16-S-BIAD3710	names	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-16-S-BIAD3710	names	idr	IDR-FMT-001	formats_accepted	fail	16 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: CintiSaverio_EM_data/2012_Obesity_Rev/VERY EARLY ALVEOL STRUCT IN PREG MOUSE WILEY OBES REV 2012.TIFF, CintiSaverio_EM_data/2021_REMD/REMD 2021.tiff, CintiSaverio_EM_data/2025_Obesity/14 19000X.tiff (+13 more)	correct	
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2012_Obesity_Rev/VERY EARLY ALVEOL STRUCT IN PREG MOUSE WILEY OBES REV 2012.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2021_REMD/REMD 2021.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/14 19000X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/16 7900X.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/16_13.000XMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/19 19000X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/22_34.000XMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/26_130.000X.jMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/31_13.500X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/32_13.500X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/AM J PHYSIOL 2009/Fig 2 .tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/AM J PHYSIOL 2009/Fig 4 .tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/7003 2025 OBENDO OXFORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/7004 2025 OBENDO OXPORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/Veleta-2012-34 copia OBENDO 2025 OXFORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	idr	IDR-IMG-001	images_readable	fail	CintiSaverio_EM_data/STEM CELLS 2009/MAMM ALV CELL STEM CELLS 2009.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-STUDY-007	field_present	warn	missing or empty: study.funding	correct	
+R4-16-S-BIAD3710	names	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2012_Obesity_Rev/VERY EARLY ALVEOL STRUCT IN PREG MOUSE WILEY OBES REV 2012.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2021_REMD/REMD 2021.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/14 19000X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/16 7900X.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/16_13.000XMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/19 19000X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/22_34.000XMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/26_130.000X.jMOD.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/31_13.500X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/2025_Obesity/32_13.500X.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/AM J PHYSIOL 2009/Fig 2 .tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/AM J PHYSIOL 2009/Fig 4 .tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/7003 2025 OBENDO OXFORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/7004 2025 OBENDO OXPORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/OBENDO 2025/Veleta-2012-34 copia OBENDO 2025 OXFORD ACADEMY.tiff: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-001	images_readable	fail	CintiSaverio_EM_data/STEM CELLS 2009/MAMM ALV CELL STEM CELLS 2009.TIFF: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-16-S-BIAD3710	names	rembi	REMBI-IMG-002	formats_accepted	warn	16 tiff file(s): plain TIFF lacks structured metadata; prefer OME-TIFF: CintiSaverio_EM_data/2012_Obesity_Rev/VERY EARLY ALVEOL STRUCT IN PREG MOUSE WILEY OBES REV 2012.TIFF, CintiSaverio_EM_data/2021_REMD/REMD 2021.tiff, CintiSaverio_EM_data/2025_Obesity/14 19000X.tiff (+13 more)	correct	
+R4-17-S-BIAD3732	names	bia	BIA-FMT-001	formats_accepted	warn	279 vendor file(s): accepted, but convert to OME-TIFF/OME-Zarr (e.g. bioformats2raw, BatchConvert) for reuse and BIA viewers: DAC_048_RNAscope_JVW_COMPLETE/230518_1A_neg.czi, DAC_048_RNAscope_JVW_COMPLETE/230518_1A_pos.czi, DAC_048_RNAscope_JVW_COMPLETE/230518_2A_neg.czi (+276 more)	correct	
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_1A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_1A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_2A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_2A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_3A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_3A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_7A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_7A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_8A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_8A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_9A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_9A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_10a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_10b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_11a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_11b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_12a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_12b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_13a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_13b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	bia	BIA-IMG-001	images_readable	warn	... and 259 more	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-17-S-BIAD3732	names	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-17-S-BIAD3732	names	idr	IDR-FMT-001	formats_accepted	fail	279 vendor file(s): IDR requires OME-Zarr; convert with bioformats2raw: DAC_048_RNAscope_JVW_COMPLETE/230518_1A_neg.czi, DAC_048_RNAscope_JVW_COMPLETE/230518_1A_pos.czi, DAC_048_RNAscope_JVW_COMPLETE/230518_2A_neg.czi (+276 more)	correct	
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_1A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_1A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_2A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_2A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_3A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_3A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_7A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_7A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_8A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_8A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_9A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_9A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_10a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_10b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_11a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_11b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_12a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_12b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_13a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_13b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	idr	IDR-IMG-001	images_readable	warn	... and 259 more	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-STUDY-007	field_present	warn	missing or empty: study.funding	correct	
+R4-17-S-BIAD3732	names	rembi	REMBI-BIOS-004	field_present	warn	none of these is filled in: biosample[*].intrinsic_variables, biosample[*].extrinsic_variables, biosample[*].experimental_variables (missing: biosample[0].intrinsic_variables, biosample[0].extrinsic_variables, biosample[0].experimental_variables)	correct	
+R4-17-S-BIAD3732	names	rembi	REMBI-SPEC-002	field_present	warn	missing or empty: specimen[0].growth_protocol	correct	
+R4-17-S-BIAD3732	names	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_1A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_1A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_2A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_2A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_3A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_3A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_7A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_7A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_8A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_8A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_9A_neg.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/230518_9A_pos.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_10a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_10b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_11a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_11b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_12a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_12b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_13a.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	DAC_048_RNAscope_JVW_COMPLETE/DAC_048_02_13b.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it)	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-001	images_readable	warn	... and 259 more	n/a	zero-byte placeholder in names mirror
+R4-17-S-BIAD3732	names	rembi	REMBI-IMG-002	formats_accepted	warn	279 vendor file(s): proprietary format; also provide OME-TIFF/OME-Zarr for long-term reuse: DAC_048_RNAscope_JVW_COMPLETE/230518_1A_neg.czi, DAC_048_RNAscope_JVW_COMPLETE/230518_1A_pos.czi, DAC_048_RNAscope_JVW_COMPLETE/230518_2A_neg.czi (+276 more)	correct	
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT02_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT02_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT03_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT03_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT04_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT04_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro02_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro02_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro03_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro03_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro04_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro04_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro05_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro05_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut2_UT01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut2_UT01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	bia	BIA-IMG-001	images_readable	fail	... and 320 more	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-24-S-BIAD4043	names	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-24-S-BIAD4043	names	idr	IDR-FMT-001	formats_accepted	fail	340 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: THP-1_Rep1_IDRmut1_UT01_mask.tif, THP-1_Rep1_IDRmut1_UT01_raw.tif, THP-1_Rep1_IDRmut1_UT02_mask.tif (+337 more)	correct	
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT02_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT02_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT03_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT03_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT04_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT04_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro02_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro02_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro03_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro03_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro04_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro04_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro05_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro05_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut2_UT01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut2_UT01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	idr	IDR-IMG-001	images_readable	fail	... and 320 more	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-STUDY-007	field_present	warn	missing or empty: study.funding	correct	
+R4-24-S-BIAD4043	names	rembi	REMBI-STUDY-008	field_present	warn	none of these is filled in: study.publications[*].doi, study.publications[*].pubmed_id (missing: study.publications, study.publications)	correct	
+R4-24-S-BIAD4043	names	rembi	REMBI-BIOS-004	field_present	warn	none of these is filled in: biosample[*].intrinsic_variables, biosample[*].extrinsic_variables, biosample[*].experimental_variables (missing: biosample[0].intrinsic_variables, biosample[0].extrinsic_variables, biosample[0].experimental_variables)	correct	
+R4-24-S-BIAD4043	names	rembi	REMBI-SPEC-002	field_present	warn	missing or empty: specimen[0].growth_protocol	correct	
+R4-24-S-BIAD4043	names	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT02_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT02_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT03_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT03_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT04_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_UT04_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro02_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro02_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro03_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro03_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro04_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro04_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro05_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut1_stauro05_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut2_UT01_mask.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	THP-1_Rep1_IDRmut2_UT01_raw.tif: unreadable: TiffFileError: not a TIFF file: header=b''	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-001	images_readable	fail	... and 320 more	n/a	zero-byte placeholder in names mirror
+R4-24-S-BIAD4043	names	rembi	REMBI-IMG-002	formats_accepted	warn	340 tiff file(s): plain TIFF lacks structured metadata; prefer OME-TIFF: THP-1_Rep1_IDRmut1_UT01_mask.tif, THP-1_Rep1_IDRmut1_UT01_raw.tif, THP-1_Rep1_IDRmut1_UT02_mask.tif (+337 more)	correct	
+R4-30-S-BIAD3450	names	bia	BIA-AUTH-004	field_present	warn	missing or empty: study.authors[1].orcid	correct	
+R4-30-S-BIAD3450	names	bia	BIA-FL-003	file_list_format	warn	Study component 6 filelist.tsv:4: empty attribute(s) ['Excitation 3', 'Emission 3'] for VMDA_DIFF3_TAU.zip	correct	
+R4-30-S-BIAD3450	names	bia	BIA-FL-003	file_list_format	warn	Study component 6 filelist.tsv:7: empty attribute(s) ['Excitation 3', 'Emission 3'] for VMDA_DIFF3_FOXA2_TH.zip	correct	
+R4-30-S-BIAD3450	names	bia	BIA-FL-003	file_list_format	warn	Study component 5 filelist.tsv:3: empty attribute(s) ['Emission 4'] for VMDA_DIFF2_GCASE.zip	correct	
+R4-30-S-BIAD3450	names	bia	BIA-FL-003	file_list_format	warn	Study component 2 filelist.tsv:10: empty attribute(s) ['Channel 3', 'Excitation 3'] for CTX_DIFF2_GCASE.zip	correct	
+R4-30-S-BIAD3450	names	bia	BIA-FL-003	file_list_format	warn	Study Component 3 filelist.tsv:6: empty attribute(s) ['Channel 3', 'Excitation 3'] for CTX_DIFF3_GCASE.zip	correct	
+R4-30-S-BIAD3450	names	bia	BIA-FMT-001	formats_accepted	fail	no image files found in dataset	wrong	all 46 images are submitted inside .zip archives; 'no image files' overstates
+R4-30-S-BIAD3450	names	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-30-S-BIAD3450	names	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-30-S-BIAD3450	names	idr	IDR-FMT-001	formats_accepted	fail	no image files found in dataset	wrong	all 46 images are submitted inside .zip archives; 'no image files' overstates
+R4-30-S-BIAD3450	names	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[0].imaging_method.ontology_id	correct	
+R4-30-S-BIAD3450	names	rembi	REMBI-ACQ-002	field_present	warn	missing or empty: image_acquisition[1].imaging_method.ontology_id	correct	
+R4-30-S-BIAD3450	names	rembi	REMBI-IMG-002	formats_accepted	fail	no image files found in dataset	wrong	all 46 images are submitted inside .zip archives; 'no image files' overstates
+R4-32-micromanager-stack	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-32-micromanager-stack	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-32-micromanager-stack	files	bia	BIA-IMG-001	images_readable	fail	test_stack_MMStack_Pos0.ome.tif: unreadable: ImportError: This documented is using an outdated schema ('http://www.openmicroscopy.org/Schemas/OME/2015-01'). But lxml is required to update older schemas to OME-2016. Please run `pip install lxml`	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it
+R4-32-micromanager-stack	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-32-micromanager-stack	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-32-micromanager-stack	files	idr	IDR-FMT-001	formats_accepted	fail	1 ome-tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: test_stack_MMStack_Pos0.ome.tif	correct	
+R4-32-micromanager-stack	files	idr	IDR-IMG-001	images_readable	fail	test_stack_MMStack_Pos0.ome.tif: unreadable: ImportError: This documented is using an outdated schema ('http://www.openmicroscopy.org/Schemas/OME/2015-01'). But lxml is required to update older schemas to OME-2016. Please run `pip install lxml`	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it
+R4-32-micromanager-stack	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-32-micromanager-stack	files	rembi	REMBI-IMG-001	images_readable	fail	test_stack_MMStack_Pos0.ome.tif: unreadable: ImportError: This documented is using an outdated schema ('http://www.openmicroscopy.org/Schemas/OME/2015-01'). But lxml is required to update older schemas to OME-2016. Please run `pip install lxml`	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it
+R4-33-micromanager-separate	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-33-micromanager-separate	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-33-micromanager-separate	files	bia	BIA-IMG-002	ome_metadata	warn	img_000000000_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	bia	BIA-IMG-002	ome_metadata	warn	img_000000000_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	bia	BIA-IMG-002	ome_metadata	warn	img_000000001_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	bia	BIA-IMG-002	ome_metadata	warn	img_000000001_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	bia	BIA-IMG-002	ome_metadata	warn	img_000000002_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	bia	BIA-IMG-002	ome_metadata	warn	img_000000002_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	bia	BIA-IMG-002	ome_metadata	warn	img_000000003_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	bia	BIA-IMG-002	ome_metadata	warn	img_000000003_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-33-micromanager-separate	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-33-micromanager-separate	files	idr	IDR-FMT-001	formats_accepted	fail	8 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: img_000000000_FITC_000.tif, img_000000000_Rhodamine_000.tif, img_000000001_FITC_000.tif (+5 more)	correct	
+R4-33-micromanager-separate	files	idr	IDR-IMG-002	ome_metadata	warn	img_000000000_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	idr	IDR-IMG-002	ome_metadata	warn	img_000000000_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	idr	IDR-IMG-002	ome_metadata	warn	img_000000001_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	idr	IDR-IMG-002	ome_metadata	warn	img_000000001_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	idr	IDR-IMG-002	ome_metadata	warn	img_000000002_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	idr	IDR-IMG-002	ome_metadata	warn	img_000000002_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	idr	IDR-IMG-002	ome_metadata	warn	img_000000003_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	idr	IDR-IMG-002	ome_metadata	warn	img_000000003_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-002	formats_accepted	warn	8 tiff file(s): plain TIFF lacks structured metadata; prefer OME-TIFF: img_000000000_FITC_000.tif, img_000000000_Rhodamine_000.tif, img_000000001_FITC_000.tif (+5 more)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-003	ome_metadata	warn	img_000000000_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-003	ome_metadata	warn	img_000000000_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-003	ome_metadata	warn	img_000000001_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-003	ome_metadata	warn	img_000000001_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-003	ome_metadata	warn	img_000000002_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-003	ome_metadata	warn	img_000000002_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-003	ome_metadata	warn	img_000000003_FITC_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-33-micromanager-separate	files	rembi	REMBI-IMG-003	ome_metadata	warn	img_000000003_Rhodamine_000.tif: no OME-XML header (plain TIFF)	correct	
+R4-34-olympus-ome-export	files	bia	BIA-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-34-olympus-ome-export	files	bia	BIA-FL-001	file_list_present	fail	no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)	correct	
+R4-34-olympus-ome-export	files	bia	BIA-IMG-001	images_readable	fail	coupe shg stack_0001.ome.tif: unreadable: ValueError: Unsupported document namespace 'http://www.openmicroscopy.org/Schemas/OME/2016-DEV0'	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it
+R4-34-olympus-ome-export	files	idr	IDR-STUDY-001	idr_study_present	fail	no IDR study file (*study*.txt) in dataset root	correct	
+R4-34-olympus-ome-export	files	idr	IDR-ASSAY-001	idr_assay_present	fail	no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)	correct	
+R4-34-olympus-ome-export	files	idr	IDR-FMT-001	formats_accepted	fail	1 ome-tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: coupe shg stack_0001.ome.tif	correct	
+R4-34-olympus-ome-export	files	idr	IDR-IMG-001	images_readable	fail	coupe shg stack_0001.ome.tif: unreadable: ValueError: Unsupported document namespace 'http://www.openmicroscopy.org/Schemas/OME/2016-DEV0'	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it
+R4-34-olympus-ome-export	files	rembi	REMBI-META-001	metadata_present	fail	no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)	correct	
+R4-34-olympus-ome-export	files	rembi	REMBI-IMG-001	images_readable	fail	coupe shg stack_0001.ome.tif: unreadable: ValueError: Unsupported document namespace 'http://www.openmicroscopy.org/Schemas/OME/2016-DEV0'	wrong	valid OME-TIFF written against an older/dev OME schema (2015-01, 2016-DEV0); ome-types refused it

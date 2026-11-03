@@ -110,6 +110,11 @@ def formats_accepted(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     msgs = params.get("messages", {})
     images = ds.image_files
     if not images:
+        archives = [f for f in ds.data_files if f.lower().endswith((".zip", ".tar", ".tar.gz", ".tgz", ".7z", ".rar"))]
+        if archives:  # S-BIAD3450 submits every image zipped
+            sample = ", ".join(archives[:3]) + (f" (+{len(archives) - 3} more)" if len(archives) > 3 else "")
+            return [Issue("warning", f"no image files outside archives; {len(archives)} archive(s) not inspected "
+                                     f"(images inside them can't be checked or viewed): {sample}")]
         return [Issue("problem", "no image files found in dataset")]
     issues = []
     by_fmt: dict[str, list[str]] = defaultdict(list)
@@ -192,12 +197,13 @@ def series_consistent(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     groups: dict[str, list] = defaultdict(list)
     for i in ds.all_image_info():
         if i.readable and i.sizes and i.format != "raster":  # figures/photos (S-BIAD4056 leaf scans) vary by design
-            groups[_group_key(ds, i.path, group_by)].append(i)
+            # one series comes from one writer: a screen-capture TIFF next to an OME-TIFF stack isn't part of it
+            groups[(_group_key(ds, i.path, group_by), i.format)].append(i)
     groups = {k: v for k, v in groups.items() if len(v) > 1}
     if not groups:
         raise SkipCheck("no series with 2+ readable images to compare")
     issues = []
-    for key, infos in sorted(groups.items()):
+    for (key, _fmt), infos in sorted(groups.items()):
         ref = infos[0]
         for i in infos[1:]:
             diffs: list[tuple[str, str]] = []

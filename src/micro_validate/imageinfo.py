@@ -12,7 +12,7 @@ VENDOR_EXTS = {
     ".czi", ".nd2", ".lif", ".lsm", ".oib", ".oif", ".ims", ".vsi", ".svs", ".ndpi", ".scn",
     ".dv", ".r3d", ".lei", ".zvi", ".ics", ".ids", ".sld", ".mrc", ".dm3", ".dm4", ".ser",
     ".stk", ".nd", ".lof", ".lifext", ".mvd2", ".obf", ".msr", ".ome", ".xdce", ".flex",
-    ".mrxs", ".bif", ".tf2", ".tf8", ".btf", ".ets", ".spe", ".fli", ".oir", ".lsr",
+    ".mrxs", ".bif", ".tf2", ".tf8", ".btf", ".ets", ".spe", ".fli", ".oir", ".lsr", ".klb", ".fits", ".fit",
 }
 TIFF_BASED_VENDOR = {".lsm", ".stk"}
 # MRC2014 (EM maps, tomograms, particle stacks); ".map" is only MRC when the header says so
@@ -219,7 +219,17 @@ def _tiff_resolution(tif: Any) -> dict[str, float | None]:
 def _apply_ome_xml(xml: str, info: ImageInfo) -> None:
     from ome_types import from_xml
 
-    ome = from_xml(xml)
+    try:
+        ome = from_xml(xml)
+    except (ValueError, ImportError) as e:
+        ns = re.search(r'xmlns(?::\w+)?="(http://www\.openmicroscopy\.org/Schemas/OME/[^"]+)"', xml)
+        if not ns or "/2016-06" in ns.group(1):
+            raise
+        # older or pre-release schema (Micro-Manager 1.4: 2015-01, Olympus exports: 2016-DEV0); ome-types reads only 2016-06
+        _apply_ome_xml_lenient(xml, info)
+        info.notes.append(f"OME-XML uses schema {ns.group(1).rsplit('/', 1)[1]}; read leniently "
+                          "(re-saving with current Bio-Formats updates it to 2016-06)")
+        return
     if not ome.images:
         raise ValueError("OME-XML has no Image elements")
     info.is_ome = True
@@ -234,6 +244,26 @@ def _apply_ome_xml(xml: str, info: ImageInfo) -> None:
     info.channel_names = [c.name or "" for c in px.channels]
     if len(ome.images) > 1:
         info.notes.append(f"{len(ome.images)} images (series) in OME-XML; using the first")
+
+
+def _apply_ome_xml_lenient(xml: str, info: ImageInfo) -> None:
+    """Pixels/Channel attributes by pattern, for OME-XML in schemas ome-types refuses."""
+    m = re.search(r"<(?:\w+:)?Pixels\b([^>]*)>", xml)
+    if not m:
+        raise ValueError("OME-XML has no Pixels element")
+    attrs = dict(re.findall(r'(\w+)="([^"]*)"', m.group(1)))
+    info.is_ome = True
+    info.sizes = {k: int(attrs.get(f"Size{k}", 1)) for k in "XYZCT"}
+    info.dtype = attrs.get("Type", "")
+
+    def size(ax: str) -> float | None:
+        try:
+            return _um(float(attrs[f"PhysicalSize{ax}"]), attrs.get(f"PhysicalSize{ax}Unit", "µm"))
+        except (KeyError, ValueError):
+            return None
+
+    info.pixel_size_um = {ax.lower(): size(ax) for ax in "XYZ"}
+    info.channel_names = re.findall(r'<(?:\w+:)?Channel\b[^>]*\bName="([^"]*)"', xml)
 
 
 def _ngff_attrs(attrs: dict[str, Any]) -> dict[str, Any]:

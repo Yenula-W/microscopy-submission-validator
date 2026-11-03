@@ -92,6 +92,7 @@ MANIFEST = [
 
 # Ship-bar rounds: each round uses only inputs no earlier round used (selection in EVALUATION.md section 9).
 # Extra kinds: "names" = names-only BIA mirror (fetch_names.py), "idrmeta" = an IDR repo's study + tables.
+_MM = f"{OME}/Micro-Manager/1.4.22/thomas/test"
 _FRAP = f"{OME}/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen"
 ROUNDS = {
     "r3": [
@@ -130,7 +131,14 @@ ROUNDS = {
         ["S-BIAD3891", "S-BIAD2499", "S-BIAD3727", "S-BIAD3375", "S-BIAD3578", "S-BIAD3613"])]
       + [(f"R4-{16 + i:02d}-{a}", "names", a) for i, a in enumerate(
         ["S-BIAD3710", "S-BIAD3732", "S-BIAD3379", "S-BIAD3896", "S-BIAD3959", "S-BIAD3909", "S-BIAD3709", "S-BIAD3712",
-         "S-BIAD4043", "S-BIAD3061", "S-BIAD3532", "S-BIAD2948", "S-BIAD3359", "S-BIAD4047", "S-BIAD3450", "S-BIAD3622"])],
+         "S-BIAD4043", "S-BIAD3061", "S-BIAD3532", "S-BIAD2948", "S-BIAD3359", "S-BIAD4047", "S-BIAD3450", "S-BIAD3622"])]
+      + [  # added when EBI FTP refused the remaining crawls
+        ("R4-32-micromanager-stack", "files", [f"{_MM}/test_stack/test_stack_MMStack_Pos0{n}" for n in (
+            ".ome.tif", "_metadata.txt")]),
+        ("R4-33-micromanager-separate", "files", [f"{_MM}/test_sep/Pos0/{n}" for n in (
+            [f"img_00000000{t}_{c}_000.tif" for t in range(4) for c in ("FITC", "Rhodamine")] + ["metadata.txt"])]),
+        ("R4-34-olympus-ome-export", "files", [f"{OME}/Olympus-OIR/etienne/coupe%20shg%20stack_0001.ome.tif"]),
+    ],
 }
 
 IMAGE_EXT = re.compile(r"\.(ome\.tiff?|tiff?|czi|nd2|lif|lsm|oib|ims|png|jpe?g|dv|mrc|zarr\.zip)$", re.I)
