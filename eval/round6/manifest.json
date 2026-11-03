@@ -1,0 +1,100 @@
+{
+ "R6-01-imspector-obf": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/OBF/ngladitz/v6/test-v6.obf",
+   "https://downloads.openmicroscopy.org/images/OBF/ngladitz/v6/test-v6-short-write.obf"
+  ]
+ },
+ "R6-02-deltavision": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/DV/U2OS/U2OS_AurB_AurA_001_R3D.dv",
+   "https://downloads.openmicroscopy.org/images/DV/U2OS/U2OS_AurB_AurA_001_R3D.dv.log"
+  ]
+ },
+ "R6-03-ome-xml": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/OME-XML/2012-06/multi-channel-time-series.ome.xml",
+   "https://downloads.openmicroscopy.org/images/OME-XML/2012-06/metadata-only.ome.xml"
+  ]
+ },
+ "R6-04-micromanager-1.4.16": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.16/serge/Pos0/img_000000000_00-BF0_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.16/serge/Pos0/img_000000000_00-BF1_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.16/serge/Pos0/img_000000000_06-CFPtriple_000.tif",
+   "https://downloads.openmicroscopy.org/images/Micro-Manager/1.4.16/serge/Pos0/img_000000000_09-DAPIquad_000.tif"
+  ]
+ },
+ "R6-10-S-BIAD3686": {
+  "kind": "bia",
+  "spec": "S-BIAD3686"
+ },
+ "R6-11-S-BIAD3778": {
+  "kind": "bia",
+  "spec": "S-BIAD3778"
+ },
+ "R6-12-S-BIAD3931": {
+  "kind": "bia",
+  "spec": "S-BIAD3931"
+ },
+ "R6-16-S-BIAD3304": {
+  "kind": "apinames",
+  "spec": "S-BIAD3304"
+ },
+ "R6-17-S-BIAD3651": {
+  "kind": "apinames",
+  "spec": "S-BIAD3651"
+ },
+ "R6-18-S-BIAD2498": {
+  "kind": "apinames",
+  "spec": "S-BIAD2498"
+ },
+ "R6-19-S-BIAD3797": {
+  "kind": "apinames",
+  "spec": "S-BIAD3797"
+ },
+ "R6-20-S-BIAD3760": {
+  "kind": "apinames",
+  "spec": "S-BIAD3760"
+ },
+ "R6-21-S-BIAD4184": {
+  "kind": "apinames",
+  "spec": "S-BIAD4184"
+ },
+ "R6-22-S-BIAD3723": {
+  "kind": "apinames",
+  "spec": "S-BIAD3723"
+ },
+ "R6-23-S-BIAD3828": {
+  "kind": "apinames",
+  "spec": "S-BIAD3828"
+ },
+ "R6-24-S-BIAD3922": {
+  "kind": "apinames",
+  "spec": "S-BIAD3922"
+ },
+ "R6-25-S-BIAD3557": {
+  "kind": "apinames",
+  "spec": "S-BIAD3557"
+ },
+ "R6-26-S-BIAD3707": {
+  "kind": "apinames",
+  "spec": "S-BIAD3707"
+ },
+ "R6-27-S-BIAD3751": {
+  "kind": "apinames",
+  "spec": "S-BIAD3751"
+ },
+ "R6-28-S-BIAD3372": {
+  "kind": "apinames",
+  "spec": "S-BIAD3372"
+ },
+ "R6-29-S-BIAD2430": {
+  "kind": "apinames",
+  "spec": "S-BIAD2430"
+ }
+}

@@ -725,7 +725,8 @@ def test_ome_tiff_in_older_schema_is_readable(tmp_path):
         info = read_info(f, f.name)
         assert info.readable and info.is_ome, info.error
         assert info.sizes["C"] == 2 and info.pixel_size_um["x"] == 0.2 and info.channel_names == ["FITC", "Rhodamine"]
-        assert schema in info.notes[-1]
+        # some ome-types versions accept 2015-01 directly; when they don't, the lenient read says so
+        assert not info.notes or schema in info.notes[-1]
 
 
 def test_klb_and_fits_are_images(tmp_path):
@@ -768,3 +769,60 @@ def test_images_readable_is_needs_review_not_verdict(bia_dataset, capsys):
     main([str(bia_dataset), "-t", "bia", "-o", str(bia_dataset.parent / "r")])
     capsys.readouterr()
     assert "## Needs review (not part of the overall result)" in (bia_dataset.parent / "r.md").read_text()
+
+
+# ------------------------------------------------------------- regressions from ship-bar rounds 5 and 6
+
+
+def test_unrecognised_data_files_are_not_no_images(tmp_path):
+    """AmiraMesh (.am) volumes are recognised; other unknown data files give a warning, not 'no image files found'."""
+    from micro_validate.imageinfo import classify
+
+    (tmp_path / "test.am").write_text("# AmiraMesh BINARY-LITTLE-ENDIAN 2.1\n\ndefine Lattice 4 4 4\n")
+    assert classify(tmp_path / "test.am") == "vendor"
+    (tmp_path / "test.am").unlink()
+    (tmp_path / "volume.nrrd").write_bytes(b"NRRD0004\n")
+    res = run(tmp_path, "bia")["BIA-FMT-001"]
+    assert res.status == "warn" and "1 other data file(s) not checked: volume.nrrd" in res.messages[0], res.messages
+
+
+def test_ome_xml_with_bindata_is_an_image(tmp_path):
+    """OME sample 2012-06 'multi-channel-time-series.ome.xml' carries its pixels as BinData."""
+    from micro_validate.imageinfo import classify, read_info
+
+    xml = ('<?xml version="1.0"?><OME xmlns="http://www.openmicroscopy.org/Schemas/OME/2016-06"><Image ID="Image:0">'
+           '<Pixels ID="Pixels:0" DimensionOrder="XYZCT" Type="uint8" SizeX="2" SizeY="2" SizeZ="1" SizeC="1" SizeT="1">'
+           '<Channel ID="Channel:0"/><BinData xmlns="http://www.openmicroscopy.org/Schemas/BinaryFile/2016-06" '
+           'BigEndian="false" Length="4">AAAAAA==</BinData></Pixels></Image></OME>')
+    (tmp_path / "ts.ome.xml").write_text(xml)
+    (tmp_path / "meta.ome.xml").write_text(xml.replace("<BinData", "<!--").replace("</BinData>", "-->"))
+    assert classify(tmp_path / "ts.ome.xml") == "ome-xml"
+    assert classify(tmp_path / "meta.ome.xml") == "sidecar"
+    info = read_info(tmp_path / "ts.ome.xml", "ts.ome.xml")
+    assert info.readable and info.sizes["X"] == 2
+    assert run(tmp_path, "bia")["BIA-FMT-001"].status == "warn"
+
+
+def test_ome_tiff_with_invalid_xml_is_readable(tmp_path):
+    """S-BIAD3778 writes literal '\\n' between attributes: the XML is broken, the TIFF is fine."""
+    import numpy as np
+    import tifffile
+
+    from micro_validate.imageinfo import read_info
+
+    xml = ('<OME xmlns="http://www.openmicroscopy.org/Schemas/OME/2016-06"\\n  ><Image Name="a"><Pixels SizeX="4"\\n '
+           'PhysicalSizeX="0.17" PhysicalSizeXUnit="&#181;m" PhysicalSizeY="0.17"/></Image></OME>')
+    tifffile.imwrite(tmp_path / "a.ome.tiff", np.zeros((6, 4), "uint8"), description=xml, metadata=None)
+    info = read_info(tmp_path / "a.ome.tiff", "a.ome.tiff")
+    assert info.readable and info.sizes["X"] == 4 and not info.is_ome, info.error
+    assert info.pixel_size_um["x"] == 0.17
+    assert any("not valid XML" in n for n in info.notes)
+    msgs = run(tmp_path, "bia")["BIA-IMG-002"].messages
+    assert any("OME-XML header is not valid XML" in m for m in msgs), msgs
+
+
+def test_unparsed_xlsx_file_list_is_a_warning(bia_dataset):
+    """S-BIAD2430 uploads an extra *file_list*.xlsx beside its TSV lists."""
+    (bia_dataset / "empty_file_list.xlsx").write_bytes(b"PK\x03\x04")
+    res = run(bia_dataset, "bia")["BIA-FL-001"]
+    assert res.status == "warn" and "Excel file lists are not parsed" in res.messages[0], res.messages

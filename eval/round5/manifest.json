@@ -1,0 +1,98 @@
+{
+ "R5-01-olympus-oir-lambda": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Olympus-OIR/gh-4205/zenodo-12773657/DAPI_mCherry_4T_5Lambda-420-630-w10nm-s50nm.oir"
+  ]
+ },
+ "R5-02-hamamatsu-ndpis": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Hamamatsu-NDPI/manuel/test3.ndpis",
+   "https://downloads.openmicroscopy.org/images/Hamamatsu-NDPI/manuel/test3-DAPI%202%20%28387%29%20.ndpi",
+   "https://downloads.openmicroscopy.org/images/Hamamatsu-NDPI/manuel/test3-FITC%202%20%28485%29.ndpi",
+   "https://downloads.openmicroscopy.org/images/Hamamatsu-NDPI/manuel/test3-TRITC%202%20%28560%29.ndpi"
+  ]
+ },
+ "R5-03-imaris-lz4": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Imaris-IMS/bitplane/lz4/croppedCDM3DLz4.ims",
+   "https://downloads.openmicroscopy.org/images/Imaris-IMS/bitplane/lz4/croppedRetinaLz4.ims"
+  ]
+ },
+ "R5-04-amiramesh": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/AmiraMesh/ignacio/test.am"
+  ]
+ },
+ "R5-10-S-BIAD3365": {
+  "kind": "bia",
+  "spec": "S-BIAD3365"
+ },
+ "R5-11-S-BIAD3802": {
+  "kind": "bia",
+  "spec": "S-BIAD3802"
+ },
+ "R5-12-S-BIAD2500": {
+  "kind": "bia",
+  "spec": "S-BIAD2500"
+ },
+ "R5-13-S-BIAD3897": {
+  "kind": "bia",
+  "spec": "S-BIAD3897"
+ },
+ "R5-15-S-BIAD4158": {
+  "kind": "bia",
+  "spec": "S-BIAD4158"
+ },
+ "R5-16-S-BIAD4045": {
+  "kind": "names",
+  "spec": "S-BIAD4045"
+ },
+ "R5-17-S-BIAD3711": {
+  "kind": "names",
+  "spec": "S-BIAD3711"
+ },
+ "R5-19-S-BIAD3625": {
+  "kind": "names",
+  "spec": "S-BIAD3625"
+ },
+ "R5-20-S-BIAD3949": {
+  "kind": "names",
+  "spec": "S-BIAD3949"
+ },
+ "R5-21-S-BIAD4181": {
+  "kind": "names",
+  "spec": "S-BIAD4181"
+ },
+ "R5-23-S-BIAD3209": {
+  "kind": "names",
+  "spec": "S-BIAD3209"
+ },
+ "R5-24-S-BIAD3703": {
+  "kind": "names",
+  "spec": "S-BIAD3703"
+ },
+ "R5-25-S-BIAD3702": {
+  "kind": "names",
+  "spec": "S-BIAD3702"
+ },
+ "R5-32-S-BIAD3480": {
+  "kind": "apinames",
+  "spec": "S-BIAD3480"
+ },
+ "R5-33-S-BIAD3699": {
+  "kind": "apinames",
+  "spec": "S-BIAD3699"
+ },
+ "R5-34-S-BIAD3191": {
+  "kind": "apinames",
+  "spec": "S-BIAD3191"
+ },
+ "R5-35-S-BIAD3619": {
+  "kind": "apinames",
+  "spec": "S-BIAD3619"
+ }
+}

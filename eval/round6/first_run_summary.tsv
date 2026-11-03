@@ -1,0 +1,13 @@
+check	n	correct	debatable	wrong	%correct
+annotation_source_image	1	1	0	0	100.0
+field_present	92	92	0	0	100.0
+file_list_format	22	22	0	0	100.0
+file_list_present	5	4	0	1	80.0
+formats_accepted	48	45	0	3	93.8
+idr_assay_present	21	21	0	0	100.0
+idr_study_present	21	21	0	0	100.0
+images_readable	15	9	0	6	60.0
+metadata_present	8	8	0	0	100.0
+ome_metadata	24	24	0	0	100.0
+TOTAL	257	247	0	10	96.1
+n/a 842

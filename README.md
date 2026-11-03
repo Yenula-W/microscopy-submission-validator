@@ -85,10 +85,19 @@ The JSON report has the same content, plus `images[]` with the full per-file det
 
 [EVALUATION.md](EVALUATION.md) covers the evaluation. The tool was run on 26 held-out public inputs: OME-TIFF, ImageJ TIFF, Zeiss LSM/CZI, Nikon ND2, Olympus OIB, MetaMorph, IDR OME-Zarr v0.4/0.5, six accepted BioImage Archive studies and seven accepted IDR studies.
 
-- 78 runs, 0 crashes.
-- 121 findings were hand-checked: 91.7% correct, 0 wrong.
-- A second round covered 110 accepted IDR studies' published tables and 29 BioImage Archive upload trees.
-- The six accepted BIA studies get no failures.
+- Rounds 1-2: 78 runs, 0 crashes. 121 findings were hand-checked: 91.7% correct, 0 wrong. Round 2 covered 110 accepted IDR studies' published tables and 29 BioImage Archive upload trees.
+- Ship-bar rounds 3-6: 4 × 21 new inputs, 252 runs, 0 crashes. Each round's first run was judged by hand before any change:
+
+  | Round | Precision |
+  |---|---|
+  | 3 | 68.7% |
+  | 4 | 94.4% |
+  | 5 | 98.9% |
+  | 6 | 96.1% |
+
+  Rounds 5 and 6 ran on the same frozen code. Every root cause found was fixed with a regression test, and reruns on the fixed code show 0 wrong.
+- **Status:** the stricter ship bar, two untouched rounds in a row with no overstated claim, is **not yet met**. Rounds 5 and 6 each had 3-4 overstated "no images" or "unreadable" claims, now fixed. See EVALUATION.md §9.
+- **Needs review:** *Image files readable* is reported in its own "Needs review" section and does not affect the overall result or the exit code. Its untouched precision in rounds 3-4 was 44%.
 
 `scripts/holdout/fetch.py` and `scripts/holdout/run_eval.py` reproduce the run. `scripts/real_data_check.sh` holds the original development-time checks.
 
@@ -98,7 +107,7 @@ The JSON report has the same content, plus `images[]` with the full per-file det
 pip install -e '.[dev]' && pytest
 ```
 
-There are 71 tests, including messy-input robustness tests and regression tests for every rule fixed during the held-out evaluation. They build tiny synthetic OME-TIFFs and NGFF v0.4 OME-Zarrs (directory and zipped). They cover good and bad versions of each check type: missing or placeholder metadata, file-list header, format, missing and orphan files, case mismatch, bad characters, inconsistent channels and pixel sizes, plain TIFF, corrupt TIFF, unzipped zarr, annotation `source_image`, IDR hints, assay and channel mismatches, the CLI exit codes, and report output.
+There are 88 tests (one is skipped unless the `[vendor]` extra is installed, and one only when it is not), including messy-input robustness tests and regression tests for every rule fixed during the held-out evaluation. They build tiny synthetic OME-TIFFs and NGFF v0.4 OME-Zarrs (directory and zipped). They cover good and bad versions of each check type: missing or placeholder metadata, file-list header, format, missing and orphan files, case mismatch, bad characters, inconsistent channels and pixel sizes, plain TIFF, corrupt TIFF, unzipped zarr, annotation `source_image`, IDR hints, assay and channel mismatches, the CLI exit codes, and report output.
 
 ## Design
 
@@ -125,5 +134,7 @@ to confirm the fix.
 - PNG/JPEG files get a header check only.
 - On Python 3.9 (zarr 2.x), zarr v3 / NGFF 0.5 arrays are checked from metadata only, with no pixel decode.
 - Ontology terms (NCBITaxon, FBbi) are checked for form only, not looked up.
-- Series consistency is checked per folder. Unrelated images in one folder are reported as a warning.
+- Series consistency is checked per folder and per format. Unrelated images of the same format in one folder are reported as a warning.
+- *Image files readable* is "needs review": a reader can still miss valid files in formats not seen in evaluation.
+- Images inside `.zip` archives and files in formats the tool does not know (e.g. NRRD, HDF5) are listed as "not checked".
 - The BioImage Archive does not publish a closed list of accepted formats. In the `bia` rules, OME-TIFF, zipped OME-Zarr and TIFF pass, and other formats warn.

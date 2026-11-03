@@ -115,6 +115,11 @@ def formats_accepted(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
             sample = ", ".join(archives[:3]) + (f" (+{len(archives) - 3} more)" if len(archives) > 3 else "")
             return [Issue("warning", f"no image files outside archives; {len(archives)} archive(s) not inspected "
                                      f"(images inside them can't be checked or viewed): {sample}")]
+        other = [f for f in ds.data_files if classify(ds.root / f) == "other"]
+        if other:  # AmiraMesh, NRRD, HDF5 ... : unknown to this tool is not the same as "not an image"
+            sample = ", ".join(other[:3]) + (f" (+{len(other) - 3} more)" if len(other) > 3 else "")
+            return [Issue("warning", f"no files in a format this tool recognises as images; {len(other)} other data "
+                                     f"file(s) not checked: {sample}. If these are images, convert them to OME-TIFF/OME-Zarr")]
         return [Issue("problem", "no image files found in dataset")]
     issues = []
     by_fmt: dict[str, list[str]] = defaultdict(list)
@@ -156,7 +161,8 @@ def ome_metadata(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     issues = []
     for i in infos:
         if i.format in ("tiff", "ome-tiff") and not i.is_ome:
-            issues.append(Issue("problem", f"{i.path}: no OME-XML header (plain TIFF)"))
+            bad = next((n for n in i.notes if n.startswith("OME-XML header is not valid XML")), None)
+            issues.append(Issue("problem", f"{i.path}: {bad}" if bad else f"{i.path}: no OME-XML header (plain TIFF)"))
         missing = [a for a in axes if i.pixel_size_um.get(a) is None]
         unitless = [n.split()[1] for n in i.notes if n.startswith("axis ") and "no unit" in n]
         if missing and set(missing) <= set(unitless):
@@ -264,7 +270,9 @@ def _need_file_lists(ds: Dataset):
 def file_list_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     if not ds.file_lists:
         return [Issue("problem", "no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)")]
-    return [Issue("problem", f"{t.path}: {t.error}") for t in ds.file_lists if t.error]
+    # an .xlsx list is present but unparsed (S-BIAD2430 uploads an extra *file_list*.xlsx beside its TSVs)
+    return [Issue("warning" if t.path.lower().endswith((".xlsx", ".xls")) else "problem", f"{t.path}: {t.error}")
+            for t in ds.file_lists if t.error]
 
 
 @check("file_list_header")

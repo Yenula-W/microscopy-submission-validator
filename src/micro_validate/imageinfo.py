@@ -1,6 +1,7 @@
 """Classify image files by format and read the metadata the checks need."""
 from __future__ import annotations
 
+import html
 import json
 import re
 import zipfile
@@ -28,7 +29,7 @@ TO_MICRON = {"pm": 1e-6, "nm": 1e-3, "µm": 1.0, "um": 1.0, "micron": 1.0, "micr
 
 
 def classify(path: Path) -> str:
-    """Return one of: ome-tiff, ome-zarr, ome-zarr-zip, tiff, mrc, vendor, raster, sidecar, table, other."""
+    """Return one of: ome-tiff, ome-zarr, ome-zarr-zip, ome-xml, tiff, mrc, vendor, raster, sidecar, table, other."""
     name = path.name.lower()
     if path.is_dir():
         return "ome-zarr" if name.endswith(".zarr") else "other"
@@ -36,6 +37,8 @@ def classify(path: Path) -> str:
         return "ome-tiff"
     if name.endswith(".zarr.zip"):
         return "ome-zarr-zip"
+    if name.endswith(".ome.xml") and b"BinData" in _head(path, 1 << 20):
+        return "ome-xml"  # OME-XML carrying its own pixels (OME sample data 2012-06)
     if name.endswith(SIDECAR_SUFFIXES):
         return "sidecar"
     suffix = path.suffix.lower()
@@ -43,7 +46,7 @@ def classify(path: Path) -> str:
         return "tiff"
     if suffix in MRC_EXTS and (suffix in (".mrc", ".mrcs") or _is_mrc(path)):
         return "mrc"
-    if suffix in VENDOR_EXTS:
+    if suffix in VENDOR_EXTS or (suffix == ".am" and _head(path).startswith((b"# AmiraMesh", b"# Avizo"))):
         return "vendor"
     if suffix in RASTER_EXTS:
         return "raster"
@@ -52,7 +55,7 @@ def classify(path: Path) -> str:
     return "other"
 
 
-IMAGE_FORMATS = {"ome-tiff", "ome-zarr", "ome-zarr-zip", "tiff", "mrc", "vendor", "raster"}
+IMAGE_FORMATS = {"ome-tiff", "ome-zarr", "ome-zarr-zip", "ome-xml", "tiff", "mrc", "vendor", "raster"}
 
 
 @dataclass
@@ -90,6 +93,11 @@ def read_info(path: Path, rel: str, verify_pixels: bool = True) -> ImageInfo:
             _read_zarr_dir(path, info, verify_pixels)
         elif fmt == "ome-zarr-zip":
             _read_zarr_zip(path, info)
+        elif fmt == "ome-xml":
+            # pattern read: ome-types rejects some BinData layouts, and the pixels aren't decoded anyway
+            _apply_ome_xml_lenient(path.read_text(encoding="utf-8", errors="replace"), info)
+            info.notes.append("pixels embedded as BinData (not decoded)")
+            info.readable = True
         elif fmt == "mrc":
             _read_mrc_header(path, info)
         elif fmt == "vendor" and path.suffix.lower() in TIFF_BASED_VENDOR:
@@ -129,7 +137,22 @@ def _read_tiff(path: Path, info: ImageInfo, verify_pixels: bool) -> None:
                 info.is_ome = True
                 info.notes.append(f"binary-only OME-TIFF; companion metadata file {binary_only.group(1)!r} not found")
         elif xml:
-            _apply_ome_xml(xml, info)
+            try:
+                _apply_ome_xml(xml, info)
+            except ValueError as e:
+                if "Could not parse XML" not in str(e) and "not well-formed" not in str(e):
+                    raise
+                # S-BIAD3778 writes literal "\n" between attributes; the TIFF itself is fine
+                _apply_tiff_series(tif, info)
+                info.pixel_size_um = _tiff_resolution(tif)
+                try:  # the calibration is usually still legible in the broken XML
+                    lenient = ImageInfo(path=info.path, format=info.format)
+                    _apply_ome_xml_lenient(xml.replace("\\n", " "), lenient)
+                    info.pixel_size_um = {k: v for k, v in lenient.pixel_size_um.items() if v} or info.pixel_size_um
+                except (ValueError, KeyError):
+                    pass
+                info.notes.append("OME-XML header is not valid XML (re-save with Bio-Formats/bfconvert to repair it); "
+                                  "read as plain TIFF")
         else:
             _apply_tiff_series(tif, info)
             info.pixel_size_um = _tiff_resolution(tif)
@@ -251,7 +274,7 @@ def _apply_ome_xml_lenient(xml: str, info: ImageInfo) -> None:
     m = re.search(r"<(?:\w+:)?Pixels\b([^>]*)>", xml)
     if not m:
         raise ValueError("OME-XML has no Pixels element")
-    attrs = dict(re.findall(r'(\w+)="([^"]*)"', m.group(1)))
+    attrs = {k: html.unescape(v) for k, v in re.findall(r'(\w+)="([^"]*)"', m.group(1))}  # PhysicalSizeXUnit="&#181;m"
     info.is_ome = True
     info.sizes = {k: int(attrs.get(f"Size{k}", 1)) for k in "XYZCT"}
     info.dtype = attrs.get("Type", "")
@@ -397,6 +420,14 @@ def _read_raster_header(path: Path, info: ImageInfo) -> None:
     info.pixel_size_um = {"x": None, "y": None, "z": None}
     info.readable = True
     info.notes.append("header checked only (PNG/JPEG carry no microscopy calibration)")
+
+
+def _head(path: Path, n: int = 64) -> bytes:
+    try:
+        with open(path, "rb") as fh:
+            return fh.read(n)
+    except OSError:
+        return b""
 
 
 def _is_mrc(path: Path) -> bool:

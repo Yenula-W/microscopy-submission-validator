@@ -172,8 +172,9 @@ rules:
     title: Open formats (recommended)
     check: formats_accepted
     params:
-      levels: {ome-tiff: pass, ome-zarr: pass, ome-zarr-zip: pass, tiff: warn, mrc: pass, vendor: warn, raster: warn}
+      levels: {ome-tiff: pass, ome-zarr: pass, ome-zarr-zip: pass, tiff: warn, ome-xml: warn, mrc: pass, vendor: warn, raster: warn}
       messages:
+        ome-xml: "pixels embedded in OME-XML (BinData) are inefficient; also provide OME-TIFF/OME-Zarr"
         tiff: "plain TIFF lacks structured metadata; prefer OME-TIFF"
         vendor: "proprietary format; also provide OME-TIFF/OME-Zarr for long-term reuse"
         raster: "PNG/JPEG hold no microscopy metadata; fine for masks and figures, not for raw acquisitions"

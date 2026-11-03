@@ -17,7 +17,7 @@ from pathlib import Path
 import yaml
 
 TARGETS = ["bia", "idr", "rembi"]
-PARTIAL_KINDS = {"bia", "idr", "names", "idrmeta"}  # subsets of accepted submissions
+PARTIAL_KINDS = {"bia", "idr", "names", "idrmeta", "apinames"}  # subsets of accepted submissions
 
 
 def check_types() -> dict[str, str]:

@@ -152,7 +152,22 @@ ROUNDS = {
         ["S-BIAD3365", "S-BIAD3802", "S-BIAD2500", "S-BIAD3897", "S-BIAD3788", "S-BIAD4158"])]
       + [(f"R5-{16 + i:02d}-{a}", "names", a) for i, a in enumerate(
         ["S-BIAD4045", "S-BIAD3711", "S-BIAD3763", "S-BIAD3625", "S-BIAD3949", "S-BIAD4181", "S-BIAD4160", "S-BIAD3209",
-         "S-BIAD3703", "S-BIAD3702", "S-BIAD3674", "S-BIAD4278", "S-BIAD3977", "S-BIAD3594", "S-BIAD3308", "S-BIAD4352"])],
+         "S-BIAD3703", "S-BIAD3702", "S-BIAD3674", "S-BIAD4278", "S-BIAD3977", "S-BIAD3594", "S-BIAD3308", "S-BIAD4352"])]
+      + [(f"R5-{32 + i:02d}-{a}", "apinames", a) for i, a in enumerate(  # added when FTP refused 9 crawls
+        ["S-BIAD3480", "S-BIAD3699", "S-BIAD3191", "S-BIAD3619"])],
+    # round 6: EBI FTP refused most crawls in rounds 3-5, so BIA names mirrors come from the JSON API ("apinames")
+    "r6": [
+        ("R6-01-imspector-obf", "files", [f"{OME}/OBF/ngladitz/v6/{n}" for n in ("test-v6.obf", "test-v6-short-write.obf")]),
+        ("R6-02-deltavision", "files", [f"{OME}/DV/U2OS/U2OS_AurB_AurA_001_R3D.dv{e}" for e in ("", ".log")]),
+        ("R6-03-ome-xml", "files", [f"{OME}/OME-XML/2012-06/{n}" for n in ("multi-channel-time-series.ome.xml",
+                                                                             "metadata-only.ome.xml")]),
+        ("R6-04-micromanager-1.4.16", "files", [f"{OME}/Micro-Manager/1.4.16/serge/Pos0/img_000000000_{c}_000.tif"
+                                                for c in ("00-BF0", "00-BF1", "06-CFPtriple", "09-DAPIquad")]),
+    ] + [(f"R6-{10 + i:02d}-{a}", "bia", a) for i, a in enumerate(
+        ["S-BIAD3686", "S-BIAD3778", "S-BIAD3931", "S-BIAD2323", "S-BIAD3848", "S-BIAD3726"])]
+      + [(f"R6-{16 + i:02d}-{a}", "apinames", a) for i, a in enumerate(
+        ["S-BIAD3304", "S-BIAD3651", "S-BIAD2498", "S-BIAD3797", "S-BIAD3760", "S-BIAD4184", "S-BIAD3723",
+         "S-BIAD3828", "S-BIAD3922", "S-BIAD3557", "S-BIAD3707", "S-BIAD3751", "S-BIAD3372", "S-BIAD2430"])],
 }
 
 IMAGE_EXT = re.compile(r"\.(ome\.tiff?|tiff?|czi|nd2|lif|lsm|oib|ims|png|jpe?g|dv|mrc|zarr\.zip)$", re.I)
@@ -308,6 +323,9 @@ def main() -> None:
             elif kind == "names":
                 from fetch_names import fetch_names
                 src.update(acc=spec, **fetch_names(spec, d))
+            elif kind == "apinames":
+                from fetch_api_names import fetch_api_names
+                src.update(acc=spec, **fetch_api_names(spec, d))
             elif kind == "idrmeta":
                 from fetch_idr_tables import fetch_repo
                 src.update(repo=spec, tables=fetch_repo(spec, d))

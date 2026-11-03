@@ -1,6 +1,8 @@
 # micro-validate: evaluation against the adoption-ready bar
 
-Date: 2026-11-02 (round 2 the same day) · Version: 0.1.0 · The bar is `~/Desktop/LabAdoption/ADOPTION_BAR.md`
+Date: 2026-11-02 (round 2 the same day; ship-bar rounds 3-6 on 2026-11-03) · Version: 0.1.0 · Bars: `~/Desktop/LabAdoption/ADOPTION_BAR.md` and `SHIP_BAR.md`
+
+**Ship-bar verdict (§9): NOT MET.** Rounds 5 and 6 were run untouched on frozen code, with no code change between them. Precision was 98.9% and 96.1%, with 0 crashes. Both rounds still had overstated claims: 3 and 4 findings that asserted more than the tool knew. Those were fixed afterwards, with regression tests, on the final commit. That final code has not yet passed two untouched rounds.
 
 | # | Bar item | Status |
 |---|---|---|
@@ -251,3 +253,78 @@ What the round-2 findings are:
 The 21 S-BIAD studies with no file-list findings are a check on false alarms: none of them raised a `file_list_matches` finding.
 
 A rerun of the round-1 held-out set on the final code gave 78 runs, 0 crashes and the same 375 findings. CI was green on the final commit.
+
+## 9. Ship-bar rounds 3-6 (`SHIP_BAR.md`)
+
+The ship bar asks for two untouched rounds in a row that pass. Each round:
+- uses new real inputs that no earlier round or development used;
+- records first-run numbers before any change;
+- needs ≥90% overall precision, no check type below 80%, 0 crashes and 0 overstated claims.
+
+Round 2 did not count toward the streak: its first run failed (§8), and a fix landed before round 3. Every number below is a **first run on frozen code**.
+
+- **Judging.** Each judged TSV in `eval/roundN/` records a verdict and an evidence note for every finding.
+  - Verdicts were set by explicit patterns, after checking each pattern on the inputs. The pattern scripts are `scripts/holdout/judge_rN.py`.
+  - "n/a" marks findings that are artifacts of how the input was built, for example:
+    - zero-byte placeholders in name mirrors;
+    - partial subsets where the harness downloaded no images;
+    - file-list checks on API-rebuilt lists.
+- **Inputs.** Each round has 21 inputs × 3 targets = 63 runs. The inputs are listed in `scripts/holdout/fetch.py` (`ROUNDS`) and `eval/roundN/manifest.json`, and they mix three kinds:
+  - OME sample files: OME-TIFF variants, Imaris, MRC/EMDB, Leica LIF, ICS, KLB, Vectra QPTIFF, Olympus OIR/OME exports, Micro-Manager, NDPI, AmiraMesh, OBF, DeltaVision and OME-XML;
+  - accepted BIA studies: page-tab JSON, the submitted file lists and the 2 smallest images;
+  - BIA name mirrors, plus the last 2 unused IDR repositories (idr0082 and idr0016).
+- **Download problems.** EBI's FTP refused many connections from round 4 on. The missing name mirrors were replaced by mirrors built from the BioStudies JSON API (`scripts/holdout/fetch_api_names.py`), or by further OME samples.
+
+| Round | Code | Judged | Correct | Wrong | Debatable | Precision | Crashes | Failing check types / overstated claims | Result |
+|---|---|---|---|---|---|---|---|---|---|
+| 3 | `50f7a3b` | 402 | 276 | 123 | 3 | 68.7% | 0 | `field_present` 55%, `file_list_matches` 9%, `images_readable` 40%, `series_consistent` 0% | FAIL |
+| 4 | `ec552ef` | 270 | 255 | 15 | 0 | 94.4% | 0 | `images_readable` 50%; 6 overstated `formats_accepted` | FAIL |
+| 5 | `4031e41` (frozen) | 276 | 273 | 3 | 0 | 98.9% | 0 | 3 overstated ("no image files found" for an AmiraMesh volume) | FAIL (overstated) |
+| 6 | `4031e41` (same) | 257 | 247 | 10 | 0 | 96.1% | 0 | `images_readable` 60% (needs review); 4 overstated | FAIL (overstated) |
+
+Rounds 5 and 6 without `images_readable`, which is outside the verdict since `4031e41`:
+- Round 5: 255 of 258 correct, 98.8%.
+- Round 6: 238 of 242 correct, 98.3%.
+
+Every other check type is at 80% or above in both rounds, so only the overstated claims stopped them.
+
+### Root causes found, each fixed with a regression test (`tests/test_validator.py`, "ship-bar round N")
+
+- **Round 3:**
+  - **NCBI taxon.** Newer BIA studies store the taxon in the Organism attribute's `valqual` `TermId`, which the converter ignored. 82 of 84 taxon warnings were wrong.
+  - **Directory entries.** BIA allows a directory path in a file list's `Files` column, so the files beneath it count as listed (S-BIAD3835).
+  - **BinaryOnly sets.** A BinaryOnly OME-TIFF whose `MetadataFile` is another OME-TIFF of the set was reported unreadable.
+  - **Missing codec.** LZW TIFFs were called "unreadable" because the `imagecodecs` package was missing. It is now a dependency, and a missing codec gives "not decoded".
+  - **MRC/EMDB.** Maps are now read from the MRC2014 header as an open `mrc` format.
+  - **Series check.** PNG/JPEG are left out of the series-consistency check.
+- **Round 4:**
+  - **Older schemas.** OME-XML in the 2015-01 (Micro-Manager) or 2016-DEV0 (Olympus) schemas is now read leniently instead of being reported unreadable.
+  - **KLB and FITS.** Both are now recognised as image formats.
+  - **Zipped images.** A dataset whose images are all zipped gets a warning that archives weren't inspected, instead of "no image files".
+  - **Series by format.** Series are compared within one format, so a screen capture beside an OME-TIFF stack is no longer compared with it.
+- **Before rounds 5-6:** `images_readable` became **needs review**. It stays on by default but is reported in its own section with its measured precision, and it is left out of the overall verdict and the exit code. Its untouched precision in rounds 3-4 was 21 of 48 (44%).
+- **Rounds 5-6:**
+  - **AmiraMesh.** AmiraMesh/Avizo `.am` files are recognised.
+  - **Unknown formats.** When no recognised image format is present but other data files are, the tool now warns about files "not checked" instead of claiming none exist.
+  - **OME-XML with pixels.** OME-XML carrying BinData pixels is an `ome-xml` image.
+  - **Malformed OME-XML.** A TIFF whose OME-XML is not valid XML (S-BIAD3778 writes literal `\n` between attributes) is read as a plain TIFF. The calibration is recovered from the broken XML and the bad header is reported.
+  - **Unparsed `.xlsx`.** An `.xlsx` file list that can't be parsed gives a warning, not a FAIL on "file list present".
+
+### Reruns on the fixed code (not untouched; they confirm the fixes)
+
+| Round | Judged | Wrong | Precision |
+|---|---|---|---|
+| 3 | 303 | 0 | 100% |
+| 4 | 264 | 0 | 100% |
+| 5 | 279 | 0 | 100% |
+| 6 | 260 | 0 | 100% |
+
+### Other ship-bar items on the final commit
+
+- **Clean install.** `pip install git+https://github.com/Yenula-W/microscopy-submission-validator` worked in fresh venvs on Python 3.9.7, 3.12.15 and 3.13.16. The README quickstart, including the `[vendor]` extra with `bioio-nd2`, then ran word for word. On the empty template dataset the exit code was 1, as expected.
+- **Extras.** Tests pass with and without the `[vendor]` extra: 87 passed, 1 skipped either way. The skipped test is the one for the other configuration. CI has a job with the extra.
+- **CI and repo.** CI is green and the repo is private.
+- **To ship:** the final code needs two more untouched rounds on new inputs.
+  - Public IDR repositories with tables are now exhausted, so those rounds will rely on BIA and OME inputs.
+  - Building BIA mirrors through the BioStudies JSON API avoids the FTP throttling.
+
