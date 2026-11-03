@@ -86,7 +86,8 @@ The JSON report has the same content, plus `images[]` with the full per-file det
 [EVALUATION.md](EVALUATION.md) covers the evaluation. The tool was run on 26 held-out public inputs: OME-TIFF, ImageJ TIFF, Zeiss LSM/CZI, Nikon ND2, Olympus OIB, MetaMorph, IDR OME-Zarr v0.4/0.5, six accepted BioImage Archive studies and seven accepted IDR studies.
 
 - 78 runs, 0 crashes.
-- 64 findings were hand-checked: 95% correct, 0 wrong.
+- 121 findings were hand-checked: 91.7% correct, 0 wrong.
+- A second round covered 110 accepted IDR studies' published tables and 29 BioImage Archive upload trees.
 - The six accepted BIA studies get no failures.
 
 `scripts/holdout/fetch.py` and `scripts/holdout/run_eval.py` reproduce the run. `scripts/real_data_check.sh` holds the original development-time checks.
@@ -97,7 +98,7 @@ The JSON report has the same content, plus `images[]` with the full per-file det
 pip install -e '.[dev]' && pytest
 ```
 
-There are 61 tests, including messy-input robustness tests and regression tests for every rule fixed during the held-out evaluation. They build tiny synthetic OME-TIFFs and NGFF v0.4 OME-Zarrs (directory and zipped). They cover good and bad versions of each check type: missing or placeholder metadata, file-list header, format, missing and orphan files, case mismatch, bad characters, inconsistent channels and pixel sizes, plain TIFF, corrupt TIFF, unzipped zarr, annotation `source_image`, IDR hints, assay and channel mismatches, the CLI exit codes, and report output.
+There are 71 tests, including messy-input robustness tests and regression tests for every rule fixed during the held-out evaluation. They build tiny synthetic OME-TIFFs and NGFF v0.4 OME-Zarrs (directory and zipped). They cover good and bad versions of each check type: missing or placeholder metadata, file-list header, format, missing and orphan files, case mismatch, bad characters, inconsistent channels and pixel sizes, plain TIFF, corrupt TIFF, unzipped zarr, annotation `source_image`, IDR hints, assay and channel mismatches, the CLI exit codes, and report output.
 
 ## Design
 

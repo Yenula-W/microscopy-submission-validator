@@ -499,3 +499,104 @@ def test_ngff_units_typo_accepted_with_note(tmp_path):
     info = read_info(z, "a.ome.zarr")
     assert info.pixel_size_um["x"] == pytest.approx(0.1)
     assert any("non-standard key 'units'" in n for n in info.notes)
+
+
+# ------------------------------------------------------------- regressions from round 2 (accepted IDR/BIA tables)
+
+
+def test_idr_curated_annotation_csv_is_the_assay_table(idr_dataset):
+    """Most accepted IDR repos publish *-annotation.csv and the study file references it (idr0068)."""
+    a = idr_dataset / "idrtest-assays.txt"
+    rows = [line.split("\t") for line in a.read_text().splitlines()]
+    (idr_dataset / "idrtest-experimentA-annotation.csv").write_text("\n".join(",".join(r) for r in rows) + "\n")
+    a.unlink()
+    s = idr_dataset / "idrtest-study.txt"
+    s.write_text(s.read_text().replace("idrtest-assays.txt", "idrtest-experimentA-annotation"))
+    res = run(idr_dataset, "idr")
+    assert res["IDR-ASSAY-001"].status == "pass", res["IDR-ASSAY-001"].messages
+    assert res["IDR-ASSAY-003"].status == "pass", res["IDR-ASSAY-003"].messages
+
+
+def test_annotation_named_data_is_not_an_idr_table_without_study(bia_dataset):
+    """BIA data such as '*_manual_annotations.tsv' (no IDR study file) stays a data file."""
+    (bia_dataset / "x_manual_annotations.tsv").write_text("cell\tlabel\n1\ta\n")
+    ds = load_dataset(bia_dataset)
+    assert "x_manual_annotations.tsv" in ds.data_files and not ds.idr_assays
+
+
+def test_idr_comma_separated_txt_assay(idr_dataset):
+    """idr0040's accepted assay file is comma-separated despite '.txt'."""
+    a = idr_dataset / "idrtest-assays.txt"
+    a.write_text(a.read_text().replace("\t", ","))
+    res = run(idr_dataset, "idr")
+    assert res["IDR-ASSAY-003"].status == "pass", res["IDR-ASSAY-003"].messages
+    assert res["IDR-ASSAY-002"].status == "warn"
+    assert "comma-separated" in res["IDR-ASSAY-002"].messages[0]
+
+
+def test_idr_reference_typo_still_reported(idr_dataset):
+    """idr0018/idr0050 study files say '...-assay.txt' for '...-assays.txt': a real, reportable mismatch."""
+    s = idr_dataset / "idrtest-study.txt"
+    s.write_text(s.read_text().replace("Experiment Assay File\tidrtest-assays.txt", "Experiment Assay File\tidrtest-assay.txt"))
+    res = run(idr_dataset, "idr")
+    assert res["IDR-ASSAY-001"].status == "warn"  # reported, with the table it most likely means
+    assert "'idrtest-assay.txt'" in res["IDR-ASSAY-001"].messages[0]
+    assert "'idrtest-assays.txt' looks like the table it means" in res["IDR-ASSAY-001"].messages[0]
+
+
+def test_idr_plate_described_by_library_plate_column(tmp_path):
+    """idr0002: a screen library describes plates (Plate/Well), not image files."""
+    root = tmp_path / "scr"
+    p = root / "plate1_1_013.ome.zarr"
+    p.mkdir(parents=True)
+    (p / ".zattrs").write_text(json.dumps({"plate": {"wells": [{"path": "A/1"}]}}))
+    (root / "s-study.txt").write_text("Study Title\tT\nStudy Description\tD\nScreen Library File\ts-library.txt\n")
+    (root / "s-library.txt").write_text("Plate\tWell\nplate1_1_013\tA1\n")
+    assert run(root, "idr")["IDR-ASSAY-003"].status == "pass"
+
+
+def test_file_list_that_lists_itself(bia_dataset):
+    """S-BIAD4206: a submitter's TSV lists itself; it exists, so it is not 'listed but not found'."""
+    write_file_list(bia_dataset, ["series1/img_01.ome.tif", "series1/img_02.ome.tif", "file_list.tsv"])
+    assert run(bia_dataset, "bia")["BIA-FL-004"].status == "pass"
+
+
+def test_unlisted_upload_reported(bia_dataset):
+    """S-BIAD4174: files uploaded for a second sample but missing from the only file list."""
+    write_ome_tiff(bia_dataset / "sample2" / "x.ome.tif")
+    msgs = run(bia_dataset, "bia")["BIA-FL-004"].messages
+    assert msgs == ["on disk but not in any file list: sample2/x.ome.tif"]
+
+
+def test_source_image_inside_container(bia_dataset):
+    """S-BIAD3632: source_image points inside a SpatialData .zarr.zip."""
+    import zipfile
+
+    with zipfile.ZipFile(bia_dataset / "PLA4.zarr.zip", "w") as z:
+        z.writestr("images/a/.zattrs", "{}")
+    (bia_dataset / "annotation_file_list.tsv").write_text("Files\tsource_image\nPLA4.zarr.zip\tPLA4.zarr.zip/images/a\n")
+    assert run(bia_dataset, "bia")["BIA-FL-005"].status == "pass"
+
+
+def test_idr_reference_to_renamed_table_is_a_warning(idr_dataset):
+    """idr0086/idr0095: study names 'experimentB-assays.txt', the table present is 'experimentB-annotation.csv'."""
+    a = idr_dataset / "idrtest-assays.txt"
+    a.rename(idr_dataset / "idrtest-experimentB-annotation.csv")
+    t = idr_dataset / "idrtest-experimentB-annotation.csv"
+    t.write_text(t.read_text().replace("\t", ","))
+    s = idr_dataset / "idrtest-study.txt"
+    s.write_text(s.read_text().replace("idrtest-assays.txt", "ExperimentB_Assays, idrtest-experimentC-assays.txt"))
+    res = run(idr_dataset, "idr")
+    msgs = res["IDR-ASSAY-001"].messages
+    assert res["IDR-ASSAY-001"].status == "fail"  # experiment C has no table at all
+    assert any("looks like the table it means" in m and "ExperimentB_Assays" in m for m in msgs)
+    assert any(m == "study file names assay file 'idrtest-experimentC-assays.txt' but it is not in the dataset" for m in msgs)
+
+
+def test_idr_single_dangling_reference_pairs_with_single_table(idr_dataset):
+    """idr0109: study names 'assayFile_27APR2021.txt'; the one table present is the curated annotation CSV."""
+    s = idr_dataset / "idrtest-study.txt"
+    s.write_text(s.read_text().replace("idrtest-assays.txt", "assayFile_27APR2021.txt"))
+    res = run(idr_dataset, "idr")
+    assert res["IDR-ASSAY-001"].status == "warn"
+    assert "'idrtest-assays.txt' looks like the table it means" in res["IDR-ASSAY-001"].messages[0]

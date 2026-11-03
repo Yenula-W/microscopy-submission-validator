@@ -24,6 +24,7 @@ class Table:
     header: list[str]
     rows: list[list[str]]  # raw rows, may include blank ones
     error: str = ""
+    delimiter: str = "\t"
 
     def records(self) -> list[dict[str, str]]:
         return [dict(zip(self.header, r)) for r in self.rows if any(c.strip() for c in r)]
@@ -72,7 +73,7 @@ class Dataset:
         return None
 
 
-def read_table(path: Path, root: Path) -> Table:
+def read_table(path: Path, root: Path, sniff: bool = False) -> Table:
     rel = path.relative_to(root).as_posix()
     if path.suffix.lower() in (".xlsx", ".xls"):
         return Table(rel, [], [], error="Excel file lists are not parsed yet; export as TSV to validate")
@@ -80,11 +81,18 @@ def read_table(path: Path, root: Path) -> Table:
         text = path.read_text(encoding="utf-8-sig", errors="replace")
     except OSError as e:
         return Table(rel, [], [], error=f"cannot read: {type(e).__name__}: {e.strerror or e}")
-    rows = list(csv.reader(text.replace("\x00", "").splitlines(), delimiter="\t"))
+    lines = text.replace("\x00", "").splitlines()
+    delim = "\t"
+    if sniff and lines:
+        # IDR tables: .csv annotation tables, and accepted '.txt' assay files that are comma-separated (idr0040)
+        first = lines[0]
+        if path.suffix.lower() == ".csv" or (first.count("\t") == 0 and first.count(",") > 0):
+            delim = ","
+    rows = list(csv.reader(lines, delimiter=delim))
     while rows and not any(c.strip() for c in rows[-1]):
         rows.pop()  # trailing newline(s) are harmless
     header = [h.strip() for h in rows[0]] if rows else []
-    return Table(rel, header, rows[1:])
+    return Table(rel, header, rows[1:], delimiter=delim)
 
 
 def read_idr_study(path: Path) -> dict[str, list[str]]:
@@ -121,8 +129,13 @@ def _is_idr_study(name: str) -> bool:
 
 def _is_idr_assay(name: str) -> bool:
     n = name.lower()
-    # IDR templates say *-assays.txt, but accepted studies also use e.g. MitoSys_assay_file.txt
-    return ("assay" in n or "library" in n) and n.endswith((".txt", ".tsv")) and not _is_file_list(name)
+    # IDR templates say *-assays.txt, but accepted studies also use e.g. MitoSys_assay_file.txt, and the
+    # published form of most studies is the curated *-annotation.csv that study files then reference
+    if _is_file_list(name):
+        return False
+    if "assay" in n or "library" in n:
+        return n.endswith((".txt", ".tsv", ".csv"))
+    return "annotation" in n and n.endswith((".csv", ".txt", ".tsv"))
 
 
 PAGETAB_NAME = re.compile(r"^S-B(IAD|SST|IAS)?\d+\.json$", re.I)
@@ -135,6 +148,7 @@ def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixe
         raise NotADirectoryError(root)
     ds = Dataset(root=root, read_pixels=read_pixels, partial=partial)
     meta_path = Path(metadata).resolve() if metadata else None
+    annotation_tables: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
         d = Path(dirpath)
         # treat *.zarr directories as single data objects
@@ -166,8 +180,21 @@ def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixe
                     ds.idr_study_error = f"cannot read: {type(e).__name__}: {e.strerror or e}"
                 continue
             if _is_idr_assay(fn):
-                ds.idr_assays.append(read_table(p, root))
+                if "assay" in fn.lower() or "library" in fn.lower():
+                    ds.idr_assays.append(read_table(p, root, sniff=True))
+                else:
+                    annotation_tables.append(p)  # decided after the walk: only IDR tables if a study file exists
                 continue
+            ds.data_files.append(rel)
+            try:
+                ds.sizes[rel] = p.stat().st_size
+            except OSError:
+                pass
+    for p in annotation_tables:
+        if ds.idr_study is not None or ds.idr_study_error:
+            ds.idr_assays.append(read_table(p, root, sniff=True))
+        else:  # e.g. BIA '*_manual_annotations.tsv' data files
+            rel = p.relative_to(root).as_posix()
             ds.data_files.append(rel)
             try:
                 ds.sizes[rel] = p.stat().st_size

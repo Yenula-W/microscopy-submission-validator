@@ -306,7 +306,8 @@ def file_list_format(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
 def file_list_matches(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     """Every listed file exists (exact, case-sensitive) and every data file is listed."""
     lists = _need_file_lists(ds)
-    present = set(ds.data_files)
+    # a submitter may list the file-list TSV itself (S-BIAD4206); it is on disk even though it isn't a data file
+    present = set(ds.data_files) | {t.path for t in ds.file_lists}
     lower = {f.lower(): f for f in present}
     listed: set[str] = set()
     issues = []
@@ -345,7 +346,9 @@ def annotation_source_image(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
             issues.append(Issue("problem", f"{t.path}: missing required column {want!r}"))
             continue
         for v in t.column(col):
-            if v.strip() and v.strip() not in present and not ds.partial:
+            # S-BIAD3632 points into a container: 'PLA4_realigned.zarr.zip/images/B05067G5_HE_regist'
+            inside = any(v.strip().startswith(f + "/") for f in present)
+            if v.strip() and v.strip() not in present and not inside and not ds.partial:
                 issues.append(Issue("problem", f"{t.path}: {col} {v!r} not found in dataset"))
             elif not v.strip():
                 issues.append(Issue("problem", f"{t.path}: empty {col} value"))
@@ -389,16 +392,35 @@ def _table_stem(name: str) -> str:
 def idr_assay_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     issues = []
     if not ds.idr_assays:
-        issues.append(Issue("problem", "no IDR assay/library file (*assays*.txt or *library*.txt)"))
+        issues.append(Issue("problem", "no IDR assay, library or annotation table (*assay*.txt, *library*.txt, *annotation*.csv)"))
     if ds.idr_study is not None:
         cells = _study_value(ds, "Experiment Assay File") + _study_value(ds, "Screen Library File")
         # accepted studies write "a.txt, b.txt", "a.txt and b.txt", or omit the extension
         named = [n.strip() for c in cells for n in re.split(r",|;|\s+and\s+", c) if n.strip()]
-        have = {_table_stem(t.path) for t in ds.idr_assays}
-        for n in named if not ds.partial else []:
-            if _table_stem(n) not in have:
+        have = {_table_stem(t.path) for t in ds.idr_assays} | {_table_stem(f) for f in ds.data_files}
+        tables = [PurePosixPath(t.path).name for t in ds.idr_assays]
+        unresolved = [n for n in named if _table_stem(n) not in have]
+        unreferenced = [t for t in tables if _table_stem(t) not in {_table_stem(n) for n in named}]
+        for n in unresolved if not ds.partial else []:
+            same = [t for t in tables if _experiment_key(t) and _experiment_key(t) == _experiment_key(n)]
+            keys = {_experiment_key(n), _experiment_key(unreferenced[0]) if unreferenced else None}
+            if not same and len(unresolved) == 1 and len(unreferenced) == 1 and None in keys:
+                # one dangling name, one unnamed table (idr0091, idr0109); never pair experiment B with A (idr0083)
+                same = unreferenced
+            if same:
+                # accepted IDR repos: study names the submitted '...-assays.txt', table published as '...-annotation.csv'
+                issues.append(Issue("warning", f"study file names assay file {n!r}, which is not in the dataset; "
+                                               f"{same[0]!r} looks like the table it means, so update "
+                                               "'Experiment Assay File' to the name of the file you submit"))
+            else:
                 issues.append(Issue("problem", f"study file names assay file {n!r} but it is not in the dataset"))
     return issues
+
+
+def _experiment_key(name: str) -> str | None:
+    """'idr0086-experimentB-assays.txt', 'ExperimentB_Assays', 'screenA-library' -> 'experiment b' / 'screen a'."""
+    m = re.search(r"(experiment|screen)[\s_-]*([A-Z0-9]+)(?![a-z])", PurePosixPath(name).name, flags=re.I)
+    return f"{m.group(1).lower()} {m.group(2).lower()}" if m else None
 
 
 @check("idr_assay_columns")
@@ -407,6 +429,8 @@ def idr_assay_columns(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
         raise SkipCheck("no IDR assay file")
     issues = []
     for t in ds.idr_assays:
+        if t.delimiter == "," and not t.path.lower().endswith(".csv") and params.get("note_delimiter", True):
+            issues.append(Issue("warning", f"{t.path}: comma-separated, while the IDR template is tab-delimited (read anyway)"))
         for col in params.get("columns", []):
             alts = col if isinstance(col, list) else [col]
             hit = next((c for c in alts if c in t.header), None)
@@ -491,6 +515,10 @@ def idr_assay_matches_files(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
                 by_stem += stem_only
             elif not ds.partial:
                 missing.append(Issue("problem", f"{t.path}: Image File {name!r} not found in dataset"))
+    plates = {v.strip() for t in ds.idr_assays for v in t.column("Plate") if v.strip()}
+    for f in ds.image_files:  # HCS: a library/annotation table describes plates, one row per well
+        if f not in referenced and (stem(f) in plates or PurePosixPath(f).name in plates):
+            referenced.add(f)
     issues = [Issue("problem", f"image not described in any assay file: {f}") for f in ds.image_files if f not in referenced]
     if by_stem:
         issues.append(Issue("warning", f"{by_stem} row(s) matched an image only by file-name stem or containing folder, "

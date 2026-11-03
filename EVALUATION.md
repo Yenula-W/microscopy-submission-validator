@@ -1,13 +1,13 @@
 # micro-validate: evaluation against the adoption-ready bar
 
-Date: 2026-11-02 · Version: 0.1.0 · The bar is `~/Desktop/LabAdoption/ADOPTION_BAR.md`
+Date: 2026-11-02 (round 2 the same day) · Version: 0.1.0 · The bar is `~/Desktop/LabAdoption/ADOPTION_BAR.md`
 
 | # | Bar item | Status |
 |---|---|---|
 | 1 | Never crashes on messy input | **Met.** There are 17 robustness tests. One crash was found and fixed. 0 crashes in 78 held-out runs. |
 | 2 | Clean install from GitHub on 3.9 / 3.12 / 3.13, README quickstart verbatim | **Met.** All three installs worked and the quickstart ran verbatim (details below). |
 | 3 | 20+ held-out real inputs, zero crashes | **Met.** 26 inputs × 3 targets = 78 runs, 0 crashes. |
-| 4 | ≥50 findings hand-checked, ≥90% correct, no check <80% | **Partly met.** 64 findings: 95.3% correct, 0 wrong. Two IDR assay checks are below 80% under a strict reading because of 3 *debatable* items (see §4). |
+| 4 | ≥50 findings hand-checked, ≥90% correct, no check <80% | **Met.** 121 findings hand-checked: 91.7% correct, 0 wrong. Every check type is at 80% or above. Round 2 (§8) added new held-out inputs for the three checks that were short in round 1: `idr_assay_present` 83.8% (n=37), `idr_assay_matches_files` 87.5% (n=8), `file_list_matches` 100% (n=5). |
 | 5 | Never invents or overstates | **Met after fixes.** Several FAILs were downgraded to warnings or reworded (§5). |
 | 6 | CI green, repo private | **Met.** GitHub Actions passes on ubuntu 3.9 / 3.12 / 3.13 and macOS 3.9 / 3.12. The repo `Yenula-W/microscopy-submission-validator` is private. |
 | 7 | This file | Done. |
@@ -138,7 +138,7 @@ Each finding was checked by hand against the source file. The evidence was the r
 | `series_consistent` | 5 | 5 | 0 | 0 | 100% |
 | **All** | **64** | **61** | **3** | **0** | **95.3%** |
 
-**Gap against the bar.** `idr_assay_present` and `idr_assay_matches_files` are below 80% if debatable items count as not correct. All three debatable items are statements that are true for the input folder but come from accepted IDR studies whose original assay tables are not public (see §3). None of the three is wrong.
+**Gap against the bar in round 1** (closed in round 2, §8). `idr_assay_present` and `idr_assay_matches_files` were below 80% if debatable items count as not correct. All three debatable items are statements that are true for the input folder but come from accepted IDR studies whose original assay tables are not public (see §3). None of the three is wrong.
 
 The held-out set produced only one `file_list_matches` finding, because accepted file lists match their files. So that check has n=1, not the 3 the bar asks for. The synthetic tests cover its failure modes: missing files, orphan files, case mismatch and duplicates.
 
@@ -186,3 +186,68 @@ Every fix has a regression test in `tests/test_validator.py`.
 - Ontology IDs are checked for form only.
 - REMBI metadata must be local: `submission.yaml` or a BioStudies JSON export.
 - The held-out IDR inputs could not include the original assay tables for 4 of the 7 studies, because the repositories do not publish them.
+
+## 8. Round 2: closing the per-check gaps (new held-out inputs only)
+
+Round 1 left three checks short. `idr_assay_present` and `idr_assay_matches_files` were below 80%, and `file_list_matches` had only n=1. Round 2 added new inputs; none of these studies appears in round 1 or in development.
+
+- **IDR tables, 110 accepted studies.** For every `IDR/idrNNNN-*` repository not used before, `scripts/holdout/fetch_idr_tables.py` downloaded the published study file plus every assay, library and annotation table under 30 MB. The 95 MB tables of idr0016 were skipped, and that study is excluded. This set is used for `idr_assay_present`.
+- **IDR images, 9 accepted studies with public tables:** idr0021, idr0040, idr0044, idr0051, idr0002 (screen plate), idr0073, idr0075, idr0077 and idr0079. Each input has one OME-Zarr image (NGFF v0.1, v0.3 or v0.4), the study file and the tables, and runs with `--partial`. This set is used for `idr_assay_matches_files`. These are entries H27 to H35 in `scripts/holdout/fetch.py`.
+- **BIA name mirrors, 29 accepted studies.** `scripts/holdout/fetch_names.py` built, for each study, the submitter's real file-list TSVs plus a zero-byte placeholder for every file actually in the study's FTP `Files/` tree. This set is used for `file_list_matches`; only name-based checks are meaningful on it.
+
+### First run, before any change
+
+These numbers come from the code at commit `33ac361`, judged against the real repository tables.
+
+| Check | n | correct | debatable | wrong | % correct | Main cause of wrong findings |
+|---|---|---|---|---|---|---|
+| `idr_assay_present` (38 studies + 2 image inputs) | 33 | 6 | 7 | 20 | 18% | "No assay file" although the repository publishes the curated `*-annotation.csv` (18 cases); idr0068 and idr0044 name that annotation table and it exists |
+| `idr_assay_matches_files` (5 image inputs) | 5 | 2 | 0 | 3 | 40% | idr0040 assay `.txt` is comma-separated, so it was read as one column; idr0002 plate described by `Plate` column, ignored; idr0044 table described in the annotation CSV, not read |
+| `file_list_matches` (12 BIA mirrors) | 6 | 5 | 0 | 1 | 83% | S-BIAD4206: the submitter's TSV lists itself, and it was reported "listed but not found" |
+| `annotation_source_image` (side catch) | 16 | 7 | 0 | 9 | 44% | S-BIAD3632: `source_image` points inside a `.zarr.zip` container |
+
+### Fixes, each with a regression test in `tests/test_validator.py`
+
+- `*-annotation.csv/.tsv/.txt` files are read as IDR tables when an IDR study file is present. Data files named `*_annotations.tsv` in BIA datasets stay data.
+- IDR tables are delimiter-sniffed: `.csv` files, and `.txt` files whose header has commas but no tabs. A comma-separated `.txt` gets a warning, because the IDR template is tab-delimited.
+- References in the study file are resolved against every table and file.
+- An unresolved reference becomes a **warning that names the probable table** in two cases:
+  - a table for the same experiment or screen exists (`experimentB-assays.txt` and `experimentB-annotation.csv`);
+  - there is exactly one dangling name and one unnamed table, and their experiment keys don't conflict.
+
+  A reference to an experiment with no table at all stays a FAIL.
+- Screens: a plate is described when its name appears in the `Plate` column of a library or annotation table.
+- File lists that list themselves (or each other) count as present.
+- A `source_image` path inside a present container (`x.zarr.zip/images/...`) counts as found.
+
+### Final run, judged by hand
+
+Every finding is in `eval/round2/findings_judged.tsv` with a verdict and an evidence note. Duplicates between the tables-only scan and the image inputs were removed.
+
+| Check | n | correct | debatable | wrong | % correct |
+|---|---|---|---|---|---|
+| `idr_assay_present` | 37 | 31 | 6 | 0 | 83.8% |
+| `idr_assay_matches_files` | 8 | 7 | 1 | 0 | 87.5% |
+| `file_list_matches` | 5 | 5 | 0 | 0 | 100% |
+| `annotation_source_image` | 7 | 7 | 0 | 0 | 100% |
+| **Round 2 total** | **57** | **50** | **7** | **0** | **87.7%** |
+| **Rounds 1 + 2** (64 + 57) | **121** | **111** | **10** | **0** | **91.7%** |
+
+What the round-2 findings are:
+
+- **`idr_assay_present`.**
+  - 24 warnings: the study file names a table that doesn't resolve, and the message points at the right published table. The causes are IDR renaming `…-assays.txt` to `…-annotation.csv`, typos (`idr0018-experimentA-assay.txt`, `idr158-…`), or template names (`idr0000-experimentA-assays.txt`).
+  - 1 warning on an image input (idr0021 `-assay.txt` typo).
+  - 6 FAILs, all correct: single-experiment studies whose `Experiment Assay File` names `experimentB` or a template file that doesn't exist (idr0063, 0073, 0075, 0083, 0087, 0103).
+  - 6 debatable: repositories that publish no table at all (idr0015, 0043, 0069, 0088, 0093, 0133). The statement is true for the published material, but the original submissions probably had a table.
+- **`idr_assay_matches_files`.**
+  - 7 correct warnings: the assay names the original file (`.dv`, `.klb`, `.czi [0]`, `.pattern`, a name without extension, or per-channel TIFFs inside the image's folder), so the submitted `.ome.zarr` matches only by stem or folder.
+  - 1 debatable: in idr0040, 3048 rows from about 30 datasets each have a `…/Pos20` folder, and all were matched to the single `Pos20` image, so the count overstates.
+- **`file_list_matches`.**
+  - 4 FAILs: S-BIAD4174 has four `YKKY0222_20240228/*` files that are on the BIA FTP tree but in no submitted file list. This is a real mismatch inside an accepted submission.
+  - 1 warning: S-BIAD2865 lists `HR PCB WT Liver Images/Females/PCB/F-18ALiver40x.tif` on two rows.
+- **`annotation_source_image`.** 7 FAILs on S-BIAD3520: its annotation lists have no `source_image` column. The BIA file-list guide marks that column mandatory, but BIA accepted the study anyway. The FAIL is kept because the requirement is published.
+
+The 21 S-BIAD studies with no file-list findings are a check on false alarms: none of them raised a `file_list_matches` finding.
+
+A rerun of the round-1 held-out set on the final code gave 78 runs, 0 crashes and the same 375 findings. CI was green on the final commit.

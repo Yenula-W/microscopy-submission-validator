@@ -58,6 +58,29 @@ MANIFEST = [
     ("H19-idr0138", "idr", {"zarr": "v0.4/idr0138A/TimEmbryos-120919/HybCycle_29/MMStack_Pos9.ome.zarr",
                             "repo": "idr0138-lohoff-seqfish", "meta": ["idr0138-study.txt"]}),
     ("H20-idr0001-plate", "idr", {"zarr": "v0.4/idr0001A/2551.zarr", "repo": None, "meta": []}),
+    # round 2 (follow-up): accepted IDR studies whose assay/library tables are public
+    ("H27-idr0021", "idr", {"zarr": "v0.1/1884807.zarr", "repo": "idr0021-lawo-pericentriolarmaterial",
+                            "meta": ["idr0021-study.txt", "experimentA/idr0021-experimentA-assays.txt",
+                                     "experimentA/idr0021-experimentA-processed.txt"]}),
+    ("H28-idr0040", "idr", {"zarr": "v0.3/idr0040A/3491626.zarr", "repo": "idr0040-aymoz-singlecell",
+                            "meta": ["idr0040-study.txt", "experimentA/idr0040-experimentA-assays.txt"]}),
+    ("H29-idr0044", "idr", {"zarr": "v0.4/idr0044A/4007801.zarr", "repo": "idr0044-mcdole-tardislightsheet",
+                            "meta": ["idr0044-study.txt", "experimentA/idr0044-experimentA-assays.txt",
+                                     "experimentA/idr0044-experimentA-annotation.csv"]}),
+    ("H30-idr0051", "idr", {"zarr": "v0.3/idr0051A/4007817.zarr", "repo": "idr0051-fulton-tailbudlightsheet",
+                            "meta": ["idr0051-study.txt", "experimentA/idr0051-experimentA-assays.txt"]}),
+    ("H31-idr0002-screen", "idr", {"zarr": "v0.1/plates/422.zarr", "repo": "idr0002-heriche-condensation",
+                                   "meta": ["idr0002-study.txt", "screenA/idr0002-screenA-library.txt",
+                                            "screenA/idr0002-screenA-processed.txt"]}),
+    ("H32-idr0073", "idr", {"zarr": "v0.4/idr0073A/9798462.zarr", "repo": "idr0073-schaadt-immuneinfiltrates",
+                            "meta": ["idr0073-study.txt", "experimentA/idr0073-experimentA-annotation.csv"]}),
+    ("H33-idr0075", "idr", {"zarr": "v0.3/idr0075A/9528933.zarr", "repo": "idr0075-cabirol-honeybee",
+                            "meta": ["idr0075-study.txt", "experimentA/idr0075-experimentA-annotation.csv"]}),
+    ("H34-idr0077", "idr", {"zarr": "v0.1/9836831.zarr", "repo": "idr0077-valuchova-flowerlightsheet",
+                            "meta": ["idr0077-study.txt", "experimentA/idr0077-experimentA-annotation.csv"]}),
+    ("H35-idr0079", "idr", {"zarr": "v0.3/idr0079A/9836998.zarr", "repo": "idr0079-hartmann-lateralline",
+                            "meta": ["idr0079-study.txt", "experimentA/idr0079-experimentA-annotation.csv",
+                                     "experimentB/idr0079-experimentB-annotation.csv"]}),
     # BioImage Archive: accepted, released studies
     ("H21-S-BIAD634", "bia", "S-BIAD634"),
     ("H22-S-BIAD4325", "bia", "S-BIAD4325"),
@@ -201,8 +224,10 @@ def main() -> None:
                 name = Path(spec["zarr"]).name
                 img_id = name.split(".")[0]
                 try:
-                    real = json.loads(get(f"https://idr.openmicroscopy.org/api/v0/m/images/{img_id}/"))["data"]["Name"]
-                    stem = re.sub(r"(\.ome)?\.(tiff?|companion\.ome|czi|nd2|lif|dv|zarr)$", "", real, flags=re.I)
+                    kind_ = "plates" if "/plates/" in spec["zarr"] else "images"  # name plates by plate name
+                    real = json.loads(get(f"https://idr.openmicroscopy.org/api/v0/m/{kind_}/{img_id}/"))["data"]["Name"]
+                    # name the converted image as a submitter would: original name minus its extension
+                    stem = re.sub(r"(\.companion\.ome|(\.ome)?\.[A-Za-z0-9]+)?(\s\[\d+\])?$", "", real)
                     name = f"{stem}.ome.zarr"
                 except Exception:
                     pass

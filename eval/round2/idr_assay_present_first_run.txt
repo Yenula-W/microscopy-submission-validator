@@ -1,0 +1,32 @@
+idr0015 | no IDR assay/library file (*assays*.txt or *library*.txt) | 
+idr0018 | study file names assay file 'idr0018-experimentA-assay.txt' but it is not in the dataset | idr0018-experimentA-annotation.csv idr0018-experimentA-assays.txt
+idr0022 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0022-screenA-annotation.csv idr0022-screenB-annotation.csv
+idr0043 | no IDR assay/library file (*assays*.txt or *library*.txt) | 
+idr0045 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0045-experimentA-annotation.csv
+idr0048 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0048-experimentA-annotation.csv
+idr0048 | study file names assay file 'idr0048-experimentA-assays' but it is not in the dataset | idr0048-experimentA-annotation.csv
+idr0050 | study file names assay file 'idr0050-experimentA-assay.txt' but it is not in the dataset | idr0050-experimentA-annotation.csv idr0050-experimentA-assays.txt idr0050-experimentB-assays.txt
+idr0053 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0053-experimentA-annotation.csv
+idr0061 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0061-screenA-annotation.csv
+idr0063 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0063-experimentA-annotation.csv
+idr0063 | study file names assay file 'idr0000-experiment1-assays' but it is not in the dataset | idr0063-experimentA-annotation.csv
+idr0064 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0064-screenA-annotation.csv
+idr0067 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0067-experimentA-annotation.csv
+idr0067 | study file names assay file 'idr0067-KingGoodman-experimentA-annotation' but it is not in the datase | idr0067-experimentA-annotation.csv
+idr0068 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0068-experimentA-annotation.csv
+idr0068 | study file names assay file 'idr0068-experimentA-annotation' but it is not in the dataset | idr0068-experimentA-annotation.csv
+idr0069 | no IDR assay/library file (*assays*.txt or *library*.txt) | 
+idr0070 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0070-experimentA-annotation.csv
+idr0072 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0072-screenA-annotation.csv idr0072-screenB-annotation.csv
+idr0073 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0073-experimentA-annotation.csv
+idr0073 | study file names assay file 'idr0073-experimentB-assays' but it is not in the dataset | idr0073-experimentA-annotation.csv
+idr0075 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0075-experimentA-annotation.csv
+idr0075 | study file names assay file 'idr0075-experimentB-assays' but it is not in the dataset | idr0075-experimentA-annotation.csv
+idr0077 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0077-experimentA-annotation.csv
+idr0078 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0078-screenA-annotation.csv idr0078-screenB-annotation.csv
+idr0079 | no IDR assay/library file (*assays*.txt or *library*.txt) | 00E41C184C_archetype_manual_annotations.tsv 02ED8CA0B9_archetype_manual_annotations.tsv 03887B26C1_archetype_manual_annotations.tsv 056F63395C_archety
+idr0079 | study file names assay file 'idr0079-experimentA-assays.txt' but it is not in the dataset | 00E41C184C_archetype_manual_annotations.tsv 02ED8CA0B9_archetype_manual_annotations.tsv 03887B26C1_archetype_manual_annotations.tsv 056F63395C_archety
+idr0079 | study file names assay file 'idr0079-experimentB-assays.txt' but it is not in the dataset | 00E41C184C_archetype_manual_annotations.tsv 02ED8CA0B9_archetype_manual_annotations.tsv 03887B26C1_archetype_manual_annotations.tsv 056F63395C_archety
+idr0080 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0080-screenA-annotation.csv
+idr0081 | no IDR assay/library file (*assays*.txt or *library*.txt) | idr0081-screenA-annotation.csv idr0081-screenB-annotation.csv idr0081-screenC-annotation.csv idr0081-screenD-annotation.csv idr0081-screenE-annotation
+studies 38 findings 31
