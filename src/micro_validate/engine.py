@@ -37,6 +37,8 @@ class Rule:
     params: dict[str, Any] = field(default_factory=dict)
     fix: str = ""
     sources: list[str] = field(default_factory=list)
+    # "needs review": reported in its own section, left out of the overall verdict; the text says why
+    review: str = ""
 
 
 @dataclass
@@ -61,6 +63,7 @@ class Result:
     messages: list[str]
     fix: str
     sources: list[str]
+    review: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return self.__dict__.copy()
@@ -106,6 +109,7 @@ def load_ruleset(target_or_path: str | Path) -> RuleSet:
             params=r.get("params", {}) or {},
             fix=r.get("fix", ""),
             sources=r.get("sources", []),
+            review=r.get("review", "") or "",
         )
         if rule.id in seen:
             raise ValueError(f"duplicate rule id {rule.id}")
@@ -148,11 +152,12 @@ def run_rules(ruleset: RuleSet, ctx: Any, max_messages: int = 20) -> list[Result
         if len(messages) > max_messages:
             messages = messages[:max_messages] + [f"... and {len(messages) - max_messages} more"]
         results.append(
-            Result(rule.id, rule.title, status, rule.severity, messages, rule.fix, ruleset.source_urls(rule))
+            Result(rule.id, rule.title, status, rule.severity, messages, rule.fix, ruleset.source_urls(rule), rule.review)
         )
     return results
 
 
 def overall_status(results: list[Result]) -> str:
-    """Worst status; skipped rules do not count against the dataset."""
-    return max((r.status for r in results if r.status != "skip"), key=STATUS_RANK.__getitem__, default="pass")
+    """Worst status; skipped and needs-review rules do not count against the dataset."""
+    return max((r.status for r in results if r.status != "skip" and not r.review),
+               key=STATUS_RANK.__getitem__, default="pass")

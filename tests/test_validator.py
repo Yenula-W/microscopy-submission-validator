@@ -751,3 +751,20 @@ def test_series_consistent_compares_one_format(tmp_path):
     assert run(root, "rembi")["REMBI-IMG-004"].status == "skip"
     write_ome_tiff(root / "stack2.ome.tif", shape=(2, 16, 16), dtype="uint8")
     assert run(root, "rembi")["REMBI-IMG-004"].status == "warn"
+
+
+def test_images_readable_is_needs_review_not_verdict(bia_dataset, capsys):
+    """images_readable is on by default but reported apart and left out of the overall result."""
+    (bia_dataset / "series1" / "img_02.ome.tif").write_bytes(b"II*\0garbage")
+    code = main([str(bia_dataset), "-t", "bia", "--json"])
+    rep = json.loads(capsys.readouterr().out)
+    img = next(r for r in rep["results"] if r["rule_id"] == "BIA-IMG-001")
+    assert img["status"] == "fail" and img["review"]
+    assert [f["rule_id"] for f in rep["needs_review"]] == ["BIA-IMG-001"]
+    assert "BIA-IMG-001" not in [f["rule_id"] for f in rep["fixes"]]
+    assert rep["summary"]["needs_review"] == 1
+    assert rep["overall"] != "fail" or any(r["status"] == "fail" and not r["review"] for r in rep["results"])
+    assert code == (1 if rep["overall"] == "fail" else 0)
+    main([str(bia_dataset), "-t", "bia", "-o", str(bia_dataset.parent / "r")])
+    capsys.readouterr()
+    assert "## Needs review (not part of the overall result)" in (bia_dataset.parent / "r.md").read_text()

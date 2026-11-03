@@ -167,6 +167,7 @@ rules:
     check: images_readable
     fix: Replace unreadable files.
     sources: [rembi-overview]
+    review: "Needs review. Untouched precision in ship-bar rounds 3-4 was 44% (21 of 48). Every cause found then is fixed, but a reader can still miss valid files, so open any file named here in Fiji/Bio-Formats before re-exporting it."
   - id: REMBI-IMG-002
     title: Open formats (recommended)
     check: formats_accepted

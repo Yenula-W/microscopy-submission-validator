@@ -139,6 +139,20 @@ ROUNDS = {
             [f"img_00000000{t}_{c}_000.tif" for t in range(4) for c in ("FITC", "Rhodamine")] + ["metadata.txt"])]),
         ("R4-34-olympus-ome-export", "files", [f"{OME}/Olympus-OIR/etienne/coupe%20shg%20stack_0001.ome.tif"]),
     ],
+    "r5": [
+        ("R5-01-olympus-oir-lambda", "files", [
+            f"{OME}/Olympus-OIR/gh-4205/zenodo-12773657/DAPI_mCherry_4T_5Lambda-420-630-w10nm-s50nm.oir"]),
+        ("R5-02-hamamatsu-ndpis", "files", [f"{OME}/Hamamatsu-NDPI/manuel/{n}" for n in (
+            "test3.ndpis", "test3-DAPI%202%20%28387%29%20.ndpi", "test3-FITC%202%20%28485%29.ndpi",
+            "test3-TRITC%202%20%28560%29.ndpi")]),
+        ("R5-03-imaris-lz4", "files", [f"{OME}/Imaris-IMS/bitplane/lz4/{n}" for n in (
+            "croppedCDM3DLz4.ims", "croppedRetinaLz4.ims")]),
+        ("R5-04-amiramesh", "files", [f"{OME}/AmiraMesh/ignacio/test.am"]),
+    ] + [(f"R5-{10 + i:02d}-{a}", "bia", a) for i, a in enumerate(
+        ["S-BIAD3365", "S-BIAD3802", "S-BIAD2500", "S-BIAD3897", "S-BIAD3788", "S-BIAD4158"])]
+      + [(f"R5-{16 + i:02d}-{a}", "names", a) for i, a in enumerate(
+        ["S-BIAD4045", "S-BIAD3711", "S-BIAD3763", "S-BIAD3625", "S-BIAD3949", "S-BIAD4181", "S-BIAD4160", "S-BIAD3209",
+         "S-BIAD3703", "S-BIAD3702", "S-BIAD3674", "S-BIAD4278", "S-BIAD3977", "S-BIAD3594", "S-BIAD3308", "S-BIAD4352"])],
 }
 
 IMAGE_EXT = re.compile(r"\.(ome\.tiff?|tiff?|czi|nd2|lif|lsm|oib|ims|png|jpe?g|dv|mrc|zarr\.zip)$", re.I)

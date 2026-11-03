@@ -219,6 +219,7 @@ rules:
     params: {unverified: warn}
     fix: Re-export or replace unreadable files; install micro-validate[vendor] to verify vendor formats.
     sources: [submit]
+    review: "Needs review. Untouched precision in ship-bar rounds 3-4 was 44% (21 of 48). Every cause found then is fixed, but a reader can still miss valid files, so open any file named here in Fiji/Bio-Formats before re-exporting it."
   - id: BIA-IMG-002
     title: Images carry OME metadata with pixel sizes
     check: ome_metadata

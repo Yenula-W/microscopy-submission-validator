@@ -13,11 +13,16 @@ LABEL = {"pass": "PASS", "warn": "WARN", "fail": "FAIL", "skip": "SKIP"}
 
 
 def build_report(ruleset: RuleSet, ds: Dataset, results: list[Result]) -> dict[str, Any]:
-    counts = Counter(r.status for r in results)
+    counts = Counter(r.status for r in results if not r.review)
+    ranked = sorted(results, key=lambda r: -STATUS_RANK[r.status])
     fixes = [
         {"rule_id": r.rule_id, "status": r.status, "title": r.title, "fix": r.fix, "examples": r.messages[:5]}
-        for r in sorted(results, key=lambda r: -STATUS_RANK[r.status])
-        if r.status in ("fail", "warn")
+        for r in ranked if r.status in ("fail", "warn") and not r.review
+    ]
+    review = [
+        {"rule_id": r.rule_id, "status": r.status, "title": r.title, "fix": r.fix, "examples": r.messages[:5],
+         "why": r.review}
+        for r in ranked if r.status in ("fail", "warn") and r.review
     ]
     return {
         "tool": "micro-validate",
@@ -34,9 +39,10 @@ def build_report(ruleset: RuleSet, ds: Dataset, results: list[Result]) -> dict[s
             "n_images": len(ds.image_files),
         },
         "overall": overall_status(results),
-        "summary": {k: counts.get(k, 0) for k in ("pass", "warn", "fail", "skip")},
+        "summary": {**{k: counts.get(k, 0) for k in ("pass", "warn", "fail", "skip")}, "needs_review": len(review)},
         "results": [r.to_dict() for r in results],
         "fixes": fixes,
+        "needs_review": review,
         "images": [i.to_dict() for i in ds._images.values()],
         "sources": ruleset.sources,
     }
@@ -70,11 +76,20 @@ def to_markdown(report: dict[str, Any]) -> str:
                 out.append(f"   - {ex}")
         out.append("")
 
+    if report.get("needs_review"):
+        out += ["## Needs review (not part of the overall result)", ""]
+        for f in report["needs_review"]:
+            out.append(f"- **[{LABEL[f['status']]}] {f['rule_id']} {f['title']}** — {f['why']} {f['fix']}")
+            for ex in f["examples"]:
+                out.append(f"   - {ex}")
+        out.append("")
+
     out += ["## All rules", "", "| Status | Rule | Check | Details | Source |", "|---|---|---|---|---|"]
     for r in report["results"]:
         details = "; ".join(r["messages"][:3]) + (" …" if len(r["messages"]) > 3 else "")
         src = " ".join(f"[{i + 1}]({u})" for i, u in enumerate(r["sources"]))
-        out.append(f"| {LABEL[r['status']]} | {r['rule_id']} | {_cell(r['title'])} | {_cell(details)} | {src} |")
+        label = LABEL[r["status"]] + (" (review)" if r.get("review") and r["status"] in ("warn", "fail") else "")
+        out.append(f"| {label} | {r['rule_id']} | {_cell(r['title'])} | {_cell(details)} | {src} |")
     out.append("")
 
     if report["images"]:

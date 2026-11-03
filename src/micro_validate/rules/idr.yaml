@@ -155,6 +155,7 @@ rules:
     params: {unverified: warn}
     fix: Replace unreadable files before conversion.
     sources: [idr-submission]
+    review: "Needs review. Untouched precision in ship-bar rounds 3-4 was 44% (21 of 48). Every cause found then is fixed, but a reader can still miss valid files, so open any file named here in Fiji/Bio-Formats before re-exporting it."
   - id: IDR-IMG-002
     title: Images carry physical pixel sizes
     check: ome_metadata
