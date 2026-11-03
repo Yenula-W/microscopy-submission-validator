@@ -1,10 +1,10 @@
 # micro-validate: evaluation against the adoption-ready bar
 
-Date: 2026-11-02 (round 2 the same day; ship-bar rounds 3-6 on 2026-11-03) · Version: 0.1.0 · Bars: `~/Desktop/LabAdoption/ADOPTION_BAR.md` and `SHIP_BAR.md`
+Date: 2026-11-02 (round 2 the same day; ship-bar rounds 3-6 on 2026-11-03) · Version: 0.1.0 · Bars: `docs/ADOPTION_BAR.md` and `docs/SHIP_BAR.md`
 
 **Ship-bar verdict (§9-§10): NOT MET.** Rounds 5, 6 and 7 were each run untouched on frozen code. Precision was 98.9%, 96.1% and 96.6%, with 0 crashes. Each round still had overstated claims: 3, 4 and 6. All of them were fixed afterwards with regression tests, but the final code has not yet passed an untouched round.
 
-**Release decision (2026-11-03):** the evaluation rounds stop here and 0.1.0 ships with a known-limitations note (§7, README). Round 7 (§10), run untouched on frozen `fd00ab4`, gave 96.6% precision (258 of 267 findings) with 0 crashes. It failed on 6 overstated "pixel size missing" claims for Zeiss SEM TIFFs whose calibration is in the `CZ_SEM` tag, which put `ome_metadata` at 71.4%. That cause is fixed in `d632ee3` with regression tests. The fixed code has not had an untouched round.
+**Release decision (2026-11-03):** the evaluation rounds stop here and 0.1.0 ships with a known-limitations note (§7, README). Round 7 (§10), run untouched on frozen `8c5c509`, gave 96.6% precision (258 of 267 findings) with 0 crashes. It failed on 6 overstated "pixel size missing" claims for Zeiss SEM TIFFs whose calibration is in the `CZ_SEM` tag, which put `ome_metadata` at 71.4%. That cause is fixed in `01d84cb` with regression tests. The fixed code has not had an untouched round.
 
 | # | Bar item | Status |
 |---|---|---|
@@ -202,7 +202,7 @@ Round 1 left three checks short. `idr_assay_present` and `idr_assay_matches_file
 
 ### First run, before any change
 
-These numbers come from the code at commit `33ac361`, judged against the real repository tables.
+These numbers come from the code at commit `2ec9cb3`, judged against the real repository tables.
 
 | Check | n | correct | debatable | wrong | % correct | Main cause of wrong findings |
 |---|---|---|---|---|---|---|
@@ -257,7 +257,7 @@ The 21 S-BIAD studies with no file-list findings are a check on false alarms: no
 
 A rerun of the round-1 held-out set on the final code gave 78 runs, 0 crashes and the same 375 findings. CI was green on the final commit.
 
-## 9. Ship-bar rounds 3-6 (`SHIP_BAR.md`)
+## 9. Ship-bar rounds 3-6 (`docs/SHIP_BAR.md`)
 
 The ship bar asks for two untouched rounds in a row that pass. Each round:
 - uses new real inputs that no earlier round or development used;
@@ -280,12 +280,12 @@ Round 2 did not count toward the streak: its first run failed (§8), and a fix l
 
 | Round | Code | Judged | Correct | Wrong | Debatable | Precision | Crashes | Failing check types / overstated claims | Result |
 |---|---|---|---|---|---|---|---|---|---|
-| 3 | `50f7a3b` | 402 | 276 | 123 | 3 | 68.7% | 0 | `field_present` 55%, `file_list_matches` 9%, `images_readable` 40%, `series_consistent` 0% | FAIL |
-| 4 | `ec552ef` | 270 | 255 | 15 | 0 | 94.4% | 0 | `images_readable` 50%; 6 overstated `formats_accepted` | FAIL |
-| 5 | `4031e41` (frozen) | 276 | 273 | 3 | 0 | 98.9% | 0 | 3 overstated ("no image files found" for an AmiraMesh volume) | FAIL (overstated) |
-| 6 | `4031e41` (same) | 257 | 247 | 10 | 0 | 96.1% | 0 | `images_readable` 60% (needs review); 4 overstated | FAIL (overstated) |
+| 3 | `891217d` | 402 | 276 | 123 | 3 | 68.7% | 0 | `field_present` 55%, `file_list_matches` 9%, `images_readable` 40%, `series_consistent` 0% | FAIL |
+| 4 | `84e8f6a` | 270 | 255 | 15 | 0 | 94.4% | 0 | `images_readable` 50%; 6 overstated `formats_accepted` | FAIL |
+| 5 | `50138ea` (frozen) | 276 | 273 | 3 | 0 | 98.9% | 0 | 3 overstated ("no image files found" for an AmiraMesh volume) | FAIL (overstated) |
+| 6 | `50138ea` (same) | 257 | 247 | 10 | 0 | 96.1% | 0 | `images_readable` 60% (needs review); 4 overstated | FAIL (overstated) |
 
-Rounds 5 and 6 without `images_readable`, which is outside the verdict since `4031e41`:
+Rounds 5 and 6 without `images_readable`, which is outside the verdict since `50138ea`:
 - Round 5: 255 of 258 correct, 98.8%.
 - Round 6: 238 of 242 correct, 98.3%.
 
@@ -331,10 +331,10 @@ Every other check type is at 80% or above in both rounds, so only the overstated
   - Public IDR repositories with tables are now exhausted, so those rounds will rely on BIA and OME inputs.
   - Building BIA mirrors through the BioStudies JSON API avoids the FTP throttling.
 
-## 10. Round 7: confirmation round on frozen `fd00ab4`
+## 10. Round 7: confirmation round on frozen `8c5c509`
 
-The code was frozen at `fd00ab4`.
-- **CI on `fd00ab4`:** all Ubuntu jobs (3.9, 3.12, 3.13) passed. GitHub never assigned a macOS runner to the macOS jobs ("The job was not acquired by Runner … capacity constraints"). As a stand-in, the full test suite at `fd00ab4` was run on a local macOS machine: 87 passed, 1 skipped on both Python 3.9 and 3.12.
+The code was frozen at `8c5c509`.
+- **CI on `8c5c509`:** all Ubuntu jobs (3.9, 3.12, 3.13) passed. GitHub never assigned a macOS runner to the macOS jobs ("The job was not acquired by Runner … capacity constraints"). As a stand-in, the full test suite at `8c5c509` was run on a local macOS machine: 87 passed, 1 skipped on both Python 3.9 and 3.12.
 - **Inputs:** 23 new inputs were fetched.
   - The 3 dropped studies are S-BIAD3728 and S-BIAD3111 (EBI FTP refused the connection) and S-BIAD3811 (TLS handshake timed out). They were left out instead of being run on partial downloads.
   - The 20 inputs that ran are 5 OME samples (Zeiss SEM TIFF, InCell 2000, Cellomics DIB, Becker & Hickl SDT, NRRD), 1 BIA study with page-tab, file list and images, and 14 BIA API name mirrors. That is 60 runs.
