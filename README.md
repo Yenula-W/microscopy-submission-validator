@@ -86,7 +86,7 @@ The JSON report has the same content, plus `images[]` with the full per-file det
 [EVALUATION.md](EVALUATION.md) covers the evaluation. The tool was run on 26 held-out public inputs: OME-TIFF, ImageJ TIFF, Zeiss LSM/CZI, Nikon ND2, Olympus OIB, MetaMorph, IDR OME-Zarr v0.4/0.5, six accepted BioImage Archive studies and seven accepted IDR studies.
 
 - Rounds 1-2: 78 runs, 0 crashes. 121 findings were hand-checked: 91.7% correct, 0 wrong. Round 2 covered 110 accepted IDR studies' published tables and 29 BioImage Archive upload trees.
-- Ship-bar rounds 3-6: 4 × 21 new inputs, 252 runs, 0 crashes. Each round's first run was judged by hand before any change:
+- Ship-bar rounds 3-7: 104 new inputs, 312 runs, 0 crashes. Each round's first run was judged by hand before any change:
 
   | Round | Precision |
   |---|---|
@@ -94,9 +94,10 @@ The JSON report has the same content, plus `images[]` with the full per-file det
   | 4 | 94.4% |
   | 5 | 98.9% |
   | 6 | 96.1% |
+  | 7 | 96.6% |
 
-  Rounds 5 and 6 ran on the same frozen code. Every root cause found was fixed with a regression test, and reruns on the fixed code show 0 wrong.
-- **Status:** the stricter ship bar, two untouched rounds in a row with no overstated claim, is **not yet met**. Rounds 5 and 6 each had 3-4 overstated "no images" or "unreadable" claims, now fixed. See EVALUATION.md §9.
+  Rounds 5 and 6 ran on the same frozen code, and round 7 on the next freeze. Every root cause found was fixed with a regression test, and reruns on the fixed code show 0 wrong.
+- **Status:** the stricter ship bar, two untouched rounds in a row with no overstated claim, is **not yet met**. Rounds 5-7 each had a few overstated claims ("no images", "unreadable", Zeiss SEM pixel size "missing"), all now fixed. See EVALUATION.md §9-§10.
 - **Needs review:** *Image files readable* is reported in its own "Needs review" section and does not affect the overall result or the exit code. Its untouched precision in rounds 3-4 was 44%.
 
 `scripts/holdout/fetch.py` and `scripts/holdout/run_eval.py` reproduce the run. `scripts/real_data_check.sh` holds the original development-time checks.
@@ -107,7 +108,7 @@ The JSON report has the same content, plus `images[]` with the full per-file det
 pip install -e '.[dev]' && pytest
 ```
 
-There are 88 tests (one is skipped unless the `[vendor]` extra is installed, and one only when it is not), including messy-input robustness tests and regression tests for every rule fixed during the held-out evaluation. They build tiny synthetic OME-TIFFs and NGFF v0.4 OME-Zarrs (directory and zipped). They cover good and bad versions of each check type: missing or placeholder metadata, file-list header, format, missing and orphan files, case mismatch, bad characters, inconsistent channels and pixel sizes, plain TIFF, corrupt TIFF, unzipped zarr, annotation `source_image`, IDR hints, assay and channel mismatches, the CLI exit codes, and report output.
+There are 90 tests (one is skipped unless the `[vendor]` extra is installed, and one only when it is not), including messy-input robustness tests and regression tests for every rule fixed during the held-out evaluation. They build tiny synthetic OME-TIFFs and NGFF v0.4 OME-Zarrs (directory and zipped). They cover good and bad versions of each check type: missing or placeholder metadata, file-list header, format, missing and orphan files, case mismatch, bad characters, inconsistent channels and pixel sizes, plain TIFF, corrupt TIFF, unzipped zarr, annotation `source_image`, IDR hints, assay and channel mismatches, the CLI exit codes, and report output.
 
 ## Design
 

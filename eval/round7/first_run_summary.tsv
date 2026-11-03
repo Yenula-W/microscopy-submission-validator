@@ -1,0 +1,11 @@
+check	n	correct	debatable	wrong	%correct
+field_present	131	131	0	0	100.0
+file_list_present	5	5	0	0	100.0
+formats_accepted	57	57	0	0	100.0
+idr_assay_present	20	20	0	0	100.0
+idr_study_present	20	20	0	0	100.0
+metadata_present	10	10	0	0	100.0
+ome_metadata	21	15	0	6	71.4
+series_consistent	3	0	3	0	0.0
+TOTAL	267	258	3	6	96.6
+n/a 856

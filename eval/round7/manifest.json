@@ -1,0 +1,97 @@
+{
+ "R7-01-zeiss-sem-tiff": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/LEO/dmankus/2160grating%20512.tif",
+   "https://downloads.openmicroscopy.org/images/LEO/dmankus/2160grating%201024.tif"
+  ]
+ },
+ "R7-02-incell2000": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/InCell2000/zenodo-14769820/Dataset_ok/A%20-%2001%28fld%201%20wv%20Cy3%20-%20Cy3%29.tif",
+   "https://downloads.openmicroscopy.org/images/InCell2000/zenodo-14769820/Dataset_ok/A%20-%2001%28fld%201%20wv%20DAPI%20-%20DAPI%29.tif",
+   "https://downloads.openmicroscopy.org/images/InCell2000/zenodo-14769820/Dataset_ok/A%20-%2001%28fld%201%20wv%20FITC%20-%20FITC%29.tif"
+  ]
+ },
+ "R7-03-cellomics-dib": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Cellomics/BBBC001/AS_09125_050118150001_A03f00d0.DIB",
+   "https://downloads.openmicroscopy.org/images/Cellomics/BBBC001/AS_09125_050118150001_A03f01d0.DIB"
+  ]
+ },
+ "R7-04-becker-hickl-sdt": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/SDT/gh-4198/FocalCheck_A1_20x_8xzoom_800nm.sdt"
+  ]
+ },
+ "R7-05-nrrd": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/NRRD/gordon/dt-helix.nhdr",
+   "https://downloads.openmicroscopy.org/images/NRRD/gordon/dt-helix.raw"
+  ]
+ },
+ "R7-12-S-BIAD3460": {
+  "kind": "bia",
+  "spec": "S-BIAD3460"
+ },
+ "R7-16-S-BIAD3627": {
+  "kind": "apinames",
+  "spec": "S-BIAD3627"
+ },
+ "R7-17-S-BIAD3429": {
+  "kind": "apinames",
+  "spec": "S-BIAD3429"
+ },
+ "R7-18-S-BIAD4042": {
+  "kind": "apinames",
+  "spec": "S-BIAD4042"
+ },
+ "R7-19-S-BIAD3807": {
+  "kind": "apinames",
+  "spec": "S-BIAD3807"
+ },
+ "R7-20-S-BIAD3804": {
+  "kind": "apinames",
+  "spec": "S-BIAD3804"
+ },
+ "R7-21-S-BIAD4107": {
+  "kind": "apinames",
+  "spec": "S-BIAD4107"
+ },
+ "R7-22-S-BIAD2557": {
+  "kind": "apinames",
+  "spec": "S-BIAD2557"
+ },
+ "R7-23-S-BIAD4044": {
+  "kind": "apinames",
+  "spec": "S-BIAD4044"
+ },
+ "R7-24-S-BIAD3759": {
+  "kind": "apinames",
+  "spec": "S-BIAD3759"
+ },
+ "R7-25-S-BIAD3621": {
+  "kind": "apinames",
+  "spec": "S-BIAD3621"
+ },
+ "R7-26-S-BIAD3836": {
+  "kind": "apinames",
+  "spec": "S-BIAD3836"
+ },
+ "R7-27-S-BIAD2846": {
+  "kind": "apinames",
+  "spec": "S-BIAD2846"
+ },
+ "R7-28-S-BIAD3720": {
+  "kind": "apinames",
+  "spec": "S-BIAD3720"
+ },
+ "R7-29-S-BIAD3705": {
+  "kind": "apinames",
+  "spec": "S-BIAD3705"
+ }
+}

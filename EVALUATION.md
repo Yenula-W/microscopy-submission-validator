@@ -2,7 +2,7 @@
 
 Date: 2026-11-02 (round 2 the same day; ship-bar rounds 3-6 on 2026-11-03) · Version: 0.1.0 · Bars: `~/Desktop/LabAdoption/ADOPTION_BAR.md` and `SHIP_BAR.md`
 
-**Ship-bar verdict (§9): NOT MET.** Rounds 5 and 6 were run untouched on frozen code, with no code change between them. Precision was 98.9% and 96.1%, with 0 crashes. Both rounds still had overstated claims: 3 and 4 findings that asserted more than the tool knew. Those were fixed afterwards, with regression tests, on the final commit. That final code has not yet passed two untouched rounds.
+**Ship-bar verdict (§9-§10): NOT MET.** Rounds 5, 6 and 7 were each run untouched on frozen code. Precision was 98.9%, 96.1% and 96.6%, with 0 crashes. Each round still had overstated claims: 3, 4 and 6. All of them were fixed afterwards with regression tests, but the final code has not yet passed an untouched round.
 
 | # | Bar item | Status |
 |---|---|---|
@@ -327,4 +327,36 @@ Every other check type is at 80% or above in both rounds, so only the overstated
 - **To ship:** the final code needs two more untouched rounds on new inputs.
   - Public IDR repositories with tables are now exhausted, so those rounds will rely on BIA and OME inputs.
   - Building BIA mirrors through the BioStudies JSON API avoids the FTP throttling.
+
+## 10. Round 7: confirmation round on frozen `fd00ab4`
+
+The code was frozen at `fd00ab4`.
+- **CI on `fd00ab4`:** all Ubuntu jobs (3.9, 3.12, 3.13) passed. GitHub never assigned a macOS runner to the macOS jobs ("The job was not acquired by Runner … capacity constraints"). As a stand-in, the full test suite at `fd00ab4` was run on a local macOS machine: 87 passed, 1 skipped on both Python 3.9 and 3.12.
+- **Inputs:** 23 new inputs were fetched.
+  - The 3 dropped studies are S-BIAD3728 and S-BIAD3111 (EBI FTP refused the connection) and S-BIAD3811 (TLS handshake timed out). They were left out instead of being run on partial downloads.
+  - The 20 inputs that ran are 5 OME samples (Zeiss SEM TIFF, InCell 2000, Cellomics DIB, Becker & Hickl SDT, NRRD), 1 BIA study with page-tab, file list and images, and 14 BIA API name mirrors. That is 60 runs.
+
+| Check type | n | correct | debatable | wrong | % correct |
+|---|---|---|---|---|---|
+| `field_present` | 131 | 131 | 0 | 0 | 100% |
+| `formats_accepted` | 57 | 57 | 0 | 0 | 100% |
+| `ome_metadata` | 21 | 15 | 0 | 6 | **71.4%** |
+| `series_consistent` | 3 | 0 | 3 | 0 | **0%** |
+| other 4 types | 55 | 55 | 0 | 0 | 100% |
+| **Total** | **267** | **258** | **3** | **6** | **96.6%** |
+
+There were 0 crashes. **Result: FAIL.** There were 6 overstated claims, and two in-verdict check types were below 80%.
+
+- **Overstated, 6 findings:** "physical pixel size missing" for two Zeiss SEM TIFFs. The calibration is in the `CZ_SEM` tag (34118) as `Image Pixel Size` 22.33 nm and 11.16 nm, and the tool did not read it.
+- **Debatable, 3 findings:** the same grating was scanned at 512 and 1024 px, which was reported as an inconsistent series.
+
+The formats the tool doesn't know (DIB, SDT, NRRD, NIfTI) were correctly reported as "not checked". This is the round 5-6 fix working on new inputs.
+
+**Fixes, each with a regression test ("ship-bar round 7"):**
+- Zeiss SEM (`CZ_SEM`) and FEI/Thermo (`[Scan] PixelWidth`) TIFF calibration is now read.
+- The series check no longer reports pixel-size or XY differences when two calibrated images cover the same physical field at different pixel counts.
+
+A rerun of round 7 on the fixed code gave 258 judged, 0 wrong.
+
+Per the instruction for this round, the loop stops here: record, fix, push. To ship, the final commit needs one more untouched round on new inputs.
 

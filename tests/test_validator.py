@@ -826,3 +826,35 @@ def test_unparsed_xlsx_file_list_is_a_warning(bia_dataset):
     (bia_dataset / "empty_file_list.xlsx").write_bytes(b"PK\x03\x04")
     res = run(bia_dataset, "bia")["BIA-FL-001"]
     assert res.status == "warn" and "Excel file lists are not parsed" in res.messages[0], res.messages
+
+
+# ------------------------------------------------------------- regressions from ship-bar round 7
+
+
+def test_zeiss_sem_and_fei_tiff_pixel_size():
+    """Zeiss SEM keeps 'Image Pixel Size' in the CZ_SEM tag, FEI/Thermo in [Scan] PixelWidth (metres)."""
+    from types import SimpleNamespace
+
+    from micro_validate.imageinfo import ImageInfo, _vendor_tiff_calibration
+
+    page = SimpleNamespace(description="")
+    sem = SimpleNamespace(is_lsm=False, is_fluoview=False, is_sem=True, is_fei=False, pages=[page],
+                          sem_metadata={"ap_image_pixel_size": ("Image Pixel Size", 22.33, "nm")})
+    info = ImageInfo(path="g.tif", format="tiff", pixel_size_um={"x": None, "y": None, "z": None})
+    _vendor_tiff_calibration(sem, info)
+    assert abs(info.pixel_size_um["x"] - 0.02233) < 1e-12 and info.pixel_size_um["y"] == info.pixel_size_um["x"]
+    fei = SimpleNamespace(is_lsm=False, is_fluoview=False, is_sem=False, is_fei=True, pages=[page],
+                          fei_metadata={"Scan": {"PixelWidth": 5e-9, "PixelHeight": 5e-9}})
+    info = ImageInfo(path="f.tif", format="tiff", pixel_size_um={"x": None, "y": None, "z": None})
+    _vendor_tiff_calibration(fei, info)
+    assert abs(info.pixel_size_um["x"] - 0.005) < 1e-12
+
+
+def test_series_same_field_at_two_resolutions(tmp_path):
+    """The same grating scanned at 512 and 1024 px (pixel size halves) is not an inconsistent series."""
+    root = tmp_path / "ds"
+    write_ome_tiff(root / "scan_512.ome.tif", shape=(1, 16, 16), px=0.2)
+    write_ome_tiff(root / "scan_1024.ome.tif", shape=(1, 32, 32), px=0.1)
+    assert run(root, "rembi")["REMBI-IMG-004"].status == "pass"
+    write_ome_tiff(root / "scan_1024.ome.tif", shape=(1, 32, 32), px=0.2)  # different field: still reported
+    assert run(root, "rembi")["REMBI-IMG-004"].status == "warn"

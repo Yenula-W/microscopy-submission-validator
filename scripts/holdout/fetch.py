@@ -168,6 +168,18 @@ ROUNDS = {
       + [(f"R6-{16 + i:02d}-{a}", "apinames", a) for i, a in enumerate(
         ["S-BIAD3304", "S-BIAD3651", "S-BIAD2498", "S-BIAD3797", "S-BIAD3760", "S-BIAD4184", "S-BIAD3723",
          "S-BIAD3828", "S-BIAD3922", "S-BIAD3557", "S-BIAD3707", "S-BIAD3751", "S-BIAD3372", "S-BIAD2430"])],
+    # round 7: confirmation round on frozen fd00ab4
+    "r7": [
+        ("R7-01-zeiss-sem-tiff", "files", [f"{OME}/LEO/dmankus/2160grating%20{n}.tif" for n in (512, 1024)]),
+        ("R7-02-incell2000", "files", [f"{OME}/InCell2000/zenodo-14769820/Dataset_ok/A%20-%2001%28fld%201%20wv%20{c}%29.tif"
+                                       for c in ("Cy3%20-%20Cy3", "DAPI%20-%20DAPI", "FITC%20-%20FITC")]),
+        ("R7-03-cellomics-dib", "files", [f"{OME}/Cellomics/BBBC001/AS_09125_050118150001_A03f0{i}d0.DIB" for i in (0, 1)]),
+        ("R7-04-becker-hickl-sdt", "files", [f"{OME}/SDT/gh-4198/FocalCheck_A1_20x_8xzoom_800nm.sdt"]),
+        ("R7-05-nrrd", "files", [f"{OME}/NRRD/gordon/dt-helix.{e}" for e in ("nhdr", "raw")]),
+    ] + [(f"R7-{10 + i:02d}-{a}", "bia", a) for i, a in enumerate(["S-BIAD3728", "S-BIAD3111", "S-BIAD3460", "S-BIAD3811"])]
+      + [(f"R7-{16 + i:02d}-{a}", "apinames", a) for i, a in enumerate(
+        ["S-BIAD3627", "S-BIAD3429", "S-BIAD4042", "S-BIAD3807", "S-BIAD3804", "S-BIAD4107", "S-BIAD2557", "S-BIAD4044",
+         "S-BIAD3759", "S-BIAD3621", "S-BIAD3836", "S-BIAD2846", "S-BIAD3720", "S-BIAD3705"])],
 }
 
 IMAGE_EXT = re.compile(r"\.(ome\.tiff?|tiff?|czi|nd2|lif|lsm|oib|ims|png|jpe?g|dv|mrc|zarr\.zip)$", re.I)

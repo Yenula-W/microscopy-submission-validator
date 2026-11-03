@@ -213,22 +213,34 @@ def series_consistent(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
         ref = infos[0]
         for i in infos[1:]:
             diffs: list[tuple[str, str]] = []
+            # the same field scanned at another resolution (SEM 512 vs 1024 px): pixel size x XY agrees
+            resampled = _same_field(i, ref, rtol=0.02)
             if "channels" in fields and i.sizes.get("C") != ref.sizes.get("C"):
                 diffs.append(("channels", f"C={i.sizes.get('C')} vs {ref.sizes.get('C')}"))
-            if "pixel_size" in fields:
+            if "pixel_size" in fields and not resampled:
                 for ax in ("x", "y", "z"):
                     a, b = i.pixel_size_um.get(ax), ref.pixel_size_um.get(ax)
                     if not _close(a, b, rtol):
                         diffs.append(("pixel_size", f"pixel size {ax}={a} vs {b} µm"))
             if "dtype" in fields and i.dtype != ref.dtype:
                 diffs.append(("dtype", f"dtype {i.dtype} vs {ref.dtype}"))
-            if "xy" in fields and (i.sizes.get("X"), i.sizes.get("Y")) != (ref.sizes.get("X"), ref.sizes.get("Y")):
+            if "xy" in fields and not resampled and (i.sizes.get("X"), i.sizes.get("Y")) != (ref.sizes.get("X"), ref.sizes.get("Y")):
                 diffs.append(("xy", f"XY {i.sizes.get('X')}x{i.sizes.get('Y')} vs {ref.sizes.get('X')}x{ref.sizes.get('Y')}"))
             if "z" in fields and i.sizes.get("Z") != ref.sizes.get("Z"):
                 diffs.append(("z", f"Z={i.sizes.get('Z')} vs {ref.sizes.get('Z')}"))
             for fld, text in diffs:
                 issues.append(Issue(fields[fld], f"folder '{key}': {i.path} differs from {ref.path}: {text}"))
     return issues
+
+
+def _same_field(a, b, rtol: float) -> bool:
+    """True when two calibrated images cover the same physical X/Y extent at different pixel counts."""
+    try:
+        ext = [(a.sizes[k.upper()] * a.pixel_size_um[k], b.sizes[k.upper()] * b.pixel_size_um[k]) for k in "xy"]
+    except (KeyError, TypeError):
+        return False
+    return (a.sizes.get("X"), a.sizes.get("Y")) != (b.sizes.get("X"), b.sizes.get("Y")) and all(
+        _close(p, q, rtol) for p, q in ext)
 
 
 @check("file_size")

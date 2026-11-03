@@ -196,6 +196,15 @@ def _vendor_tiff_calibration(tif: Any, info: ImageInfo) -> None:
             name, _, _, step, unit = dim[:5]
             if str(name).lower() in ("x", "y", "z") and step:
                 ps[str(name).lower()] = _um(float(step), unit or "µm")
+    elif tif.is_sem and tif.sem_metadata:  # Zeiss SEM CZ_SEM tag: ('Image Pixel Size', 22.33, 'nm')
+        v = tif.sem_metadata.get("ap_image_pixel_size") or tif.sem_metadata.get("ap_pixel_size")
+        if isinstance(v, (tuple, list)) and len(v) >= 3 and isinstance(v[1], (int, float)) and v[1] > 0:
+            ps["x"] = ps["y"] = _um(float(v[1]), str(v[2]))
+    elif tif.is_fei and tif.fei_metadata:  # FEI/Thermo SEM/FIB: [Scan] PixelWidth/PixelHeight in metres
+        scan = tif.fei_metadata.get("Scan", {}) or {}
+        for ax, key in (("x", "PixelWidth"), ("y", "PixelHeight")):
+            if scan.get(key):
+                ps[ax] = float(scan[key]) * 1e6
     elif (tif.pages[0].description or "").lstrip().startswith("<MetaData>"):  # MetaMorph / MetaSeries XML
         desc = tif.pages[0].description
 
