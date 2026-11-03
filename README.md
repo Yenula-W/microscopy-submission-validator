@@ -128,6 +128,7 @@ to confirm the fix.
 
 ## Not done yet / known limits
 
+- **Unfamiliar vendor file types can be misreported.** The tool reads the common formats and several vendor TIFF variants, but a format or vendor tag it has not seen can produce a wrong FAIL (for example "pixel size missing" when the calibration sits in a vendor tag). Check any FAIL on an unusual format against the file itself, and please report it as an issue with the file type and the message.
 - Excel (`.xlsx`) file lists are detected but not parsed. Export them as TSV.
 - REMBI fields come from a local `submission.yaml` or a BioStudies page-tab JSON export. Nothing is fetched from the BIA web form.
 - OME-Zarr HCS plates and `bioformats2raw` containers are reported as "not checked", with no per-image checks yet.

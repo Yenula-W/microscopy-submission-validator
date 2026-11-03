@@ -4,6 +4,8 @@ Date: 2026-11-02 (round 2 the same day; ship-bar rounds 3-6 on 2026-11-03) · Ve
 
 **Ship-bar verdict (§9-§10): NOT MET.** Rounds 5, 6 and 7 were each run untouched on frozen code. Precision was 98.9%, 96.1% and 96.6%, with 0 crashes. Each round still had overstated claims: 3, 4 and 6. All of them were fixed afterwards with regression tests, but the final code has not yet passed an untouched round.
 
+**Release decision (2026-11-03):** the evaluation rounds stop here and 0.1.0 ships with a known-limitations note (§7, README). Round 7 (§10), run untouched on frozen `fd00ab4`, gave 96.6% precision (258 of 267 findings) with 0 crashes. It failed on 6 overstated "pixel size missing" claims for Zeiss SEM TIFFs whose calibration is in the `CZ_SEM` tag, which put `ome_metadata` at 71.4%. That cause is fixed in `d632ee3` with regression tests. The fixed code has not had an untouched round.
+
 | # | Bar item | Status |
 |---|---|---|
 | 1 | Never crashes on messy input | **Met.** There are 17 robustness tests. One crash was found and fixed. 0 crashes in 78 held-out runs. |
@@ -182,6 +184,7 @@ Every fix has a regression test in `tests/test_validator.py`.
 
 ## 7. Known limitations
 
+- **Unfamiliar vendor file types can be misreported.** Each of rounds 4-7 found a vendor format or tag the tool had not seen, and each produced overstated claims until fixed (round 7: Zeiss SEM calibration in `CZ_SEM`). More such formats will exist. Users should check any FAIL on an unusual format against the file, and report it.
 - Vendor formats beyond LSM, STK, MetaMorph and FluoView TIFF need `micro-validate[vendor]` plus a bioio plugin. With `bioio-nd2`, the H09 ND2 files read correctly (800×600×13 T, 0.37 µm). Without it, they are reported as "readability not checked".
 - HCS plates and `bioformats2raw` containers get no per-image checks.
 - `.xlsx` file lists are not parsed.
