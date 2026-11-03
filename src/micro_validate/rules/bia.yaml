@@ -210,7 +210,7 @@ rules:
       messages:
         ome-zarr: "OME-Zarr must be zipped and uploaded as .ome.zarr.zip"
         vendor: "accepted, but convert to OME-TIFF/OME-Zarr (e.g. bioformats2raw, BatchConvert) for reuse and BIA viewers"
-        raster: "lossy/8-bit formats lose microscopy metadata; prefer the original acquisition files"
+        raster: "PNG/JPEG hold no microscopy metadata; fine for masks and figures, but submit raw acquisitions in their original or OME format"
     fix: Zip OME-Zarr folders (.ome.zarr.zip); prefer open OME formats over vendor files.
     sources: [file-list, submit]
   - id: BIA-IMG-001
@@ -229,6 +229,7 @@ rules:
   - id: BIA-IMG-003
     title: Consistent dimensions/channels/pixel sizes within a series
     check: series_consistent
+    severity: warn
     params:
       group_by: directory
       fields: {channels: problem, pixel_size: problem, dtype: warning, xy: warning}

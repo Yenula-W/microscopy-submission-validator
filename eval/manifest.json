@@ -1,0 +1,246 @@
+{
+  "H01-ome-artificial": {
+    "kind": "files",
+    "urls": [
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/bioformats-artificial/single-channel.ome.tif",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/bioformats-artificial/multi-channel.ome.tif",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/bioformats-artificial/z-series.ome.tif",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/bioformats-artificial/time-series.ome.tif",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/bioformats-artificial/multi-channel-z-series.ome.tif"
+    ]
+  },
+  "H02-ome-companion": {
+    "kind": "files",
+    "urls": [
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/companion/multifile-Z1.ome.tiff",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/companion/multifile-Z2.ome.tiff",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/companion/multifile-Z3.ome.tiff",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/companion/multifile-Z4.ome.tiff",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/companion/multifile-Z5.ome.tiff",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/companion/multifile.companion.ome"
+    ]
+  },
+  "H03-ome-modulo": {
+    "kind": "files",
+    "urls": [
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/modulo/FLIM-ModuloAlongC.ome.tiff",
+      "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/modulo/LAMBDA-ModuloAlongZ-ModuloAlongT.ome.tiff"
+    ]
+  },
+  "H04-imagej-confocal-series": {
+    "kind": "zip",
+    "urls": [
+      "https://imagej.net/ij/images/confocal-series.zip"
+    ]
+  },
+  "H05-imagej-5d": {
+    "kind": "zip",
+    "urls": [
+      "https://imagej.net/ij/images/5d.zip"
+    ]
+  },
+  "H06-imagej-composites": {
+    "kind": "files",
+    "urls": [
+      "https://imagej.net/ij/images/Composite.tif",
+      "https://imagej.net/ij/images/3_channel_inverted_luts.tif"
+    ]
+  },
+  "H07-fluoview-tiff": {
+    "kind": "files",
+    "urls": [
+      "https://imagej.net/ij/images/fluoview-multi.tif"
+    ]
+  },
+  "H08-zeiss-lsm": {
+    "kind": "files",
+    "urls": [
+      "https://imagej.net/ij/images/Cntrl1.lsm"
+    ]
+  },
+  "H09-nikon-nd2": {
+    "kind": "files",
+    "urls": [
+      "https://downloads.openmicroscopy.org/images/ND2/aryeh/MeOh_high_fluo_003.nd2",
+      "https://downloads.openmicroscopy.org/images/ND2/aryeh/MeOh_high_fluo_007.nd2"
+    ]
+  },
+  "H10-olympus-oib": {
+    "kind": "files",
+    "urls": [
+      "https://downloads.openmicroscopy.org/images/Olympus-FluoView/imagesc-71616/20220824_4492_cord_dapi__iba568_60x.oib"
+    ]
+  },
+  "H11-metamorph-timelapse": {
+    "kind": "files",
+    "urls": [
+      "https://downloads.openmicroscopy.org/images/Metamorph/zenodo-13642395/test_timelapse_20240816.nd",
+      "https://downloads.openmicroscopy.org/images/Metamorph/zenodo-13642395/test_timelapse_20240816_s1_t1.TIF",
+      "https://downloads.openmicroscopy.org/images/Metamorph/zenodo-13642395/test_timelapse_20240816_s1_t2.TIF",
+      "https://downloads.openmicroscopy.org/images/Metamorph/zenodo-13642395/test_timelapse_20240816_s1_t3.TIF"
+    ]
+  },
+  "H12-plain-tiff-screen": {
+    "kind": "files",
+    "urls": [
+      "https://downloads.openmicroscopy.org/images/TIFF/condensation/A1.pattern1.tif",
+      "https://downloads.openmicroscopy.org/images/TIFF/condensation/A1.pattern2.tif"
+    ]
+  },
+  "H13-idr0052": {
+    "kind": "idr",
+    "zarr": "v0.4/idr0052A/5514375.zarr",
+    "repo": "idr0052-walther-condensinmap",
+    "meta": [
+      "idr0052-study.txt",
+      "experimentA/MitoSys_assay_file.txt"
+    ],
+    "image_name": "cell0015_R0002.ome.zarr"
+  },
+  "H14-idr0054": {
+    "kind": "idr",
+    "zarr": "v0.4/idr0054A/5025551.zarr",
+    "repo": "idr0054-segura-tonsilhyperion",
+    "meta": [
+      "idr0054-study.txt",
+      "experimentA/idr0054-experimentA-assays.txt"
+    ],
+    "image_name": "Tonsil 1.ome.zarr"
+  },
+  "H15-idr0066-v05": {
+    "kind": "idr",
+    "zarr": "v0.5/idr0066/ExpD_chicken_embryo_MIP.ome.zarr",
+    "repo": "idr0066-voigt-mesospim",
+    "meta": [
+      "idr0066-study.txt",
+      "experimentD/idr0066-chicken-assays.txt"
+    ],
+    "image_name": "ExpD_chicken_embryo_MIP.ome.zarr"
+  },
+  "H16-idr0101": {
+    "kind": "idr",
+    "zarr": "v0.4/idr0101A/13457537.zarr",
+    "repo": "idr0101-payne-insitugenomeseq",
+    "meta": [
+      "idr0101-study.txt"
+    ],
+    "image_name": "cell002_processed.ome.zarr"
+  },
+  "H17-idr0076": {
+    "kind": "idr",
+    "zarr": "v0.4/idr0076A/10501752.zarr",
+    "repo": "idr0076-ali-metabric",
+    "meta": [
+      "idr0076-study.txt"
+    ],
+    "image_name": "MB0002_1_345.ome.zarr"
+  },
+  "H18-idr0047": {
+    "kind": "idr",
+    "zarr": "v0.4/idr0047A/4496763.zarr",
+    "repo": "idr0047-neuert-yeastmrna",
+    "meta": [
+      "idr0047-study.txt"
+    ],
+    "image_name": "Exp1_rep1_0min_im1.ome.zarr"
+  },
+  "H19-idr0138": {
+    "kind": "idr",
+    "zarr": "v0.4/idr0138A/TimEmbryos-120919/HybCycle_29/MMStack_Pos9.ome.zarr",
+    "repo": "idr0138-lohoff-seqfish",
+    "meta": [
+      "idr0138-study.txt"
+    ],
+    "image_name": "MMStack_Pos9.ome.zarr"
+  },
+  "H20-idr0001-plate": {
+    "kind": "idr",
+    "zarr": "v0.4/idr0001A/2551.zarr",
+    "repo": null,
+    "meta": [],
+    "image_name": "2551.zarr"
+  },
+  "H21-S-BIAD634": {
+    "kind": "bia",
+    "acc": "S-BIAD634",
+    "http": "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/634/S-BIAD634",
+    "file_lists": [
+      "file_list_annotations.json",
+      "file_list_raw_images.json"
+    ],
+    "picked": [
+      "dataset/visualized_singlecell_groundtruth/Ganglioneuroblastoma_8_singlemask.png",
+      "dataset/visualized_singlecell_groundtruth/otherspecimen_7_singlemask.png"
+    ],
+    "n_files": 468
+  },
+  "H22-S-BIAD4325": {
+    "kind": "bia",
+    "acc": "S-BIAD4325",
+    "http": "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/325/S-BIAD4325",
+    "file_lists": [
+      "Files.json"
+    ],
+    "picked": [
+      "Figure 7e-3.czi",
+      "Figure 7e-2.czi"
+    ],
+    "n_files": 26
+  },
+  "H23-S-BIAD2619": {
+    "kind": "bia",
+    "acc": "S-BIAD2619",
+    "http": "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/619/S-BIAD2619",
+    "file_lists": [
+      "File_List.json"
+    ],
+    "picked": [
+      "Figure 4G.2.tiff",
+      "Figure 4G.4.tiff"
+    ],
+    "n_files": 47
+  },
+  "H24-S-BIAD4214": {
+    "kind": "bia",
+    "acc": "S-BIAD4214",
+    "http": "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/214/S-BIAD4214",
+    "file_lists": [
+      "BIA_file_list_306_307_332.json"
+    ],
+    "picked": [
+      "306_analysis_results/Control/6h_Incision/Image3/565/results/Elbow.png",
+      "306_analysis_results/Control/0h_Incison/Image3/633/results/Elbow.png"
+    ],
+    "n_files": 253
+  },
+  "H25-S-BIAD3623": {
+    "kind": "bia",
+    "acc": "S-BIAD3623",
+    "http": "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/623/S-BIAD3623",
+    "file_lists": [
+      "PAINT.json",
+      "TEM.json",
+      "TIRF.json"
+    ],
+    "picked": [
+      "TIRF/20251119-114453_WT.tiff",
+      "TIRF/20251119-130020_WT.tiff"
+    ],
+    "n_files": 52
+  },
+  "H26-S-BIAD4285": {
+    "kind": "bia",
+    "acc": "S-BIAD4285",
+    "http": "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/285/S-BIAD4285",
+    "file_lists": [
+      "file_list_gerbil.json",
+      "file_list_ihc_segmentation.json",
+      "file_list_mouse.json",
+      "file_list_sgn_segmentation.json"
+    ],
+    "picked": [
+      "M_IHC.ome.zarr.zip"
+    ],
+    "n_files": 10
+  }
+}

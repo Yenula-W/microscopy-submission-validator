@@ -33,10 +33,18 @@ rules:
       fields:
         - Study Title
         - Study Description
-        - Study Key Words
-        - Study Organism
-    fix: Fill in the Study Title, Study Description, Study Key Words and Study Organism lines (replace '#' hints).
+    fix: Fill in the Study Title and Study Description lines (replace '#' hints).
     sources: [idr-experiments, idr-templates]
+  - id: IDR-STUDY-006
+    title: Keywords and organism (recommended)
+    check: idr_study_fields
+    severity: warn
+    params:
+      fields:
+        - Study Key Words
+        - [Study Organism, Experiment Organism]
+    fix: Add 'Study Key Words' and the organism (study-level 'Study Organism' or per-experiment 'Experiment Organism'); the IDR experiments page does not list these as mandatory, but the template asks for them.
+    sources: [idr-templates]
   - id: IDR-STUDY-003
     title: Primary contact
     check: idr_study_fields
@@ -93,22 +101,30 @@ rules:
     fix: Add the assay (non-screen) or library (screen) file and name it in 'Experiment Assay File'.
     sources: [idr-submission, idr-experiments]
   - id: IDR-ASSAY-002
-    title: Assay file has required annotation columns
+    title: Assay file identifies each image
     check: idr_assay_columns
     params:
       require_values: true
       columns:
+        - [Image File, Image Name, Plate]
+    fix: Add an 'Image File' column (one row per image, exact file name) or, for screens, Plate/Well columns.
+    sources: [idr-experiments, idr-templates]
+  - id: IDR-ASSAY-005
+    title: Assay file annotation columns (recommended)
+    check: idr_assay_columns
+    severity: warn
+    params:
+      require_values: true
+      columns:
         - Characteristics [Organism]
-        - [Assay Name, Plate]
-        - [Dataset Name, Plate]
-        - [Image File, Well]
+        - [Dataset Name, Assay Name, Plate]
         - Channels
-    fix: Use the IDR assay template columns; fill organism, assay/dataset names, image file and channels for every row.
+    fix: Add organism, dataset name and channel (label:target) columns as in the IDR assay template; the IDR page marks no assay column mandatory.
     sources: [idr-experiments, idr-templates]
   - id: IDR-ASSAY-003
     title: Every image described by an assay row, every row resolves to an image
     check: idr_assay_matches_files
-    params: {file_column: Image File, path_column: "Comment [Image File Path]"}
+    params: {file_columns: [Image File, Image Name], path_column: "Comment [Image File Path]"}
     fix: Add a row per image (exact file name) and remove rows for images not submitted.
     sources: [idr-experiments]
   - id: IDR-ASSAY-004
@@ -148,6 +164,7 @@ rules:
   - id: IDR-IMG-003
     title: Consistent dimensions/channels/pixel sizes within a dataset
     check: series_consistent
+    severity: warn
     params:
       group_by: directory
       fields: {channels: problem, pixel_size: warning, dtype: warning, xy: warning}

@@ -139,8 +139,8 @@ def fetch_bia(acc: str, out: Path) -> dict:
             data = get(f"{http}/Files/{stem}.tsv")
         except Exception:
             data = _json_list_to_tsv(get(f"{http}/Files/{fl}"))
-        save(out / f"{stem}.tsv" if "file_list" in stem.lower() else out / f"{stem}_file_list.tsv", data)
-    files = json.loads(get(f"https://www.ebi.ac.uk/biostudies/api/v1/files/{acc}?start=0&length=5000"))["data"]
+        save(out / f"{stem}.tsv", data)  # keep the submitter's name: BIA does not prescribe one
+    files = json.loads(get(f"https://www.ebi.ac.uk/biostudies/api/v1/files/{acc}?start=0&length=1000&metadata=true"))["data"]
     imgs = sorted({(f["Size"], f["path"]) for f in files if IMAGE_EXT.search(f["path"]) and f.get("isDirectory") != "true"})
     picked = [p for s, p in imgs if s < 60_000_000][:2]
     for p in picked:

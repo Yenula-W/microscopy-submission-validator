@@ -1,0 +1,65 @@
+n,input,target,rule,check,status,message,verdict,note
+1,H21-S-BIAD634,bia,BIA-BIOS-002,field_present,warn,missing or empty: biosample[1].organism[0].ncbi_taxon,correct,"S-BIAD634 organism is free text 'Homo sapiens (human)', no taxon id; recommended only"
+2,H26-S-BIAD4285,bia,BIA-BIOS-002,field_present,warn,missing or empty: biosample[0].organism[0].ncbi_taxon,correct,"S-BIAD4285 organism 'Mus musculus (mouse)', no taxon id"
+3,H25-S-BIAD3623,rembi,REMBI-ACQ-002,field_present,warn,missing or empty: image_acquisition[0].imaging_method.ontology_id,correct,"S-BIAD3623 imaging method is text 'evanescent wave microscopy', no FBbi id"
+4,H25-S-BIAD3623,rembi,REMBI-SPEC-002,field_present,warn,missing or empty: specimen[1].growth_protocol,correct,S-BIAD3623 Specimen sections have no Growth protocol
+5,H23-S-BIAD2619,bia,BIA-FL-004,file_list_matches,warn,listed more than once: Figure 4A.1.tiff,correct,File_List.tsv lines 36-37 both list 'Figure 4A.1.tiff' (Fixed / Live)
+6,H05-imagej-5d,bia,BIA-FL-001,file_list_present,fail,"no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)",correct,folder has no file list
+7,H17-idr0076,bia,BIA-FL-001,file_list_present,fail,"no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)",correct,folder has no file list
+8,H18-idr0047,bia,BIA-FL-001,file_list_present,fail,"no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)",correct,folder has no file list
+9,H14-idr0054,bia,BIA-FL-001,file_list_present,fail,"no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)",correct,folder has no file list
+10,H25-S-BIAD3623,idr,IDR-FMT-001,formats_accepted,fail,"2 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: TIRF/20251119-114453_WT.tiff, TIRF/20251119-130020_WT.tiff",correct,IDR submission page: image data must be OME-Zarr
+11,H24-S-BIAD4214,rembi,REMBI-IMG-002,formats_accepted,warn,"2 raster file(s): PNG/JPEG hold no microscopy metadata; fine for masks and figures, not for raw acquisitions: 306_analysis_results/Control/0h_Incison/Image3/633/results/Elbow.png, 306_analysis_results/Control/6h_Incision/Image3/565/results/Elbow.png",correct,Elbow.png are analysis plots; message says PNG is fine for figures
+12,H16-idr0101,bia,BIA-FMT-001,formats_accepted,warn,1 ome-zarr file(s): OME-Zarr must be zipped and uploaded as .ome.zarr.zip: cell002_processed.ome.zarr,correct,BIA file-list guide: zip OME-Zarr as .ome.zarr.zip
+13,H08-zeiss-lsm,rembi,REMBI-IMG-002,formats_accepted,warn,1 vendor file(s): proprietary format; also provide OME-TIFF/OME-Zarr for long-term reuse: Cntrl1.lsm,correct,LSM is Zeiss proprietary; recommendation only
+14,H13-idr0052,idr,IDR-ASSAY-003,idr_assay_matches_files,warn,"240 row(s) matched an image only by file-name stem or containing folder, not by exact name; update 'Image File' to the names of the files you submit",correct,MitoSys rows list per-plane TIFFs under .../cell0015_R0002/rawtif; image matched by folder
+15,H14-idr0054,idr,IDR-ASSAY-003,idr_assay_matches_files,fail,image not described in any assay file: Tonsil 1.ome.zarr,debatable,assay lists per-channel PNGs that IDR merged into 'Tonsil 1'; true for this input but caused by how the held-out input was assembled
+16,H15-idr0066-v05,idr,IDR-ASSAY-003,idr_assay_matches_files,warn,"1 row(s) matched an image only by file-name stem or containing folder, not by exact name; update 'Image File' to the names of the files you submit",correct,assay row 'ExpD_chicken_embryo_MIP.tif' vs submitted .ome.zarr
+17,H17-idr0076,idr,IDR-ASSAY-001,idr_assay_present,fail,no IDR assay/library file (*assays*.txt or *library*.txt),debatable,"IDR repo publishes only the study file for idr0076; finding true for the input, but the accepted submission did have an assay file"
+18,H19-idr0138,idr,IDR-ASSAY-001,idr_assay_present,fail,no IDR assay/library file (*assays*.txt or *library*.txt),debatable,same as 17 (idr0138)
+19,H12-plain-tiff-screen,idr,IDR-ASSAY-001,idr_assay_present,fail,no IDR assay/library file (*assays*.txt or *library*.txt),correct,no assay file in a non-IDR folder
+20,H25-S-BIAD3623,idr,IDR-ASSAY-001,idr_assay_present,fail,no IDR assay/library file (*assays*.txt or *library*.txt),correct,no assay file in a BIA study folder
+21,H18-idr0047,idr,IDR-EXP-004,idr_processed_data,warn,study file declares no 'Processed Data File Name',correct,idr0047-study.txt has no 'Processed Data File Name' line
+22,H19-idr0138,idr,IDR-EXP-004,idr_processed_data,warn,study file declares no 'Processed Data File Name',correct,line present but empty
+23,H15-idr0066-v05,idr,IDR-EXP-004,idr_processed_data,warn,study file declares no 'Processed Data File Name',correct,line present but empty
+24,H13-idr0052,idr,IDR-EXP-004,idr_processed_data,warn,study file declares no 'Processed Data File Name',correct,line present but empty
+25,H13-idr0052,idr,IDR-STUDY-006,idr_study_fields,warn,idr0052-study.txt: 'Study Key Words' missing or still a template hint,correct,no 'Study Key Words' line
+26,H19-idr0138,idr,IDR-EXP-003,idr_study_fields,warn,idr0138-study.txt: 'Protocol Description' missing or still a template hint,correct,'Protocol Description' empty
+27,H14-idr0054,idr,IDR-STUDY-006,idr_study_fields,warn,idr0054-study.txt: 'Study Key Words' missing or still a template hint,correct,no 'Study Key Words' line
+28,H16-idr0101,idr,IDR-EXP-003,idr_study_fields,warn,idr0101-study.txt: 'Protocol Description' missing or still a template hint,correct,'Protocol Description' empty
+29,H01-ome-artificial,idr,IDR-STUDY-001,idr_study_present,fail,no IDR study file (*study*.txt) in dataset root,correct,no study file
+30,H12-plain-tiff-screen,idr,IDR-STUDY-001,idr_study_present,fail,no IDR study file (*study*.txt) in dataset root,correct,no study file
+31,H21-S-BIAD634,idr,IDR-STUDY-001,idr_study_present,fail,no IDR study file (*study*.txt) in dataset root,correct,no study file
+32,H03-ome-modulo,idr,IDR-STUDY-001,idr_study_present,fail,no IDR study file (*study*.txt) in dataset root,correct,no study file
+33,H09-nikon-nd2,rembi,REMBI-IMG-001,images_readable,warn,MeOh_high_fluo_003.nd2: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it),correct,no bioio installed (default install)
+34,H10-olympus-oib,bia,BIA-IMG-001,images_readable,warn,20220824_4492_cord_dapi__iba568_60x.oib: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it),correct,no bioio installed
+35,H20-idr0001-plate,rembi,REMBI-IMG-001,images_readable,warn,2551.zarr: readability not checked (OME-Zarr HCS plate: per-image checks are not supported yet),correct,plate reported as not checked (an earlier run wrongly said 'unreadable'; fixed)
+36,H22-S-BIAD4325,idr,IDR-IMG-001,images_readable,warn,Figure 7e-2.czi: readability not checked (no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it),correct,no bioio installed
+37,H18-idr0047,bia,BIA-META-001,metadata_present,fail,"no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)",correct,no metadata file
+38,H19-idr0138,bia,BIA-META-001,metadata_present,fail,"no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)",correct,no metadata file
+39,H01-ome-artificial,rembi,REMBI-META-001,metadata_present,fail,"no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)",correct,no metadata file
+40,H07-fluoview-tiff,rembi,REMBI-META-001,metadata_present,fail,"no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)",correct,no metadata file
+41,H23-S-BIAD2619,rembi,REMBI-IMG-003,ome_metadata,warn,Figure 4G.2.tiff: no OME-XML header (plain TIFF),correct,tifffile: no OME-XML
+42,H23-S-BIAD2619,idr,IDR-IMG-002,ome_metadata,warn,Figure 4G.2.tiff: no OME-XML header (plain TIFF),correct,tifffile: no OME-XML
+43,H04-imagej-confocal-series,bia,BIA-IMG-002,ome_metadata,warn,confocal-series.tif: no OME-XML header (plain TIFF),correct,"ImageJ TIFF, no OME-XML"
+44,H02-ome-companion,bia,BIA-IMG-002,ome_metadata,warn,"multifile-Z4.ome.tiff: physical pixel size missing for axis x, y",correct,companion XML has no PhysicalSize
+45,H03-ome-modulo,bia,BIA-IMG-003,series_consistent,warn,folder '(dataset root)': LAMBDA-ModuloAlongZ-ModuloAlongT.ome.tiff differs from FLIM-ModuloAlongC.ome.tiff: C=1 vs 16,correct,C=1 vs 16 confirmed
+46,H01-ome-artificial,idr,IDR-IMG-003,series_consistent,warn,folder '(dataset root)': single-channel.ome.tif differs from multi-channel-z-series.ome.tif: C=1 vs 3,correct,C confirmed
+47,H03-ome-modulo,rembi,REMBI-IMG-004,series_consistent,warn,folder '(dataset root)': LAMBDA-ModuloAlongZ-ModuloAlongT.ome.tiff differs from FLIM-ModuloAlongC.ome.tiff: C=1 vs 16,correct,confirmed
+48,H01-ome-artificial,bia,BIA-IMG-003,series_consistent,warn,folder '(dataset root)': z-series.ome.tif differs from multi-channel-z-series.ome.tif: C=1 vs 3,correct,confirmed
+49,H01-ome-artificial,idr,IDR-IMG-002,ome_metadata,warn,"z-series.ome.tif: physical pixel size missing for axis x, y",correct,OME-XML has no PhysicalSizeX
+50,H03-ome-modulo,rembi,REMBI-IMG-003,ome_metadata,warn,"LAMBDA-ModuloAlongZ-ModuloAlongT.ome.tiff: physical pixel size missing for axis x, y",correct,OME-XML has no PhysicalSizeX
+51,H01-ome-artificial,rembi,REMBI-IMG-003,ome_metadata,warn,"single-channel.ome.tif: physical pixel size missing for axis x, y",correct,OME-XML has no PhysicalSizeX
+52,H11-metamorph-timelapse,idr,IDR-IMG-002,ome_metadata,warn,test_timelapse_20240816_s1_t3.TIF: no OME-XML header (plain TIFF),correct,"MetaSeries TIFF, no OME-XML"
+53,H21-S-BIAD634,rembi,REMBI-BIOS-002,field_present,warn,missing or empty: biosample[2].organism[0].ncbi_taxon,correct,organism text only
+54,H02-ome-companion,rembi,REMBI-IMG-003,ome_metadata,warn,"multifile-Z1.ome.tiff: physical pixel size missing for axis x, y",correct,companion XML has no PhysicalSize
+55,H03-ome-modulo,bia,BIA-IMG-002,ome_metadata,warn,"LAMBDA-ModuloAlongZ-ModuloAlongT.ome.tiff: physical pixel size missing for axis x, y",correct,OME-XML has no PhysicalSizeX
+56,H20-idr0001-plate,rembi,REMBI-META-001,metadata_present,fail,"no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)",correct,no metadata file
+57,H26-S-BIAD4285,rembi,REMBI-SPEC-002,field_present,warn,missing or empty: specimen[0].growth_protocol,correct,S-BIAD4285 Specimen has no Growth protocol
+58,H07-fluoview-tiff,rembi,REMBI-IMG-002,formats_accepted,warn,1 tiff file(s): plain TIFF lacks structured metadata; prefer OME-TIFF: fluoview-multi.tif,correct,"FluoView TIFF, no OME-XML"
+59,H06-imagej-composites,bia,BIA-FL-001,file_list_present,fail,"no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)",correct,no file list
+60,H25-S-BIAD3623,bia,BIA-IMG-002,ome_metadata,warn,TIRF/20251119-114453_WT.tiff: no OME-XML header (plain TIFF),correct,tifffile: no OME-XML
+61,H25-S-BIAD3623,bia,BIA-IMG-002,ome_metadata,warn,TIRF/20251119-130020_WT.tiff: no OME-XML header (plain TIFF),correct,tifffile: no OME-XML
+62,H02-ome-companion,bia,BIA-META-001,metadata_present,fail,"no metadata file found in the dataset root (submission.yaml, submission.json or a BioStudies S-BIAD*.json export)",correct,no metadata file
+63,H01-ome-artificial,idr,IDR-IMG-003,series_consistent,warn,folder '(dataset root)': time-series.ome.tif differs from multi-channel-z-series.ome.tif: C=1 vs 3,correct,C confirmed
+64,H11-metamorph-timelapse,idr,IDR-FMT-001,formats_accepted,fail,"3 tiff file(s): IDR requires OME-Zarr; convert with bioformats2raw: test_timelapse_20240816_s1_t1.TIF, test_timelapse_20240816_s1_t2.TIF, test_timelapse_20240816_s1_t3.TIF",correct,MetaMorph TIFFs; IDR requires OME-Zarr

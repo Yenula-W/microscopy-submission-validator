@@ -175,7 +175,7 @@ rules:
       messages:
         tiff: "plain TIFF lacks structured metadata; prefer OME-TIFF"
         vendor: "proprietary format; also provide OME-TIFF/OME-Zarr for long-term reuse"
-        raster: "not a microscopy format"
+        raster: "PNG/JPEG hold no microscopy metadata; fine for masks and figures, not for raw acquisitions"
     fix: Provide images in OME-TIFF or OME-Zarr.
     sources: [rembi-paper]
   - id: REMBI-IMG-003
@@ -188,6 +188,7 @@ rules:
   - id: REMBI-IMG-004
     title: Consistent series
     check: series_consistent
+    severity: warn
     params:
       group_by: directory
       fields: {channels: problem, pixel_size: problem, dtype: warning, xy: warning}

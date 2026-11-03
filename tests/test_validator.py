@@ -135,11 +135,11 @@ def test_bia_bad_filename_chars(bia_dataset):
     assert "'#é'" in res["BIA-NAME-001"].messages[0]
 
 
-def test_bia_inconsistent_series(bia_dataset):
+def test_bia_inconsistent_series(bia_dataset):  # warn: advice, not a repository rule
     write_ome_tiff(bia_dataset / "series1" / "img_02.ome.tif", shape=(3, 16, 16), px=0.2)
     res = run(bia_dataset, "bia")
     msgs = " ".join(res["BIA-IMG-003"].messages)
-    assert res["BIA-IMG-003"].status == "fail"
+    assert res["BIA-IMG-003"].status == "warn"  # advice, not a repository requirement
     assert "C=3 vs 2" in msgs and "pixel size x=0.2" in msgs
 
 
@@ -236,7 +236,7 @@ def test_idr_stem_match_and_comma_assay_list(idr_dataset):
                                        "Experiment Assay File\tidrtest-assays.txt, other-assays.txt"))
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-003"].status == "warn"
-    assert "matched only by name stem" in res["IDR-ASSAY-003"].messages[0]
+    assert "only by file-name stem" in res["IDR-ASSAY-003"].messages[0]
     assert res["IDR-ASSAY-001"].messages == ["study file names assay file 'other-assays.txt' but it is not in the dataset"]
 
 
@@ -370,3 +370,132 @@ def test_ngff_v05_zarr3_image(tmp_path):
     assert info.sizes["C"] == 2 and info.dtype == "uint8" and info.pixel_size_um["x"] == 0.5
     if int(zarr.__version__.split(".")[0]) < 3:
         assert any("zarr v3" in n for n in info.notes)
+
+
+def test_binary_only_ome_tiff_with_companion(tmp_path):
+    """OME sample 'companion': BinaryOnly OME-TIFFs + .companion.ome are valid, not unreadable."""
+    import numpy as np
+    import tifffile
+
+    from micro_validate.imageinfo import classify, read_info
+
+    ns = 'xmlns="http://www.openmicroscopy.org/Schemas/OME/2016-06"'
+    stub = f'<?xml version="1.0"?><OME {ns} UUID="urn:uuid:1"><BinaryOnly MetadataFile="set.companion.ome" UUID="urn:uuid:0"/></OME>'
+    tifffile.imwrite(tmp_path / "set-Z1.ome.tiff", np.zeros((6, 4), "uint8"), description=stub, metadata=None)
+    (tmp_path / "set.companion.ome").write_text(
+        f'<OME {ns}><Image ID="Image:0"><Pixels ID="Pixels:0" DimensionOrder="XYZCT" Type="uint8" SizeX="4" SizeY="6" '
+        'SizeZ="1" SizeC="1" SizeT="1" PhysicalSizeX="0.2" PhysicalSizeY="0.2"><Channel ID="Channel:0"/>'
+        '<TiffData/></Pixels></Image></OME>')
+    info = read_info(tmp_path / "set-Z1.ome.tiff", "set-Z1.ome.tiff")
+    assert info.readable and info.is_ome and info.pixel_size_um["x"] == 0.2, info
+    assert classify(tmp_path / "set.companion.ome") == "sidecar"
+    (tmp_path / "set.companion.ome").unlink()
+    info = read_info(tmp_path / "set-Z1.ome.tiff", "set-Z1.ome.tiff")
+    assert info.readable and "not found" in info.notes[0]
+
+
+def test_dpi_default_resolution_is_not_a_pixel_size(tmp_path):
+    """Olympus FluoView sample stored 72 px/cm; that is not a 138.9 µm pixel."""
+    import numpy as np
+    import tifffile
+
+    from micro_validate.imageinfo import read_info
+
+    tifffile.imwrite(tmp_path / "a.tif", np.zeros((4, 4), "uint8"), resolution=(72, 72), resolutionunit="CENTIMETER")
+    assert read_info(tmp_path / "a.tif", "a.tif").pixel_size_um["x"] is None
+    tifffile.imwrite(tmp_path / "b.tif", np.zeros((4, 4), "uint8"), resolution=(10000 / 0.5, 10000 / 0.5), resolutionunit="CENTIMETER")
+    assert read_info(tmp_path / "b.tif", "b.tif").pixel_size_um["x"] == pytest.approx(0.5)
+
+
+def test_metaseries_calibration(tmp_path):
+    """MetaMorph TIFFs keep calibration in MetaSeries XML (OME sample zenodo-13642395: 0.65 µm)."""
+    import numpy as np
+    import tifffile
+
+    from micro_validate.imageinfo import read_info
+
+    desc = ('<MetaData><PlaneInfo>'
+            '<prop id="spatial-calibration-x" type="float" value="0.65"/>'
+            '<prop id="spatial-calibration-y" type="float" value="0.65"/>'
+            '<prop id="spatial-calibration-units" type="string" value="um"/>'
+            '</PlaneInfo></MetaData>')
+    tifffile.imwrite(tmp_path / "m.tif", np.zeros((4, 4), "uint16"), description=desc, metadata=None)
+    info = read_info(tmp_path / "m.tif", "m.tif")
+    assert info.pixel_size_um["x"] == pytest.approx(0.65)
+
+
+def test_file_list_recognised_by_header(bia_dataset):
+    """Accepted BIA studies name lists freely (S-BIAD3623: PAINT.tsv, TEM.tsv)."""
+    (bia_dataset / "file_list.tsv").rename(bia_dataset / "PAINT.tsv")
+    ds = load_dataset(bia_dataset)
+    assert [t.path for t in ds.file_lists] == ["PAINT.tsv"]
+    assert run(bia_dataset, "bia")["BIA-FL-004"].status == "pass"
+
+
+def test_png_jpeg_header_check(tmp_path):
+    """BIA studies ship PNG masks (S-BIAD634, S-BIAD4214): verify headers instead of 'unverified'."""
+    import struct
+    import zlib
+
+    from micro_validate.imageinfo import read_info
+
+    raw = b"\x00" + b"\x00" * 3
+    ihdr = struct.pack(">IIBBBBB", 3, 1, 8, 0, 0, 0, 0)
+    chunk = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d))
+    (tmp_path / "m.png").write_bytes(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))
+    info = read_info(tmp_path / "m.png", "m.png")
+    assert info.readable and info.sizes["X"] == 3 and info.sizes["C"] == 1
+    (tmp_path / "bad.png").write_bytes(b"\x89PNG\r\n")
+    assert read_info(tmp_path / "bad.png", "bad.png").readable is False
+    (tmp_path / "bad.jpg").write_bytes(b"\xff\xd8\xff\xe0garbage")
+    assert read_info(tmp_path / "bad.jpg", "bad.jpg").readable is False
+
+
+def test_idr_accepted_study_conventions(idr_dataset):
+    """Patterns from accepted IDR studies (idr0052, idr0054, idr0066, idr0101) must not fail."""
+    s = idr_dataset / "idrtest-study.txt"
+    text = s.read_text()
+    text = text.replace("Study Key Words\tnuclei\n", "").replace("Study Organism\tHomo sapiens\n", "Experiment Organism\tHomo sapiens\n")
+    text = text.replace("Experiment Assay File\tidrtest-assays.txt", "Experiment Assay File\tidrtest-assays and idrtest-assays.txt")
+    s.write_text(text)
+    a = idr_dataset / "idrtest-assays.txt"
+    a.write_text(a.read_text().replace("Assay Name", "Comment [x]").replace("Image File\t", "Image Name\t"))
+    res = run(idr_dataset, "idr")
+    assert res["IDR-STUDY-002"].status == "pass"
+    assert res["IDR-STUDY-006"].status == "warn"  # keywords missing: recommended only
+    assert res["IDR-ASSAY-001"].status == "pass"
+    assert res["IDR-ASSAY-002"].status == "pass"
+    assert res["IDR-ASSAY-003"].status == "pass"
+
+
+def test_idr_fileset_folder_matches_converted_image(idr_dataset):
+    """idr0052: rows list per-plane TIFFs inside a cell folder; the converted image is named after the folder."""
+    a = idr_dataset / "idrtest-assays.txt"
+    a.write_text(a.read_text().replace("a.ome.zarr\timages", "plane_T0001.tif\timages/a/rawtif"))
+    res = run(idr_dataset, "idr")
+    assert res["IDR-ASSAY-003"].status == "warn"
+    assert "only by file-name stem" in res["IDR-ASSAY-003"].messages[0]
+
+
+def test_hcs_plate_is_not_checked_rather_than_unreadable(tmp_path, capsys):
+    """IDR idr0001A/2551.zarr is a valid plate; it must not be reported as unreadable."""
+    p = tmp_path / "plate.zarr"
+    p.mkdir()
+    (p / ".zattrs").write_text(json.dumps({"plate": {"wells": [{"path": "A/1"}], "version": "0.4"}}))
+    res = run(tmp_path, "rembi")
+    assert res["REMBI-IMG-001"].status == "warn"
+    assert "per-image checks are not supported" in res["REMBI-IMG-001"].messages[0]
+
+
+def test_ngff_units_typo_accepted_with_note(tmp_path):
+    """idr0047 writes {'units': 'micrometer'}; read it, but note the non-standard key."""
+    from micro_validate.imageinfo import read_info
+
+    z = write_ome_zarr(tmp_path / "a.ome.zarr")
+    attrs = json.loads((z / ".zattrs").read_text())
+    for ax in attrs["multiscales"][0]["axes"][1:]:
+        ax["units"] = ax.pop("unit")
+    (z / ".zattrs").write_text(json.dumps(attrs))
+    info = read_info(z, "a.ome.zarr")
+    assert info.pixel_size_um["x"] == pytest.approx(0.1)
+    assert any("non-standard key 'units'" in n for n in info.notes)

@@ -104,6 +104,16 @@ def _is_file_list(name: str) -> bool:
     return ("file_list" in n or "filelist" in n or "file-list" in n) and n.endswith((".tsv", ".xlsx", ".xls"))
 
 
+def _first_header(path: Path) -> str:
+    """BIA file lists can have any name; they are recognised by a first column named 'Files'."""
+    try:
+        with open(path, "rb") as fh:
+            head = fh.read(4096).decode("utf-8-sig", errors="replace")
+    except OSError:
+        return ""
+    return head.splitlines()[0].split("\t")[0].strip().strip('"').lower() if head else ""
+
+
 def _is_idr_study(name: str) -> bool:
     n = name.lower()
     return "study" in n and n.endswith(".txt")
@@ -145,7 +155,7 @@ def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixe
                 continue
             if meta_path is not None and p == meta_path:
                 continue
-            if _is_file_list(fn):
+            if _is_file_list(fn) or (fn.lower().endswith(".tsv") and _first_header(p) == "files"):
                 ds.file_lists.append(read_table(p, root))
                 continue
             if _is_idr_study(fn) and d == root:

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -14,6 +15,8 @@ VENDOR_EXTS = {
     ".mrxs", ".bif", ".tf2", ".tf8", ".btf", ".ets", ".spe", ".fli", ".oir", ".lsr",
 }
 TIFF_BASED_VENDOR = {".lsm", ".stk"}
+# metadata files that accompany images but hold no pixels: OME companion XML, MetaMorph .nd index
+SIDECAR_SUFFIXES = (".companion.ome", ".ome.xml", ".nd")
 RASTER_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".jp2"}
 TABLE_EXTS = {".tsv", ".csv", ".txt", ".xlsx", ".xls", ".json", ".yaml", ".yml", ".md", ".pdf"}
 
@@ -23,7 +26,7 @@ TO_MICRON = {"pm": 1e-6, "nm": 1e-3, "µm": 1.0, "um": 1.0, "micron": 1.0, "micr
 
 
 def classify(path: Path) -> str:
-    """Return one of: ome-tiff, ome-zarr, ome-zarr-zip, tiff, vendor, raster, table, other."""
+    """Return one of: ome-tiff, ome-zarr, ome-zarr-zip, tiff, vendor, raster, sidecar, table, other."""
     name = path.name.lower()
     if path.is_dir():
         return "ome-zarr" if name.endswith(".zarr") else "other"
@@ -31,6 +34,8 @@ def classify(path: Path) -> str:
         return "ome-tiff"
     if name.endswith(".zarr.zip"):
         return "ome-zarr-zip"
+    if name.endswith(SIDECAR_SUFFIXES):
+        return "sidecar"
     suffix = path.suffix.lower()
     if suffix in (".tif", ".tiff"):
         return "tiff"
@@ -85,6 +90,8 @@ def read_info(path: Path, rel: str, verify_pixels: bool = True) -> ImageInfo:
             _read_tiff(path, info, verify_pixels)  # Zeiss LSM, MetaMorph STK, Olympus FluoView TIFFs
         elif fmt == "vendor":
             _read_bioio(path, info)
+        elif fmt == "raster" and path.suffix.lower() in (".png", ".jpg", ".jpeg"):
+            _read_raster_header(path, info)
         else:
             info.readable = None
             info.notes.append("no reader for this format; readability not verified")
@@ -99,30 +106,66 @@ def _read_tiff(path: Path, info: ImageInfo, verify_pixels: bool) -> None:
 
     with tifffile.TiffFile(path) as tif:
         xml = tif.ome_metadata
-        if xml:
+        binary_only = re.search(r'<(?:\w+:)?BinaryOnly[^>]*MetadataFile="([^"]+)"', xml or "")
+        if binary_only:
+            # valid OME-TIFF whose metadata lives in a companion file (OME-TIFF spec, "BinaryOnly")
+            companion = path.parent / binary_only.group(1)
+            if companion.is_file():
+                _apply_ome_xml(companion.read_text(encoding="utf-8", errors="replace"), info)
+                info.notes.append(f"metadata read from companion file {companion.name}")
+            else:
+                _apply_tiff_series(tif, info)
+                info.is_ome = True
+                info.notes.append(f"binary-only OME-TIFF; companion metadata file {binary_only.group(1)!r} not found")
+        elif xml:
             _apply_ome_xml(xml, info)
         else:
-            s = tif.series[0]
-            info.dtype = str(s.dtype)
-            axes = s.axes.upper()
-            for ax, n in zip(axes, s.shape):
-                key = {"S": "C", "I": "Z", "Q": "Z"}.get(ax, ax)
-                if key in "XYZCT":
-                    info.sizes[key] = info.sizes.get(key, 1) * n
-            for k in "XYZCT":
-                info.sizes.setdefault(k, 1)
+            _apply_tiff_series(tif, info)
             info.pixel_size_um = _tiff_resolution(tif)
-            if tif.is_lsm and tif.lsm_metadata:
-                lsm = tif.lsm_metadata  # voxel sizes in metres
-                for ax in "xyz":
-                    v = lsm.get(f"VoxelSize{ax.upper()}")
-                    if v:
-                        info.pixel_size_um[ax] = float(v) * 1e6
+            _vendor_tiff_calibration(tif, info)
             if info.format == "ome-tiff":
                 info.notes.append("file named .ome.tif but contains no OME-XML")
         if verify_pixels:
             tif.pages[0].asarray()
     info.readable = True
+
+
+def _apply_tiff_series(tif: Any, info: ImageInfo) -> None:
+    s = tif.series[0]
+    info.dtype = str(s.dtype)
+    for ax, n in zip(s.axes.upper(), s.shape):
+        key = {"S": "C", "I": "Z", "Q": "Z"}.get(ax, ax)
+        if key in "XYZCT":
+            info.sizes[key] = info.sizes.get(key, 1) * n
+    for k in "XYZCT":
+        info.sizes.setdefault(k, 1)
+
+
+def _vendor_tiff_calibration(tif: Any, info: ImageInfo) -> None:
+    """Vendor TIFF flavours keep calibration outside the TIFF resolution tags."""
+    ps = info.pixel_size_um
+    if tif.is_lsm and tif.lsm_metadata:
+        for ax in "xyz":  # Zeiss LSM: voxel sizes in metres
+            v = tif.lsm_metadata.get(f"VoxelSize{ax.upper()}")
+            if v:
+                ps[ax] = float(v) * 1e6
+    elif tif.is_fluoview and tif.fluoview_metadata:
+        for dim in tif.fluoview_metadata.get("Dimensions", []):  # (name, size, origin, step, unit)
+            name, _, _, step, unit = dim[:5]
+            if str(name).lower() in ("x", "y", "z") and step:
+                ps[str(name).lower()] = _um(float(step), unit or "µm")
+    elif (tif.pages[0].description or "").lstrip().startswith("<MetaData>"):  # MetaMorph / MetaSeries XML
+        desc = tif.pages[0].description
+
+        def prop(key: str) -> str | None:
+            m = re.search(rf'id="{key}" type="\w+" value="([^"]*)"', desc)
+            return m.group(1) if m else None
+
+        unit = prop("spatial-calibration-units")
+        for ax in "xy":
+            v = prop(f"spatial-calibration-{ax}")
+            if v and unit and unit.lower() not in ("pixel", "pixels"):
+                ps[ax] = _um(float(v), unit)
 
 
 def _tiff_resolution(tif: Any) -> dict[str, float | None]:
@@ -141,6 +184,9 @@ def _tiff_resolution(tif: Any) -> dict[str, float | None]:
             scale = TO_MICRON.get(str(unit).replace("\\u00B5", "µ"), None)
         else:
             scale = 10000.0 if runit == 3 else None
+        px_per_unit = xr[0] / xr[1] if xr[1] else 0
+        if not unit and runit == 3 and round(px_per_unit, 2) in (72.0, 96.0, 300.0, 28.35, 37.8, 118.11):
+            scale = None  # dpi default (e.g. Olympus FluoView writes 72/cm), not a microscope calibration
         if scale and xr[0] and yr[0]:
             out["x"] = xr[1] / xr[0] * scale
             out["y"] = yr[1] / yr[0] * scale
@@ -194,7 +240,12 @@ def _apply_ngff(attrs: dict[str, Any], array_meta: dict[str, Any], info: ImageIn
     for ct in ms["datasets"][0].get("coordinateTransformations", []):
         if ct.get("type") == "scale":
             scale = ct["scale"]
-    units = {a["name"]: a.get("unit") for a in ms.get("axes", []) if isinstance(a, dict)}
+    units = {}
+    for a in ms.get("axes", []):
+        if isinstance(a, dict):
+            units[a["name"]] = a.get("unit") or a.get("units")
+            if a.get("units") and not a.get("unit"):  # seen in IDR idr0047
+                info.notes.append(f"axis {a['name']} uses non-standard key 'units' instead of 'unit'")
     info.pixel_size_um = {"x": None, "y": None, "z": None}
     if scale:
         for name, v in zip(axes, scale):
@@ -221,7 +272,11 @@ def _read_zarr_dir(path: Path, info: ImageInfo, verify_pixels: bool) -> None:
     attrs = _ngff_attrs(attrs)
     if "multiscales" not in attrs:
         if "plate" in attrs or "bioformats2raw.layout" in attrs:
-            raise ValueError("HCS plate / bioformats2raw container: per-image checks not supported yet")
+            kind = "HCS plate" if "plate" in attrs else "bioformats2raw container"
+            info.readable = None  # valid OME-Zarr, just not something we inspect per image yet
+            info.is_ome = True
+            info.notes.append(f"OME-Zarr {kind}: per-image checks are not supported yet")
+            return
         raise ValueError("zarr group has no 'multiscales' (not an OME-Zarr image)")
     level0 = path / attrs["multiscales"][0]["datasets"][0]["path"]
     if (level0 / "zarr.json").exists():
@@ -260,12 +315,47 @@ def _read_zarr_zip(path: Path, info: ImageInfo) -> None:
     raise ValueError("zip contains no OME-Zarr multiscales image")
 
 
+def _read_raster_header(path: Path, info: ImageInfo) -> None:
+    """Check PNG/JPEG headers (no pixel decode): enough to catch truncated or mislabelled files."""
+    import struct
+
+    with open(path, "rb") as fh:
+        head = fh.read(65536)
+    if path.suffix.lower() == ".png":
+        if not head.startswith(b"\x89PNG\r\n\x1a\n") or head[12:16] != b"IHDR":
+            raise ValueError("not a valid PNG (bad signature or missing IHDR)")
+        w, h, depth, ctype = struct.unpack(">IIBB", head[16:26])
+        channels = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}.get(ctype, 1)
+        info.dtype = "uint16" if depth == 16 else "uint8"
+    else:
+        if not head.startswith(b"\xff\xd8"):
+            raise ValueError("not a valid JPEG (missing SOI marker)")
+        i, w, h, channels = 2, 0, 0, 0
+        while i + 9 < len(head):
+            if head[i] != 0xFF:
+                i += 1
+                continue
+            marker, seglen = head[i + 1], struct.unpack(">H", head[i + 2:i + 4])[0]
+            if marker in (0xC0, 0xC1, 0xC2):
+                h, w = struct.unpack(">HH", head[i + 5:i + 9])
+                channels = head[i + 9] if i + 9 < len(head) else 1
+                break
+            i += 2 + seglen
+        if not w:
+            raise ValueError("JPEG frame header not found")
+        info.dtype = "uint8"
+    info.sizes = {"X": w, "Y": h, "Z": 1, "C": channels, "T": 1}
+    info.pixel_size_um = {"x": None, "y": None, "z": None}
+    info.readable = True
+    info.notes.append("header checked only (PNG/JPEG carry no microscopy calibration)")
+
+
 def _read_bioio(path: Path, info: ImageInfo) -> None:
     try:
         from bioio import BioImage  # optional extra
     except ImportError:
         info.readable = None
-        info.notes.append("vendor format: install 'micro-validate[vendor]' plus a bioio reader plugin to verify")
+        info.notes.append("no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it")
         return
     img = BioImage(path)
     d = img.dims

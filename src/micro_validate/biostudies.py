@@ -79,10 +79,12 @@ def to_rembi(data: dict[str, Any]) -> dict[str, Any]:
     study["authors"] = authors
     statements = st.get("funding statement", [])
     grants = [{"funder": _first(_attrs(s), "Agency"), "identifier": _first(_attrs(s), "grant_id")} for s in by_type.get("funding", [])]
+    grants = [g for g in grants if any(g.values())]  # accepted studies contain empty Funding shells
     if statements or grants:
         study["funding"] = [{"funding_statement": statements[0] if statements else None, "grant_references": grants}]
     pubs = [{"title": _first(_attrs(s), "Title"), "doi": _first(_attrs(s), "DOI"), "pubmed_id": _first(_attrs(s), "Pubmed ID"),
              "year": _first(_attrs(s), "Year")} for s in by_type.get("publication", [])]
+    pubs = [p for p in pubs if any(p.values())]
     if pubs:
         study["publications"] = pubs
 

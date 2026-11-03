@@ -19,39 +19,56 @@ with `--target path/to/rules.yaml`.
 ## Install
 
 ```bash
-pip install -e .            # tifffile, ome-types, zarr, pyyaml, numpy
-pip install -e '.[vendor]'  # optional: bioio, to read vendor formats (add a reader plugin, e.g. bioio-czi)
+python3 -m venv mv-env
+source mv-env/bin/activate
+pip install git+https://github.com/Yenula-W/microscopy-submission-validator
+micro-validate --list-targets
 ```
 
-This needs Python 3.10 or later.
+This works on Python 3.9 to 3.13 (CI tests 3.9, 3.12 and 3.13). The core dependencies are tifffile, ome-types, zarr, pyyaml and numpy.
+
+To read vendor formats, add the optional `bioio` extra and a reader plugin, e.g. `bioio-nd2`:
+
+```bash
+pip install "micro-validate[vendor] @ git+https://github.com/Yenula-W/microscopy-submission-validator" bioio-nd2
+```
+
+Zeiss LSM, MetaMorph and FluoView TIFFs are read without this extra.
 
 ## Use
 
 ```bash
+mkdir -p my_dataset                                           # your images go here
+micro-validate --template bia > my_dataset/submission.yaml   # fill in, then:
 micro-validate my_dataset --target bia
-micro-validate my_dataset --target idr --out reports/idr   # writes reports/idr.md + reports/idr.json
+micro-validate my_dataset --target idr --out reports/idr     # writes reports/idr.md + reports/idr.json
 micro-validate my_dataset --target rembi --json
-micro-validate --list-targets
-micro-validate --template bia > my_dataset/submission.yaml
+micro-validate my_dataset --target bia --partial             # dataset is a pilot subset of the full submission
 ```
 
 The exit code is 0 when nothing fails, 1 when any rule fails (with `--strict`, also on warnings), and 2 on a usage error.
-Use `--no-pixels` to read headers only and skip decoding a pixel block per image.
+
+Options:
+
+- `--no-pixels` reads headers only and skips decoding one pixel block per image.
+- `--partial` assumes you are checking a sample. It does not report files that a file list or assay table names but that are absent on disk. Every file that *is* present must still be described.
 
 ### Dataset layout
 
 ```
 my_dataset/
   submission.yaml          # REMBI metadata (bia, rembi). Get a template with --template bia
+  S-BIADnnn.json           # ...or a BioStudies page-tab JSON export (read automatically)
   file_list.tsv            # BIA file list: first column "Files", one row per file
   annotation_file_list.tsv # optional: BIA annotation list, needs a source_image column
   <name>-study.txt         # IDR study file (IDR template format)
-  <name>-assays.txt        # IDR assay file, or *library*.txt for screens
+  <name>-assays.txt        # IDR assay file (any *assay*.txt), or *library*.txt for screens
   images/...               # .ome.tif, .ome.zarr/, .ome.zarr.zip, vendor files, ...
 ```
 
 A `*.zarr` directory counts as one file. Every other file under the folder is a data
-file, and the BIA file-list check expects it to be listed.
+file, and the BIA file-list check expects it to be listed. Sidecar metadata files such as
+`.companion.ome` and MetaMorph `.nd` count as data files but not as images.
 
 ### Report
 
@@ -64,19 +81,15 @@ The Markdown report has these sections:
 
 The JSON report has the same content, plus `images[]` with the full per-file details.
 
-## Tested on real public data
+## Evaluation
 
-`scripts/real_data_check.sh <scratch-dir>` downloads the data and repeats these runs:
+[EVALUATION.md](EVALUATION.md) covers the evaluation. The tool was run on 26 held-out public inputs: OME-TIFF, ImageJ TIFF, Zeiss LSM/CZI, Nikon ND2, Olympus OIB, MetaMorph, IDR OME-Zarr v0.4/0.5, six accepted BioImage Archive studies and seven accepted IDR studies.
 
-| Dataset | Target | Result | What it found |
-|---|---|---|---|
-| OME sample `tubhiswt-4D` (86-file multi-file OME-TIFF, 512×512×10×2×43), raw folder | bia | FAIL | No REMBI metadata and no file list. Also found that **the OME-XML has no PhysicalSizeX/Y**: this is real, as the `<Pixels>` element has no physical sizes. |
-| same, with `submission.yaml` and a generated `file_list.tsv` | bia / rembi | WARN | Only pixel sizes and ORCID remain. All 86 files are listed and readable, and the series is consistent. |
-| same | idr | FAIL | IDR now requires OME-Zarr, so all 86 OME-TIFFs fail. There are also no study or assay files. |
-| IDR `idr0062A` image 6001240 (OME-Zarr v0.4, 271×275×236×2) as `B1_C1.ome.zarr`, plus the **real** idr0062 study and assay files from GitHub | idr | FAIL | The study file has no `Study Key Words` line (it predates the template). The assays list 20+ images that are not in this one-image subset. `B1_C1.tif` matched the converted `.ome.zarr` by stem only. `Channels` holds `LaminB1 / Dapi` (1 entry) for a 2-channel image. No processed data file is declared. |
-| same | bia | FAIL | Unzipped OME-Zarr (BIA wants `.ome.zarr.zip`), no metadata, no file list. |
+- 78 runs, 0 crashes.
+- 64 findings were hand-checked: 95% correct, 0 wrong.
+- The six accepted BIA studies get no failures.
 
-`examples/` holds Markdown reports from these runs.
+`scripts/holdout/fetch.py` and `scripts/holdout/run_eval.py` reproduce the run. `scripts/real_data_check.sh` holds the original development-time checks.
 
 ## Tests
 
@@ -84,7 +97,7 @@ The JSON report has the same content, plus `images[]` with the full per-file det
 pip install -e '.[dev]' && pytest
 ```
 
-There are 30 tests. They build tiny synthetic OME-TIFFs and NGFF v0.4 OME-Zarrs (directory and zipped). They cover good and bad versions of each check type: missing or placeholder metadata, file-list header, format, missing and orphan files, case mismatch, bad characters, inconsistent channels and pixel sizes, plain TIFF, corrupt TIFF, unzipped zarr, annotation `source_image`, IDR hints, assay and channel mismatches, the CLI exit codes, and report output.
+There are 61 tests, including messy-input robustness tests and regression tests for every rule fixed during the held-out evaluation. They build tiny synthetic OME-TIFFs and NGFF v0.4 OME-Zarrs (directory and zipped). They cover good and bad versions of each check type: missing or placeholder metadata, file-list header, format, missing and orphan files, case mismatch, bad characters, inconsistent channels and pixel sizes, plain TIFF, corrupt TIFF, unzipped zarr, annotation `source_image`, IDR hints, assay and channel mismatches, the CLI exit codes, and report output.
 
 ## Design
 
@@ -104,9 +117,12 @@ to confirm the fix.
 
 ## Not done yet / known limits
 
-- Excel file lists (`.xlsx`) are detected but not parsed. Export them as TSV.
-- The BIA web-form metadata is not fetched. REMBI fields come from your local `submission.yaml`, which mirrors the form.
-- IDR HCS plates (OME-Zarr `plate` layout) and `bioformats2raw.layout` containers are reported as unreadable for per-image checks.
-- Vendor formats can only be verified when `bioio` and a matching reader plugin are installed. Otherwise they are marked "unverified" (warn).
+- Excel (`.xlsx`) file lists are detected but not parsed. Export them as TSV.
+- REMBI fields come from a local `submission.yaml` or a BioStudies page-tab JSON export. Nothing is fetched from the BIA web form.
+- OME-Zarr HCS plates and `bioformats2raw` containers are reported as "not checked", with no per-image checks yet.
+- Vendor formats other than LSM, STK, MetaMorph and FluoView TIFF need `micro-validate[vendor]` plus a bioio reader plugin. Without it they are reported as "readability not checked" (warn).
+- PNG/JPEG files get a header check only.
+- On Python 3.9 (zarr 2.x), zarr v3 / NGFF 0.5 arrays are checked from metadata only, with no pixel decode.
 - Ontology terms (NCBITaxon, FBbi) are checked for form only, not looked up.
+- Series consistency is checked per folder. Unrelated images in one folder are reported as a warning.
 - The BioImage Archive does not publish a closed list of accepted formats. In the `bia` rules, OME-TIFF, zipped OME-Zarr and TIFF pass, and other formats warn.

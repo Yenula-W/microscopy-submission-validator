@@ -63,7 +63,8 @@ def metadata_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     if ds.metadata_error:
         return [Issue("problem", f"{ds.metadata_path}: cannot parse: {ds.metadata_error}")]
     if ds.metadata is None:
-        return [Issue("problem", "no submission.yaml / submission.json found in dataset root")]
+        return [Issue("problem", "no metadata file found in the dataset root (submission.yaml, submission.json "
+                                 "or a BioStudies S-BIAD*.json export)")]
     return []
 
 
@@ -135,7 +136,7 @@ def images_readable(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
         if i.readable is False:
             issues.append(Issue("problem", f"{i.path}: unreadable: {i.error}"))
         elif i.readable is None and unverified != "pass":
-            issues.append(Issue("warning", f"{i.path}: not verified ({'; '.join(i.notes)})"))
+            issues.append(Issue("warning", f"{i.path}: readability not checked ({'; '.join(i.notes)})"))
     return issues
 
 
@@ -143,19 +144,22 @@ def images_readable(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
 def ome_metadata(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     """Images should carry OME metadata with physical pixel sizes (REMBI image acquisition parameters)."""
     axes = params.get("pixel_size_axes", ["x", "y"])
-    infos = [i for i in ds.all_image_info() if i.readable]
+    # PNG/JPEG never carry calibration; they are usually masks or figures, so don't nag about them here
+    infos = [i for i in ds.all_image_info() if i.readable and i.format != "raster"]
     if not infos:
-        raise SkipCheck("no readable images")
+        raise SkipCheck("no readable microscopy images")
     issues = []
     for i in infos:
         if i.format in ("tiff", "ome-tiff") and not i.is_ome:
             issues.append(Issue("problem", f"{i.path}: no OME-XML header (plain TIFF)"))
         missing = [a for a in axes if i.pixel_size_um.get(a) is None]
-        if missing and i.sizes.get(missing[0].upper(), 2) > 1:
+        unitless = [n.split()[1] for n in i.notes if n.startswith("axis ") and "no unit" in n]
+        if missing and set(missing) <= set(unitless):
+            issues.append(Issue("warning", f"{i.path}: axes {', '.join(sorted(unitless))} have a scale but no unit, "
+                                           "so the physical pixel size is not established"))
+        elif missing and i.sizes.get(missing[0].upper(), 2) > 1:
             issues.append(Issue("warning", f"{i.path}: physical pixel size missing for axis {', '.join(missing)}"))
-        for note in i.notes:
-            if "no unit" in note or "no OME-XML" in note:
-                issues.append(Issue("warning", f"{i.path}: {note}"))
+        issues += [Issue("warning", f"{i.path}: {n}") for n in i.notes if "non-standard key" in n]
     return issues
 
 
@@ -211,7 +215,7 @@ def series_consistent(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
             if "z" in fields and i.sizes.get("Z") != ref.sizes.get("Z"):
                 diffs.append(("z", f"Z={i.sizes.get('Z')} vs {ref.sizes.get('Z')}"))
             for fld, text in diffs:
-                issues.append(Issue(fields[fld], f"series '{key}': {i.path} differs from {ref.path}: {text}"))
+                issues.append(Issue(fields[fld], f"folder '{key}': {i.path} differs from {ref.path}: {text}"))
     return issues
 
 
@@ -253,7 +257,7 @@ def _need_file_lists(ds: Dataset):
 @check("file_list_present")
 def file_list_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     if not ds.file_lists:
-        return [Issue("problem", "no file list (*file_list*.tsv) found in dataset")]
+        return [Issue("problem", "no file list found (a .tsv whose first column is 'Files', or a file named *file_list*.tsv)")]
     return [Issue("problem", f"{t.path}: {t.error}") for t in ds.file_lists if t.error]
 
 
@@ -377,6 +381,10 @@ def idr_study_fields(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     return issues
 
 
+def _table_stem(name: str) -> str:
+    return re.sub(r"\.(txt|tsv|csv)$", "", PurePosixPath(name.strip()).name, flags=re.I)
+
+
 @check("idr_assay_present")
 def idr_assay_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     issues = []
@@ -384,10 +392,11 @@ def idr_assay_present(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
         issues.append(Issue("problem", "no IDR assay/library file (*assays*.txt or *library*.txt)"))
     if ds.idr_study is not None:
         cells = _study_value(ds, "Experiment Assay File") + _study_value(ds, "Screen Library File")
-        named = [n.strip() for c in cells for n in c.split(",") if n.strip()]  # IDR files often comma-join
-        have = {PurePosixPath(t.path).name for t in ds.idr_assays}
-        for n in named:
-            if PurePosixPath(n).name not in have:
+        # accepted studies write "a.txt, b.txt", "a.txt and b.txt", or omit the extension
+        named = [n.strip() for c in cells for n in re.split(r",|;|\s+and\s+", c) if n.strip()]
+        have = {_table_stem(t.path) for t in ds.idr_assays}
+        for n in named if not ds.partial else []:
+            if _table_stem(n) not in have:
                 issues.append(Issue("problem", f"study file names assay file {n!r} but it is not in the dataset"))
     return issues
 
@@ -411,7 +420,7 @@ def idr_assay_columns(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     return issues
 
 
-COMPOUND_EXTS = (".ome.zarr.zip", ".zarr.zip", ".ome.zarr", ".zarr", ".ome.tiff", ".ome.tif", ".ome.btf")
+COMPOUND_EXTS = (".ome.zarr.zip", ".zarr.zip", ".ome.zarr", ".zarr", ".ome.tiff", ".ome.tif", ".ome.btf", ".companion.ome")
 
 
 def stem(name: str) -> str:
@@ -443,7 +452,7 @@ class _ImageIndex:
         hits = self.by_name.get(PurePosixPath(name).name, [])
         if len(hits) == 1:
             return hits[0], False
-        hits = self.by_stem.get(stem(name), []) if use_stem else []
+        hits = self.by_stem.get(stem(name), []) if use_stem and name else []
         if len(hits) == 1:
             return hits[0], True  # e.g. original .tif listed, converted .ome.zarr on disk
         return None, False
@@ -454,20 +463,29 @@ def idr_assay_matches_files(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     """Every 'Image File' row resolves to a dataset image; every image is described by a row."""
     if not ds.idr_assays:
         raise SkipCheck("no IDR assay file")
-    file_col = params.get("file_column", "Image File")
+    file_cols = params.get("file_columns", ["Image File", "Image Name"])
     path_col = params.get("path_column", "Comment [Image File Path]")
     index = _ImageIndex(ds.image_files)
     by_stem = 0
     referenced: set[str] = set()
     missing: list[Issue] = []
     for t in ds.idr_assays:
-        if file_col not in t.header:
+        file_col = next((c for c in file_cols if c in t.header), None)
+        if file_col is None:
             continue  # reported by idr_assay_columns
         for rec in t.records():
             name = rec.get(file_col, "").strip()
             if is_missing(name):
                 continue
             hit, stem_only = index.match(name, rec.get(path_col, ""), params.get("match_stem", True))
+            if hit is None and rec.get(path_col, "").strip().strip("/"):
+                # multi-file fileset converted to one image named after one of its folders
+                # (idr0052: .../cell0015_R0002/rawtif/TR1_..._T0001.tif -> cell0015_R0002.ome.zarr)
+                for part in reversed(PurePosixPath(rec[path_col].strip().strip("/")).parts):
+                    hit, _ = index.match(part)
+                    if hit:
+                        stem_only = True
+                        break
             if hit:
                 referenced.add(hit)
                 by_stem += stem_only
@@ -475,8 +493,8 @@ def idr_assay_matches_files(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
                 missing.append(Issue("problem", f"{t.path}: Image File {name!r} not found in dataset"))
     issues = [Issue("problem", f"image not described in any assay file: {f}") for f in ds.image_files if f not in referenced]
     if by_stem:
-        issues.append(Issue("warning", f"{by_stem} row(s) matched only by name stem (different extension); "
-                                       "update 'Image File' to the submitted file names"))
+        issues.append(Issue("warning", f"{by_stem} row(s) matched an image only by file-name stem or containing folder, "
+                                       "not by exact name; update 'Image File' to the names of the files you submit"))
     return issues + missing
 
 
@@ -488,7 +506,9 @@ def idr_processed_data(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     if not names:
         return [Issue("problem", "study file declares no 'Processed Data File Name'")]
     have = {PurePosixPath(f).name for f in ds.data_files} | {PurePosixPath(t.path).name for t in ds.idr_assays}
-    return [Issue("warning", f"processed data file {n!r} declared but not in dataset") for n in names
+    if ds.partial:
+        return []
+    return [Issue("warning", f"processed data file {n!r} is declared but not in the dataset") for n in names
             if PurePosixPath(n).name not in have]
 
 
@@ -501,10 +521,11 @@ def idr_channels_match(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     issues = []
     compared = 0
     for t in ds.idr_assays:
-        if "Channels" not in t.header or "Image File" not in t.header:
+        name_col = next((c for c in ("Image File", "Image Name") if c in t.header), None)
+        if "Channels" not in t.header or name_col is None:
             continue
         for rec in t.records():
-            ch, name = rec.get("Channels", ""), rec.get("Image File", "").strip()
+            ch, name = rec.get("Channels", ""), rec.get(name_col, "").strip()
             hit, _ = index.match(name, rec.get("Comment [Image File Path]", ""))
             if is_missing(ch) or hit is None:
                 continue
