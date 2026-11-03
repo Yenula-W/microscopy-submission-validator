@@ -35,11 +35,11 @@ def _first(a: dict[str, list[str]], key: str) -> str | None:
     return vals[0] if vals else None
 
 
-def _organism(text: str) -> dict[str, Any]:
-    """'Homo sapiens (human)' -> scientific + common name; NCBI taxon only if written in the text."""
+def _organism(text: str, qualifiers: str = "") -> dict[str, Any]:
+    """'Homo sapiens (human)' -> scientific + common name; NCBI taxon from the text or its TermId qualifier."""
     m = re.match(r"^\s*([^()]+?)\s*(?:\(([^)]*)\))?\s*$", text)
     sci, common = (m.group(1), m.group(2)) if m else (text, None)
-    taxon = re.search(r"NCBITaxon[_:]\s*(\d+)", text)
+    taxon = re.search(r"NCBITaxon[_:]\s*(\d+)", text) or re.search(r"NCBITaxon[_:]\s*(\d+)", qualifiers)
     return {"scientific_name": sci, "common_name": common, "ncbi_taxon": f"NCBITaxon_{taxon.group(1)}" if taxon else None}
 
 
@@ -101,7 +101,10 @@ def to_rembi(data: dict[str, Any]) -> dict[str, Any]:
     for s in by_type.get("biosample", []):
         a = _attrs(s)
         bios.append({
-            "organism": [_organism(o) for o in a.get("organism", [])],
+            "organism": [_organism(str(o.get("value") or ""), " ".join(str(q.get("value") or "") for q in o.get("valqual") or []
+                                                                     if isinstance(q, dict)))
+                         for o in s.get("attributes", []) or []
+                         if isinstance(o, dict) and str(o.get("name", "")).strip().lower() == "organism"],
             "biological_entity": _first(a, "Biological entity"),
             "description": _first(a, "Description"),
             "intrinsic_variables": _first(a, "Intrinsic variable"),

@@ -171,7 +171,7 @@ rules:
     title: Open formats (recommended)
     check: formats_accepted
     params:
-      levels: {ome-tiff: pass, ome-zarr: pass, ome-zarr-zip: pass, tiff: warn, vendor: warn, raster: warn}
+      levels: {ome-tiff: pass, ome-zarr: pass, ome-zarr-zip: pass, tiff: warn, mrc: pass, vendor: warn, raster: warn}
       messages:
         tiff: "plain TIFF lacks structured metadata; prefer OME-TIFF"
         vendor: "proprietary format; also provide OME-TIFF/OME-Zarr for long-term reuse"

@@ -1,0 +1,114 @@
+{
+ "R3-02-ome-binaryonly": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/binaryonly/multifile-Z1.ome.tiff",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/binaryonly/multifile-Z2.ome.tiff",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/binaryonly/multifile-Z3.ome.tiff",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/binaryonly/multifile-Z4.ome.tiff",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/binaryonly/multifile-Z5.ome.tiff"
+  ]
+ },
+ "R3-03-ome-plate-companion": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/plate-companion/hcs.companion.ome",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/plate-companion/well-A2.ome.tiff",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/plate-companion/well-B1.ome.tiff",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/plate-companion/well-B3.ome.tiff",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/plate-companion/well-C2-2.ome.tiff",
+   "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/plate-companion/well-C2.ome.tiff"
+  ]
+ },
+ "R3-04-imaris-ims": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Imaris-IMS/davemason/Convallaria_3C_1T_confocal.ims"
+  ]
+ },
+ "R3-05-emdb-map": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/MRC/EMDB/EMD-2225/EMD-2225.map"
+  ]
+ },
+ "R3-06-leica-frap-folder": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen/150519_FRAP_test_ROIs_chromagreen.lif",
+   "https://downloads.openmicroscopy.org/images/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen/150519_FRAP_test_ROIs_chromagreen-junctions.mat",
+   "https://downloads.openmicroscopy.org/images/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen/FRAP000_1um.png",
+   "https://downloads.openmicroscopy.org/images/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen/FRAP001_2_5um.png",
+   "https://downloads.openmicroscopy.org/images/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen/FRAP%20001_2_5um.roi",
+   "https://downloads.openmicroscopy.org/images/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen/FRAP_000_1um.roi",
+   "https://downloads.openmicroscopy.org/images/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen/Thumbs.db"
+  ]
+ },
+ "R3-07-ics": {
+  "kind": "files",
+  "spec": [
+   "https://downloads.openmicroscopy.org/images/ICS/jan/benchmark_v1_2018_x64y64z5c2s1t11_w1Laser4054BD4BP_5c8bc101d6559_hrm.ics",
+   "https://downloads.openmicroscopy.org/images/ICS/jan/benchmark_v1_2018_x64y64z5c2s1t11_w1Laser4054BD4BP_5c8bc101d6559_hrm.ids"
+  ]
+ },
+ "R3-09-idr0082": {
+  "kind": "idrmeta",
+  "spec": "idr0082-pennycuick-lesions"
+ },
+ "R3-10-S-BIAD3373": {
+  "kind": "bia",
+  "spec": "S-BIAD3373"
+ },
+ "R3-11-S-BIAD3657": {
+  "kind": "bia",
+  "spec": "S-BIAD3657"
+ },
+ "R3-12-S-BIAD3572": {
+  "kind": "bia",
+  "spec": "S-BIAD3572"
+ },
+ "R3-13-S-BIAD4011": {
+  "kind": "bia",
+  "spec": "S-BIAD4011"
+ },
+ "R3-14-S-BIAD3717": {
+  "kind": "bia",
+  "spec": "S-BIAD3717"
+ },
+ "R3-15-S-BIAD4056": {
+  "kind": "bia",
+  "spec": "S-BIAD4056"
+ },
+ "R3-18-S-BIAD4119": {
+  "kind": "names",
+  "spec": "S-BIAD4119"
+ },
+ "R3-20-S-BIAD3700": {
+  "kind": "names",
+  "spec": "S-BIAD3700"
+ },
+ "R3-21-S-BIAD3774": {
+  "kind": "names",
+  "spec": "S-BIAD3774"
+ },
+ "R3-26-S-BIAD3835": {
+  "kind": "names",
+  "spec": "S-BIAD3835"
+ },
+ "R3-28-S-BIAD4059": {
+  "kind": "names",
+  "spec": "S-BIAD4059"
+ },
+ "R3-29-S-BIAD3704": {
+  "kind": "names",
+  "spec": "S-BIAD3704"
+ },
+ "R3-30-S-BIAD4046": {
+  "kind": "names",
+  "spec": "S-BIAD4046"
+ },
+ "R3-31-S-BIAD3658": {
+  "kind": "names",
+  "spec": "S-BIAD3658"
+ }
+}

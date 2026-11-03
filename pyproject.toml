@@ -9,13 +9,26 @@ description = "Pre-submission validator for microscopy datasets (BioImage Archiv
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
+authors = [{ name = "Yenula Wickramasinghe" }]
+keywords = ["microscopy", "REMBI", "BioImage Archive", "IDR", "OME-TIFF", "OME-Zarr", "validation"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Image Processing",
+]
 dependencies = [
   "pyyaml>=6",
   "numpy>=1.24",
   "tifffile>=2023.7.10",
   "ome-types>=0.5",
   "zarr>=2.16",
+  "imagecodecs>=2023.1.23",  # LZW/deflate/JPEG-compressed TIFFs (common in BIA submissions)
 ]
+
+[project.urls]
+Homepage = "https://github.com/Yenula-W/microscopy-submission-validator"
+Issues = "https://github.com/Yenula-W/microscopy-submission-validator/issues"
+Evaluation = "https://github.com/Yenula-W/microscopy-submission-validator/blob/main/EVALUATION.md"
 
 [project.optional-dependencies]
 vendor = ["bioio>=1.0"]

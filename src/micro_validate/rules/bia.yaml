@@ -206,7 +206,7 @@ rules:
     title: Image formats
     check: formats_accepted
     params:
-      levels: {ome-tiff: pass, ome-zarr-zip: pass, ome-zarr: warn, tiff: pass, vendor: warn, raster: warn}
+      levels: {ome-tiff: pass, ome-zarr-zip: pass, ome-zarr: warn, tiff: pass, mrc: pass, vendor: warn, raster: warn}
       messages:
         ome-zarr: "OME-Zarr must be zipped and uploaded as .ome.zarr.zip"
         vendor: "accepted, but convert to OME-TIFF/OME-Zarr (e.g. bioformats2raw, BatchConvert) for reuse and BIA viewers"

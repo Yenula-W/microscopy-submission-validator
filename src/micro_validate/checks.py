@@ -191,7 +191,7 @@ def series_consistent(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
     rtol = float(params.get("rtol", 1e-3))
     groups: dict[str, list] = defaultdict(list)
     for i in ds.all_image_info():
-        if i.readable and i.sizes:
+        if i.readable and i.sizes and i.format != "raster":  # figures/photos (S-BIAD4056 leaf scans) vary by design
             groups[_group_key(ds, i.path, group_by)].append(i)
     groups = {k: v for k, v in groups.items() if len(v) > 1}
     if not groups:
@@ -315,15 +315,17 @@ def file_list_matches(ds: Dataset, params: dict[str, Any]) -> list[Issue]:
         for n, f in enumerate(t.column(t.header[0] if t.header else "Files"), start=2):
             f = f.strip()
             listed.add(f)
-            if f not in present and not ds.partial:
+            if f not in present and not ds.partial and not any(p.startswith(f.rstrip("/") + "/") for p in present):
                 hint = f" (case differs: on disk as {lower[f.lower()]})" if f.lower() in lower else ""
                 issues.append(Issue("problem", f"{t.path}: listed but not found: {f}{hint}"))
     dupes = [f for t in lists for f in set(t.column("Files")) if t.column("Files").count(f) > 1]
     issues += [Issue("warning", f"listed more than once: {f}") for f in sorted(set(dupes))]
     if params.get("check_orphans", True):
         scope = ds.image_files if params.get("orphans_images_only") else ds.data_files
+        # BIA allows a directory path in Files ("the file path may refer to a directory"), e.g. S-BIAD3835
+        dirs = tuple(d.rstrip("/") + "/" for d in listed if d and d not in present)
         for f in scope:
-            if f not in listed:
+            if f not in listed and not f.startswith(dirs):
                 issues.append(Issue("problem", f"on disk but not in any file list: {f}"))
     return issues
 

@@ -1,0 +1,16 @@
+check	n	correct	debatable	wrong	%correct
+field_present	101	101	0	0	100.0
+file_list_format	30	30	0	0	100.0
+file_list_header	1	1	0	0	100.0
+file_list_matches	2	2	0	0	100.0
+file_list_present	6	6	0	0	100.0
+filename_chars	2	2	0	0	100.0
+formats_accepted	42	42	0	0	100.0
+idr_assay_columns	1	1	0	0	100.0
+idr_assay_present	20	20	0	0	100.0
+idr_study_present	20	20	0	0	100.0
+images_readable	12	12	0	0	100.0
+metadata_present	12	12	0	0	100.0
+ome_metadata	54	54	0	0	100.0
+TOTAL	303	303	0	0	100.0
+n/a 331

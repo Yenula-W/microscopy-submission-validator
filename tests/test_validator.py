@@ -600,3 +600,106 @@ def test_idr_single_dangling_reference_pairs_with_single_table(idr_dataset):
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-001"].status == "warn"
     assert "'idrtest-assays.txt' looks like the table it means" in res["IDR-ASSAY-001"].messages[0]
+
+
+# ------------------------------------------------------------- regressions from ship-bar round 3
+
+
+def test_file_list_may_name_a_directory(bia_dataset):
+    """S-BIAD3835 lists the folder 'Source_Images'; BIA allows a directory path, so files under it are listed."""
+    write_file_list(bia_dataset, ["series1"])
+    res = run(bia_dataset, "bia")["BIA-FL-004"]
+    assert res.status == "pass", res.messages
+    write_file_list(bia_dataset, ["series1", "series1"])
+    assert run(bia_dataset, "bia")["BIA-FL-004"].messages == ["listed more than once: series1"]
+    write_file_list(bia_dataset, ["series2"])  # a directory that isn't there is still reported
+    assert any("listed but not found: series2" in m for m in run(bia_dataset, "bia")["BIA-FL-004"].messages)
+
+
+def test_pagetab_organism_taxon_from_valqual(bia_dataset):
+    """Newer BIA studies put the NCBI taxon in the Organism attribute's valqual TermId."""
+    page = json.loads(json.dumps(PAGETAB))
+    org = page["section"]["subsections"][2][0]["attributes"][0]
+    org["valqual"] = [{"name": "Ontology", "value": "NCBITaxon"}, {"name": "TermId", "value": "NCBITaxon_9606"}]
+    (bia_dataset / "submission.yaml").unlink()
+    (bia_dataset / "S-BIAD9999.json").write_text(json.dumps(page))
+    bios = load_dataset(bia_dataset).metadata["biosample"]
+    assert bios[0]["organism"][0]["ncbi_taxon"] == "NCBITaxon_9606"
+    assert bios[1]["organism"][0]["ncbi_taxon"] is None
+
+
+def test_binary_only_ome_tiff_whose_metadata_file_is_a_tiff(tmp_path):
+    """OME sample 'binaryonly': Z2..Z5 point MetadataFile at multifile-Z1.ome.tiff, which holds the full OME-XML."""
+    import numpy as np
+    import tifffile
+
+    from micro_validate.imageinfo import read_info
+
+    ns = 'xmlns="http://www.openmicroscopy.org/Schemas/OME/2016-06"'
+    full = (f'<?xml version="1.0"?><OME {ns}><Image ID="Image:0"><Pixels ID="Pixels:0" DimensionOrder="XYZCT" '
+            'Type="uint8" SizeX="4" SizeY="6" SizeZ="2" SizeC="1" SizeT="1" PhysicalSizeX="0.5" PhysicalSizeY="0.5">'
+            '<Channel ID="Channel:0"/><TiffData/></Pixels></Image></OME>')
+    stub = f'<?xml version="1.0"?><OME {ns}><BinaryOnly MetadataFile="m-Z1.ome.tiff" UUID="urn:uuid:0"/></OME>'
+    tifffile.imwrite(tmp_path / "m-Z1.ome.tiff", np.zeros((6, 4), "uint8"), description=full, metadata=None)
+    tifffile.imwrite(tmp_path / "m-Z2.ome.tiff", np.zeros((6, 4), "uint8"), description=stub, metadata=None)
+    info = read_info(tmp_path / "m-Z2.ome.tiff", "m-Z2.ome.tiff")
+    assert info.readable and info.pixel_size_um["x"] == 0.5, info
+
+
+def test_tiff_codec_missing_is_not_unreadable(tmp_path, monkeypatch):
+    """BIA submissions hold LZW TIFFs; without imagecodecs tifffile can't decode them, but the file isn't bad."""
+    import tifffile
+
+    from micro_validate.imageinfo import read_info
+
+    write_ome_tiff(tmp_path / "a.tif", ome=False)
+
+    def no_codec(self, *a, **k):
+        raise ValueError("<COMPRESSION.LZW: 5> requires the 'imagecodecs' package")
+
+    monkeypatch.setattr(tifffile.TiffPage, "asarray", no_codec)
+    info = read_info(tmp_path / "a.tif", "a.tif")
+    assert info.readable is None and "imagecodecs" in info.notes[-1]
+
+
+def test_mrc_map_is_an_image(tmp_path):
+    """EMDB maps (EMD-2225.map) are MRC2014 volumes: read the header; a '.map' that isn't MRC stays 'other'."""
+    import struct
+
+    from micro_validate.imageinfo import classify, read_info
+
+    h = bytearray(1024)
+    h[0:16] = struct.pack("<4i", 8, 8, 4, 2)
+    h[28:40] = struct.pack("<3i", 8, 8, 4)
+    h[40:52] = struct.pack("<3f", 28.0, 28.0, 14.0)
+    h[208:216] = b"MAP DA\0\0"
+    (tmp_path / "emd.map").write_bytes(bytes(h) + b"\0" * (8 * 8 * 4 * 4))
+    info = read_info(tmp_path / "emd.map", "emd.map")
+    assert classify(tmp_path / "emd.map") == "mrc"
+    assert info.readable and info.sizes["Z"] == 4 and abs(info.pixel_size_um["x"] - 3.5e-4) < 1e-9
+    (tmp_path / "short.mrc").write_bytes(bytes(h) + b"\0" * 10)
+    assert read_info(tmp_path / "short.mrc", "short.mrc").readable is False
+    (tmp_path / "route.map").write_text("not an image")
+    assert classify(tmp_path / "route.map") == "other"
+
+
+def test_series_consistent_ignores_png_jpeg(tmp_path):
+    """S-BIAD4056: photos of different leaves differ in size by design; not an acquisition series."""
+    root = tmp_path / "ds"
+    (root / "photos").mkdir(parents=True)
+    for n, (w, h) in {"a.png": (10, 20), "b.png": (30, 40)}.items():
+        _write_png(root / "photos" / n, w, h)
+    res = run(root, "rembi")["REMBI-IMG-004"]
+    assert res.status == "skip", res.messages
+
+
+def _write_png(path: Path, w: int, h: int) -> None:
+    import struct
+    import zlib
+
+    raw = b"".join(b"\0" + b"\0" * w for _ in range(h))
+
+    def chunk(t, d):
+        return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xFFFFFFFF)
+    path.write_bytes(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">2I5B", w, h, 8, 0, 0, 0, 0))
+                     + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))

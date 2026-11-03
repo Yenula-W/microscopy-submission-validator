@@ -139,12 +139,13 @@ rules:
     title: Images are OME-Zarr
     check: formats_accepted
     params:
-      levels: {ome-zarr: pass, ome-zarr-zip: warn, ome-tiff: fail, tiff: fail, vendor: fail, raster: fail}
+      levels: {ome-zarr: pass, ome-zarr-zip: warn, ome-tiff: fail, tiff: fail, mrc: fail, vendor: fail, raster: fail}
       messages:
         ome-zarr-zip: "IDR serves OME-Zarr from object storage; unzip before upload"
         ome-tiff: "IDR requires OME-Zarr; convert with bioformats2raw"
         tiff: "IDR requires OME-Zarr; convert with bioformats2raw"
         vendor: "IDR requires OME-Zarr; convert with bioformats2raw"
+        mrc: "IDR requires OME-Zarr; EM maps and tomograms usually belong in EMDB/EMPIAR or the BioImage Archive"
         raster: "IDR requires OME-Zarr"
     fix: Convert images to OME-Zarr (bioformats2raw / ome-zarr-py) and send IDR a small sample for testing first.
     sources: [idr-submission]

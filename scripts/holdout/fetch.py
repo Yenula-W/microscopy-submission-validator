@@ -114,6 +114,23 @@ ROUNDS = {
       + [(f"R3-{16 + i:02d}-{a}", "names", a) for i, a in enumerate(
         ["S-BIAD3951", "S-BIAD3905", "S-BIAD4119", "S-BIAD3562", "S-BIAD3700", "S-BIAD3774", "S-BIAD3612", "S-BIAD3950",
          "S-BIAD3184", "S-BIAD2823", "S-BIAD3835", "S-BIAD3996", "S-BIAD4059", "S-BIAD3704", "S-BIAD4046", "S-BIAD3658"])],
+    "r4": [
+        ("R4-01-leica-lif", "files", [f"{OME}/Leica-LIF/michael/PR2729_frameOrderCombinedScanTypes.lif"]),
+        ("R4-02-klb", "files", [f"{OME}/KLB/samples/img.klb"]),
+        ("R4-03-cellprofiler-pattern", "files", [f"{OME}/TIFF/cellprofiler/fruit-fly-cells/POS002.pattern/{n}" for n in (
+            "POS002.pattern", "01_POS002_Z00_T00_D.TIF", "01_POS002_Z00_T00_F.TIF", "01_POS002_Z00_T00_R.TIF")]),
+        ("R4-04-olympus-mixed-folder", "files", [f"{OME}/Olympus-OIR/etienne/{n}" for n in (
+            "Clipboard-venus%20stack.tif", "amy%20slice%20z%20stack_0001.oir", "amy%20slice%20z%20stack_0001.ome.tif")]),
+        ("R4-05-vectra-qptiff", "files", [f"{OME}/Vectra-QPTIFF/perkinelmer/PKI_fields/HnE_3_1x1component_data.tif"]),
+        ("R4-06-png-dataset", "files", [f"{OME}/PNG/user-1/dataset-user-1/user-1%200{i}%20TEST.png" for i in (1, 2, 3, 4)]),
+        ("R4-07-olympus-oir", "files", [f"{OME}/Olympus-OIR/imagesc-105684/1202-interval_10sec_sequence_frame.oir"]),
+        ("R4-08-idr0125", "idrmeta", "idr0125-way-cellpainting"),
+        ("R4-09-idr0016", "idrmeta", "idr0016-wawer-bioactivecompoundprofiling"),
+    ] + [(f"R4-{10 + i:02d}-{a}", "bia", a) for i, a in enumerate(
+        ["S-BIAD3891", "S-BIAD2499", "S-BIAD3727", "S-BIAD3375", "S-BIAD3578", "S-BIAD3613"])]
+      + [(f"R4-{16 + i:02d}-{a}", "names", a) for i, a in enumerate(
+        ["S-BIAD3710", "S-BIAD3732", "S-BIAD3379", "S-BIAD3896", "S-BIAD3959", "S-BIAD3909", "S-BIAD3709", "S-BIAD3712",
+         "S-BIAD4043", "S-BIAD3061", "S-BIAD3532", "S-BIAD2948", "S-BIAD3359", "S-BIAD4047", "S-BIAD3450", "S-BIAD3622"])],
 }
 
 IMAGE_EXT = re.compile(r"\.(ome\.tiff?|tiff?|czi|nd2|lif|lsm|oib|ims|png|jpe?g|dv|mrc|zarr\.zip)$", re.I)

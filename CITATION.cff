@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use micro-validate, please cite it as below."
+title: "micro-validate: pre-submission validator for microscopy datasets (BioImage Archive, IDR, REMBI)"
+type: software
+authors:
+  - family-names: Wickramasinghe
+    given-names: Yenula
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/Yenula-W/microscopy-submission-validator"
+keywords: [microscopy, REMBI, BioImage Archive, IDR, OME-TIFF, OME-Zarr, validation]

@@ -15,6 +15,8 @@ VENDOR_EXTS = {
     ".mrxs", ".bif", ".tf2", ".tf8", ".btf", ".ets", ".spe", ".fli", ".oir", ".lsr",
 }
 TIFF_BASED_VENDOR = {".lsm", ".stk"}
+# MRC2014 (EM maps, tomograms, particle stacks); ".map" is only MRC when the header says so
+MRC_EXTS = {".mrc", ".mrcs", ".map", ".rec"}
 # metadata files that accompany images but hold no pixels: OME companion XML, MetaMorph .nd index
 SIDECAR_SUFFIXES = (".companion.ome", ".ome.xml", ".nd")
 RASTER_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".jp2"}
@@ -26,7 +28,7 @@ TO_MICRON = {"pm": 1e-6, "nm": 1e-3, "µm": 1.0, "um": 1.0, "micron": 1.0, "micr
 
 
 def classify(path: Path) -> str:
-    """Return one of: ome-tiff, ome-zarr, ome-zarr-zip, tiff, vendor, raster, sidecar, table, other."""
+    """Return one of: ome-tiff, ome-zarr, ome-zarr-zip, tiff, mrc, vendor, raster, sidecar, table, other."""
     name = path.name.lower()
     if path.is_dir():
         return "ome-zarr" if name.endswith(".zarr") else "other"
@@ -39,6 +41,8 @@ def classify(path: Path) -> str:
     suffix = path.suffix.lower()
     if suffix in (".tif", ".tiff"):
         return "tiff"
+    if suffix in MRC_EXTS and (suffix in (".mrc", ".mrcs") or _is_mrc(path)):
+        return "mrc"
     if suffix in VENDOR_EXTS:
         return "vendor"
     if suffix in RASTER_EXTS:
@@ -48,7 +52,7 @@ def classify(path: Path) -> str:
     return "other"
 
 
-IMAGE_FORMATS = {"ome-tiff", "ome-zarr", "ome-zarr-zip", "tiff", "vendor", "raster"}
+IMAGE_FORMATS = {"ome-tiff", "ome-zarr", "ome-zarr-zip", "tiff", "mrc", "vendor", "raster"}
 
 
 @dataclass
@@ -86,6 +90,8 @@ def read_info(path: Path, rel: str, verify_pixels: bool = True) -> ImageInfo:
             _read_zarr_dir(path, info, verify_pixels)
         elif fmt == "ome-zarr-zip":
             _read_zarr_zip(path, info)
+        elif fmt == "mrc":
+            _read_mrc_header(path, info)
         elif fmt == "vendor" and path.suffix.lower() in TIFF_BASED_VENDOR:
             _read_tiff(path, info, verify_pixels)  # Zeiss LSM, MetaMorph STK, Olympus FluoView TIFFs
         elif fmt == "vendor":
@@ -110,7 +116,12 @@ def _read_tiff(path: Path, info: ImageInfo, verify_pixels: bool) -> None:
         if binary_only:
             # valid OME-TIFF whose metadata lives in a companion file (OME-TIFF spec, "BinaryOnly")
             companion = path.parent / binary_only.group(1)
-            if companion.is_file():
+            if companion.is_file() and companion.suffix.lower() in (".tif", ".tiff", ".tf2", ".tf8", ".btf"):
+                # the metadata file may itself be an OME-TIFF of the set (OME sample data "binaryonly")
+                with tifffile.TiffFile(companion) as master:
+                    _apply_ome_xml(master.ome_metadata or "", info)
+                info.notes.append(f"metadata read from {companion.name}")
+            elif companion.is_file():
                 _apply_ome_xml(companion.read_text(encoding="utf-8", errors="replace"), info)
                 info.notes.append(f"metadata read from companion file {companion.name}")
             else:
@@ -126,7 +137,15 @@ def _read_tiff(path: Path, info: ImageInfo, verify_pixels: bool) -> None:
             if info.format == "ome-tiff":
                 info.notes.append("file named .ome.tif but contains no OME-XML")
         if verify_pixels:
-            tif.pages[0].asarray()
+            try:
+                tif.pages[0].asarray()
+            except ValueError as e:
+                if "imagecodecs" not in str(e):
+                    raise
+                # e.g. LZW: a valid TIFF this install can't decode; not evidence the file is bad
+                info.readable = None
+                info.notes.append(f"header read, pixels not decoded ({e}); pip install imagecodecs to check them")
+                return
     info.readable = True
 
 
@@ -348,6 +367,37 @@ def _read_raster_header(path: Path, info: ImageInfo) -> None:
     info.pixel_size_um = {"x": None, "y": None, "z": None}
     info.readable = True
     info.notes.append("header checked only (PNG/JPEG carry no microscopy calibration)")
+
+
+def _is_mrc(path: Path) -> bool:
+    try:
+        with open(path, "rb") as fh:
+            return fh.read(212)[208:212] == b"MAP "
+    except OSError:
+        return False
+
+
+def _read_mrc_header(path: Path, info: ImageInfo) -> None:
+    """MRC2014 header: NX NY NZ MODE (int32), MX MY MZ (int32 at 28), cell lengths in Å (float32 at 40)."""
+    import struct
+
+    with open(path, "rb") as fh:
+        h = fh.read(1024)
+    if len(h) < 1024 or h[208:212] != b"MAP ":
+        raise ValueError("not an MRC2014 file (no 'MAP ' tag in the header)")
+    endian = "<" if h[212] in (0x44, 0x41) else ">"
+    nx, ny, nz, mode = struct.unpack(endian + "4i", h[0:16])
+    mx, my, mz = struct.unpack(endian + "3i", h[28:40])
+    cx, cy, cz = struct.unpack(endian + "3f", h[40:52])
+    dtypes = {0: "int8", 1: "int16", 2: "float32", 4: "complex64", 6: "uint16", 12: "float16"}
+    info.sizes = {"X": nx, "Y": ny, "Z": nz, "C": 1, "T": 1}
+    info.dtype = dtypes.get(mode, f"mode {mode}")
+    info.pixel_size_um = {ax: c / m * 1e-4 for ax, c, m in (("x", cx, mx), ("y", cy, my), ("z", cz, mz)) if m > 0 and c > 0}
+    expected = 1024 + struct.unpack(endian + "i", h[92:96])[0] + nx * ny * nz * {0: 1, 1: 2, 2: 4, 4: 8, 6: 2, 12: 2}.get(mode, 0)
+    if path.stat().st_size < expected:
+        raise ValueError(f"MRC file truncated: {path.stat().st_size} bytes, header implies {expected}")
+    info.notes.append("MRC header checked (pixel data not decoded)")
+    info.readable = True
 
 
 def _read_bioio(path: Path, info: ImageInfo) -> None:
