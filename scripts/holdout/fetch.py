@@ -90,6 +90,32 @@ MANIFEST = [
     ("H26-S-BIAD4285", "bia", "S-BIAD4285"),
 ]
 
+# Ship-bar rounds: each round uses only inputs no earlier round used (selection in EVALUATION.md section 9).
+# Extra kinds: "names" = names-only BIA mirror (fetch_names.py), "idrmeta" = an IDR repo's study + tables.
+_FRAP = f"{OME}/Leica-LIF/seanwarren/150519_FRAP_test_ROIs_chromagreen"
+ROUNDS = {
+    "r3": [
+        ("R3-01-ome-tubhiswt-3D", "files", [f"{OME}/OME-TIFF/2016-06/tubhiswt-3D/tubhiswt_C{i}.ome.tif" for i in (0, 1)]),
+        ("R3-02-ome-binaryonly", "files", [f"{OME}/OME-TIFF/2016-06/binaryonly/multifile-Z{i}.ome.tiff" for i in range(1, 6)]),
+        ("R3-03-ome-plate-companion", "files", [f"{OME}/OME-TIFF/2016-06/plate-companion/{n}" for n in (
+            "hcs.companion.ome", "well-A2.ome.tiff", "well-B1.ome.tiff", "well-B3.ome.tiff", "well-C2-2.ome.tiff",
+            "well-C2.ome.tiff")]),
+        ("R3-04-imaris-ims", "files", [f"{OME}/Imaris-IMS/davemason/Convallaria_3C_1T_confocal.ims"]),
+        ("R3-05-emdb-map", "files", [f"{OME}/MRC/EMDB/EMD-2225/EMD-2225.map"]),
+        ("R3-06-leica-frap-folder", "files", [f"{_FRAP}/{n}" for n in (
+            "150519_FRAP_test_ROIs_chromagreen.lif", "150519_FRAP_test_ROIs_chromagreen-junctions.mat",
+            "FRAP000_1um.png", "FRAP001_2_5um.png", "FRAP%20001_2_5um.roi", "FRAP_000_1um.roi", "Thumbs.db")]),
+        ("R3-07-ics", "files", [f"{OME}/ICS/jan/benchmark_v1_2018_x64y64z5c2s1t11_w1Laser4054BD4BP_5c8bc101d6559_hrm.{e}"
+                                for e in ("ics", "ids")]),
+        ("R3-08-idr0062", "idrmeta", "idr0062-blin-nuclearsegmentation"),
+        ("R3-09-idr0082", "idrmeta", "idr0082-pennycuick-lesions"),
+    ] + [(f"R3-{10 + i:02d}-{a}", "bia", a) for i, a in enumerate(
+        ["S-BIAD3373", "S-BIAD3657", "S-BIAD3572", "S-BIAD4011", "S-BIAD3717", "S-BIAD4056"])]
+      + [(f"R3-{16 + i:02d}-{a}", "names", a) for i, a in enumerate(
+        ["S-BIAD3951", "S-BIAD3905", "S-BIAD4119", "S-BIAD3562", "S-BIAD3700", "S-BIAD3774", "S-BIAD3612", "S-BIAD3950",
+         "S-BIAD3184", "S-BIAD2823", "S-BIAD3835", "S-BIAD3996", "S-BIAD4059", "S-BIAD3704", "S-BIAD4046", "S-BIAD3658"])],
+}
+
 IMAGE_EXT = re.compile(r"\.(ome\.tiff?|tiff?|czi|nd2|lif|lsm|oib|ims|png|jpe?g|dv|mrc|zarr\.zip)$", re.I)
 
 
@@ -198,9 +224,12 @@ def _json_list_to_tsv(raw: bytes) -> bytes:
 
 def main() -> None:
     out = Path(sys.argv[1])
-    only = set(sys.argv[2:])
+    sys.path.insert(0, str(Path(__file__).parent))  # fetch_names / fetch_idr_tables
+    args = sys.argv[2:]
+    manifest = ROUNDS[args.pop(0)] if args and args[0] in ROUNDS else MANIFEST
+    only = set(args)
     record = {}
-    for hid, kind, spec in MANIFEST:
+    for hid, kind, spec in manifest:
         if only and hid not in only:
             continue
         d = out / "inputs" / hid
@@ -212,7 +241,7 @@ def main() -> None:
         try:
             if kind == "files":
                 for url in spec:
-                    save(d / url.rsplit("/", 1)[1], get(url, 600))
+                    save(d / urllib.parse.unquote(url.rsplit("/", 1)[1]), get(url, 600))
                 src["urls"] = spec
             elif kind == "zip":
                 with zipfile.ZipFile(io.BytesIO(get(spec))) as z:
@@ -237,6 +266,12 @@ def main() -> None:
                 src.update(spec, image_name=name)
             elif kind == "bia":
                 src.update(acc=spec, **fetch_bia(spec, d))
+            elif kind == "names":
+                from fetch_names import fetch_names
+                src.update(acc=spec, **fetch_names(spec, d))
+            elif kind == "idrmeta":
+                from fetch_idr_tables import fetch_repo
+                src.update(repo=spec, tables=fetch_repo(spec, d))
         except Exception as e:
             print("  FAILED", hid, e)
             src["fetch_error"] = str(e)

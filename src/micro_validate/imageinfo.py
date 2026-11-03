@@ -357,7 +357,15 @@ def _read_bioio(path: Path, info: ImageInfo) -> None:
         info.readable = None
         info.notes.append("no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it")
         return
-    img = BioImage(path)
+    try:
+        img = BioImage(path)
+    except Exception as e:
+        if type(e).__name__ != "UnsupportedFileFormatError":
+            raise
+        # bioio is installed but none of its plugins handles this format: not evidence the file is bad
+        info.readable = None
+        info.notes.append(f"no bioio plugin installed for {path.suffix} files; install one (see bioio's plugin list) to check it")
+        return
     d = img.dims
     info.sizes = {"X": d.X, "Y": d.Y, "Z": d.Z, "C": d.C, "T": d.T}
     info.dtype = str(img.dtype)

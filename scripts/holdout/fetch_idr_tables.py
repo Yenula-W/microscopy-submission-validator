@@ -25,25 +25,29 @@ def main() -> None:
     repos = Path(sys.argv[2]).read_text().split()
     skip = tuple(sys.argv[3:])
     for repo in repos:
-        if repo.startswith(skip):
+        if repo.startswith(skip) or (out / repo).exists():
             continue
-        d = out / repo
-        if d.exists():
-            continue
-        tree = json.loads(subprocess.run(["gh", "api", f"repos/IDR/{repo}/git/trees/HEAD?recursive=1"],
-                                         capture_output=True, text=True).stdout or "{}").get("tree", [])
-        blobs = [(t["path"], t.get("size", 0)) for t in tree if t.get("type") == "blob"]
-        study = [p for p, _ in blobs if "/" not in p and re.search(r"study.*\.txt$", p, re.I)]
-        tables = [p for p, s in blobs if TABLE.search(p) and s < MAX_BYTES]
-        if not study:
-            continue
-        d.mkdir(parents=True)
-        for p in study + tables:
-            try:
-                (d / Path(p).name).write_bytes(get(f"{GH_RAW}/{repo}/HEAD/{p}"))
-            except Exception as e:
-                print("  skip", repo, p, e)
-        print(repo, len(tables), "tables")
+        n = fetch_repo(repo, out / repo)
+        if n is not None:
+            print(repo, n, "tables")
+
+
+def fetch_repo(repo: str, d: Path) -> int | None:
+    """Study file + every assay/library/annotation table of one IDR repo, flattened into d."""
+    tree = json.loads(subprocess.run(["gh", "api", f"repos/IDR/{repo}/git/trees/HEAD?recursive=1"],
+                                     capture_output=True, text=True).stdout or "{}").get("tree", [])
+    blobs = [(t["path"], t.get("size", 0)) for t in tree if t.get("type") == "blob"]
+    study = [p for p, _ in blobs if "/" not in p and re.search(r"study.*\.txt$", p, re.I)]
+    tables = [p for p, s in blobs if TABLE.search(p) and s < MAX_BYTES]
+    if not study:
+        return None
+    d.mkdir(parents=True, exist_ok=True)
+    for p in study + tables:
+        try:
+            (d / Path(p).name).write_bytes(get(f"{GH_RAW}/{repo}/HEAD/{p}"))
+        except Exception as e:
+            print("  skip", repo, p, e)
+    return len(tables)
 
 
 if __name__ == "__main__":

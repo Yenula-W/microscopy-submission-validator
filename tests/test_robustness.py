@@ -166,3 +166,32 @@ def test_metadata_with_wrong_types(tmp_path, capsys):
     rep = run_all(tmp_path, capsys)
     date = next(r for r in rep["bia"]["results"] if r["rule_id"] == "BIA-STUDY-004")
     assert date["status"] == "pass"  # YAML parses the date as datetime.date; still a valid date
+
+
+def _has_bioio() -> bool:
+    try:
+        import bioio  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+@pytest.mark.skipif(_has_bioio(), reason="checks the behaviour without the [vendor] extra")
+def test_vendor_file_without_extra_is_not_called_unreadable(tmp_path):
+    from micro_validate.imageinfo import read_info
+
+    (tmp_path / "scan.czi").write_bytes(b"ZISRAWFILE" + b"\0" * 100)
+    info = read_info(tmp_path / "scan.czi", "scan.czi")
+    assert info.readable is None
+    assert any("micro-validate[vendor]" in n for n in info.notes)
+
+
+def test_vendor_file_with_extra_but_no_plugin_is_not_called_unreadable(tmp_path):
+    pytest.importorskip("bioio")
+    from micro_validate.imageinfo import read_info
+
+    # no bioio plugin reads Slidebook files; the [vendor] extra installs bioio alone
+    (tmp_path / "scan.sld").write_bytes(b"\0" * 200)
+    info = read_info(tmp_path / "scan.sld", "scan.sld")
+    assert info.readable is None, info.error
+    assert any("no bioio plugin" in n for n in info.notes)

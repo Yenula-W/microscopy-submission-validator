@@ -17,7 +17,7 @@ from pathlib import Path
 import yaml
 
 TARGETS = ["bia", "idr", "rembi"]
-PARTIAL_KINDS = {"bia", "idr"}  # subsets of accepted submissions
+PARTIAL_KINDS = {"bia", "idr", "names", "idrmeta"}  # subsets of accepted submissions
 
 
 def check_types() -> dict[str, str]:
@@ -58,7 +58,7 @@ def main() -> None:
                     crash_msgs += [m for m in r["messages"] if "check crashed" in m]
                     if r["status"] in ("warn", "fail"):
                         for m in r["messages"]:
-                            findings.append({"input": hid, "target": t, "rule": r["rule_id"],
+                            findings.append({"input": hid, "kind": manifest[hid]["kind"], "target": t, "rule": r["rule_id"],
                                              "check": types.get(r["rule_id"], "?"), "status": r["status"],
                                              "message": m})
             size = sum(base.with_suffix(s).stat().st_size for s in (".md", ".json") if base.with_suffix(s).exists())
@@ -73,7 +73,7 @@ def main() -> None:
         w.writeheader()
         w.writerows(runs)
     with open(out / "findings.csv", "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["input", "target", "rule", "check", "status", "message"])
+        w = csv.DictWriter(f, fieldnames=["input", "kind", "target", "rule", "check", "status", "message"])
         w.writeheader()
         w.writerows(findings)
     # stratified sample: >=3 per check type (all if fewer), then fill to >=60 at random
@@ -89,7 +89,7 @@ def main() -> None:
     rng.shuffle(rest)
     sample += rest[: max(0, 64 - len(sample))]
     with open(out / "sample.csv", "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["n", "input", "target", "rule", "check", "status", "message", "verdict", "note"])
+        w = csv.DictWriter(f, fieldnames=["n", "input", "kind", "target", "rule", "check", "status", "message", "verdict", "note"])
         w.writeheader()
         for i, s in enumerate(sample, 1):
             w.writerow({"n": i, **s, "verdict": "", "note": ""})

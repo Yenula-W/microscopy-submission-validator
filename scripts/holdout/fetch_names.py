@@ -51,31 +51,35 @@ def crawl(url: str, rel: str = "", out: list[str] | None = None) -> list[str]:
 def main() -> None:
     root = Path(sys.argv[1]) / "names"
     for acc in sys.argv[2:]:
-        d = root / acc
-        if d.exists():
+        if (root / acc).exists():
             print("have", acc)
             continue
-        info = json.loads(get(f"https://www.ebi.ac.uk/biostudies/api/v1/studies/{acc}/info"))
-        http = info["httpLink"]
-        study = get(f"https://www.ebi.ac.uk/biostudies/api/v1/studies/{acc}")
-        files = crawl(f"{http}/Files")
-        lists = sorted({a["value"] for a in _iter_attrs(json.loads(study)) if a.get("name") == "File List"})
-        d.mkdir(parents=True)
-        (d / f"{acc}.json").write_bytes(study)
-        for fl in lists:
-            stem = re.sub(r"\.(json|tsv|xlsx?)$", "", fl, flags=re.I)
-            uploaded = [f for f in files if re.sub(r"\.(json|tsv|xlsx?)$", "", f, flags=re.I) == stem]
-            tsv = next((f for f in uploaded if f.lower().endswith(".tsv")), None)
-            data = get(f"{http}/Files/{urllib.parse.quote(tsv)}") if tsv else _json_list_to_tsv(get(f"{http}/Files/{urllib.parse.quote(fl)}"))
-            (d / f"{stem}.tsv").parent.mkdir(parents=True, exist_ok=True)
-            (d / f"{stem}.tsv").write_bytes(data)
-            for f in uploaded:  # the list itself (any format) is not a data file
-                files.remove(f)
-        for f in files:
-            p = d / f
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.touch()
-        print(acc, len(files), "files,", len(lists), "lists")
+        r = fetch_names(acc, root / acc)
+        print(acc, r["n_files"], "files,", len(r["file_lists"]), "lists")
+
+
+def fetch_names(acc: str, d: Path) -> dict:
+    info = json.loads(get(f"https://www.ebi.ac.uk/biostudies/api/v1/studies/{acc}/info"))
+    http = info["httpLink"]
+    study = get(f"https://www.ebi.ac.uk/biostudies/api/v1/studies/{acc}")
+    files = crawl(f"{http}/Files")
+    lists = sorted({a["value"] for a in _iter_attrs(json.loads(study)) if a.get("name") == "File List"})
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{acc}.json").write_bytes(study)
+    for fl in lists:
+        stem = re.sub(r"\.(json|tsv|xlsx?)$", "", fl, flags=re.I)
+        uploaded = [f for f in files if re.sub(r"\.(json|tsv|xlsx?)$", "", f, flags=re.I) == stem]
+        tsv = next((f for f in uploaded if f.lower().endswith(".tsv")), None)
+        data = get(f"{http}/Files/{urllib.parse.quote(tsv)}") if tsv else _json_list_to_tsv(get(f"{http}/Files/{urllib.parse.quote(fl)}"))
+        (d / f"{stem}.tsv").parent.mkdir(parents=True, exist_ok=True)
+        (d / f"{stem}.tsv").write_bytes(data)
+        for f in uploaded:  # the list itself (any format) is not a data file
+            files.remove(f)
+    for f in files:
+        p = d / f
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.touch()
+    return {"http": http, "file_lists": lists, "n_files": len(files)}
 
 
 if __name__ == "__main__":

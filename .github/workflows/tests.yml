@@ -15,6 +15,10 @@ jobs:
             python: "3.9"
           - os: macos-latest
             python: "3.12"
+          # tests for the optional [vendor] extra run here and skip cleanly everywhere else
+          - os: ubuntu-latest
+            python: "3.12"
+            extras: "dev,vendor"
     steps:
       - uses: actions/checkout@v4
       # setup-python has no 3.9 build for current Ubuntu images; uv's standalone builds do
@@ -22,7 +26,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: uv venv --python ${{ matrix.python }} .venv
-      - run: uv pip install '.[dev]'
+      - run: uv pip install ".[${{ matrix.extras || 'dev' }}]"
       - run: .venv/bin/python -V && .venv/bin/pytest -q
       - name: CLI smoke test
         run: |
