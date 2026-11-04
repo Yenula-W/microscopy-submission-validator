@@ -79,7 +79,7 @@ def test_bia_missing_metadata_fields(bia_dataset):
     del meta["study"]["title"]
     meta["biosample"]["organism"][0]["ncbi_taxon"] = "# e.g. NCBITaxon_9606"
     meta["study"]["authors"].append({"first_name": "Bob"})
-    (bia_dataset / "submission.yaml").write_text(yaml.safe_dump(meta))
+    (bia_dataset / "submission.yaml").write_text(yaml.safe_dump(meta), encoding="utf-8")
     res = run(bia_dataset, "bia")
     assert res["BIA-STUDY-001"].status == "fail"
     assert res["BIA-BIOS-002"].status == "warn"  # recommended: accepted BIA studies give organism as text only
@@ -97,7 +97,7 @@ def test_bia_no_metadata(bia_dataset):
 def test_bia_template_is_incomplete(tmp_path, bia_dataset):
     from micro_validate.cli import _template
 
-    (bia_dataset / "submission.yaml").write_text(_template("bia"))
+    (bia_dataset / "submission.yaml").write_text(_template("bia"), encoding="utf-8")
     res = run(bia_dataset, "bia")
     assert res["BIA-STUDY-001"].status == "fail"
     assert res["BIA-STUDY-003"].status == "fail"  # empty keywords list
@@ -185,9 +185,9 @@ def test_zipped_zarr_readable(bia_dataset):
 def test_annotation_file_list_needs_source_image(bia_dataset):
     (bia_dataset / "masks").mkdir()
     (bia_dataset / "masks" / "m1.png").write_bytes(b"\x89PNG")
-    (bia_dataset / "annotation_file_list.tsv").write_text("Files\ttype\nmasks/m1.png\tmask\n")
+    (bia_dataset / "annotation_file_list.tsv").write_text("Files\ttype\nmasks/m1.png\tmask\n", encoding="utf-8")
     assert run(bia_dataset, "bia")["BIA-FL-005"].status == "fail"
-    (bia_dataset / "annotation_file_list.tsv").write_text("Files\tsource_image\nmasks/m1.png\tseries1/img_01.ome.tif\n")
+    (bia_dataset / "annotation_file_list.tsv").write_text("Files\tsource_image\nmasks/m1.png\tseries1/img_01.ome.tif\n", encoding="utf-8")
     assert run(bia_dataset, "bia")["BIA-FL-005"].status == "pass"
 
 
@@ -209,8 +209,8 @@ def test_idr_rejects_ome_tiff(idr_dataset):
 
 
 def test_idr_study_hints_count_as_missing(idr_dataset):
-    text = (idr_dataset / "idrtest-study.txt").read_text().replace("Study Title\tSynthetic study", "Study Title\t# fill in")
-    (idr_dataset / "idrtest-study.txt").write_text(text)
+    text = (idr_dataset / "idrtest-study.txt").read_text(encoding="utf-8").replace("Study Title\tSynthetic study", "Study Title\t# fill in")
+    (idr_dataset / "idrtest-study.txt").write_text(text, encoding="utf-8")
     res = run(idr_dataset, "idr")
     assert res["IDR-STUDY-002"].status == "fail"
     assert "Study Title" in res["IDR-STUDY-002"].messages[0]
@@ -218,9 +218,9 @@ def test_idr_study_hints_count_as_missing(idr_dataset):
 
 def test_idr_assay_problems(idr_dataset):
     p = idr_dataset / "idrtest-assays.txt"
-    text = p.read_text().replace("b.ome.zarr\timages\tDAPI:DNA;GFP:protein", "missing.ome.zarr\timages\tDAPI:DNA")
+    text = p.read_text(encoding="utf-8").replace("b.ome.zarr\timages\tDAPI:DNA;GFP:protein", "missing.ome.zarr\timages\tDAPI:DNA")
     text = text.replace("a.ome.zarr\timages\tDAPI:DNA;GFP:protein", "a.ome.zarr\timages\tDAPI:DNA")
-    p.write_text(text)
+    p.write_text(text, encoding="utf-8")
     res = run(idr_dataset, "idr")
     msgs = " ".join(res["IDR-ASSAY-003"].messages)
     assert "missing.ome.zarr" in msgs and "images/b.ome.zarr" in msgs
@@ -230,9 +230,9 @@ def test_idr_assay_problems(idr_dataset):
 def test_idr_stem_match_and_comma_assay_list(idr_dataset):
     # real IDR files list the original .tif name and comma-join assay files in one cell
     p = idr_dataset / "idrtest-assays.txt"
-    p.write_text(p.read_text().replace("a.ome.zarr\timages", "a.tif\t/images"))
+    p.write_text(p.read_text(encoding="utf-8").replace("a.ome.zarr\timages", "a.tif\t/images"))
     s = idr_dataset / "idrtest-study.txt"
-    s.write_text(s.read_text().replace("Experiment Assay File\tidrtest-assays.txt",
+    s.write_text(s.read_text(encoding="utf-8").replace("Experiment Assay File\tidrtest-assays.txt",
                                        "Experiment Assay File\tidrtest-assays.txt, other-assays.txt"))
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-003"].status == "warn"
@@ -260,10 +260,10 @@ def test_rembi_good(bia_dataset):
 def test_cli_writes_reports_and_exit_codes(bia_dataset, tmp_path, capsys):
     out = tmp_path / "rep" / "report"
     assert main([str(bia_dataset), "--target", "bia", "--out", str(out)]) == 0
-    data = json.loads(out.with_suffix(".json").read_text())
+    data = json.loads(out.with_suffix(".json").read_text(encoding="utf-8"))
     assert data["overall"] in ("pass", "warn")
     assert data["summary"]["fail"] == 0
-    md = out.with_suffix(".md").read_text()
+    md = out.with_suffix(".md").read_text(encoding="utf-8")
     assert md.startswith("# Submission check: BioImage Archive")
     assert "## All rules" in md and "https://www.ebi.ac.uk/bioimage-archive/help-file-list" in md
 
@@ -310,7 +310,7 @@ PAGETAB = {
 def test_biostudies_pagetab_metadata(bia_dataset):
     """Accepted BIA studies: list-valued sections, single author Name, organism as text (S-BIAD634)."""
     (bia_dataset / "submission.yaml").unlink()
-    (bia_dataset / "S-BIAD9999.json").write_text(json.dumps(PAGETAB))
+    (bia_dataset / "S-BIAD9999.json").write_text(json.dumps(PAGETAB), encoding="utf-8")
     ds = load_dataset(bia_dataset)
     assert ds.metadata["biosample"][1]["organism"][0] == {
         "scientific_name": "Mus musculus", "common_name": "mouse", "ncbi_taxon": None}
@@ -325,7 +325,7 @@ def test_annotation_source_image_column_spelling(bia_dataset):
     """S-BIAD634's accepted annotation list uses a 'source image' header."""
     (bia_dataset / "masks").mkdir()
     (bia_dataset / "masks" / "m1.png").write_bytes(b"\x89PNG")
-    (bia_dataset / "file_list_annotations.tsv").write_text("Files\tsource image\nmasks/m1.png\tseries1/img_01.ome.tif\n")
+    (bia_dataset / "file_list_annotations.tsv").write_text("Files\tsource image\nmasks/m1.png\tseries1/img_01.ome.tif\n", encoding="utf-8")
     assert run(bia_dataset, "bia")["BIA-FL-005"].status == "pass"
 
 
@@ -340,7 +340,7 @@ def test_idr_singular_assay_file_name(idr_dataset):
     """idr0052 publishes experimentA/MitoSys_assay_file.txt."""
     (idr_dataset / "idrtest-assays.txt").rename(idr_dataset / "MitoSys_assay_file.txt")
     s = idr_dataset / "idrtest-study.txt"
-    s.write_text(s.read_text().replace("idrtest-assays.txt", "MitoSys_assay_file.txt"))
+    s.write_text(s.read_text(encoding="utf-8").replace("idrtest-assays.txt", "MitoSys_assay_file.txt"))
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-001"].status == "pass" and res["IDR-ASSAY-003"].status == "pass"
 
@@ -358,13 +358,13 @@ def test_ngff_v05_zarr3_image(tmp_path):
         "axes": [{"name": "c", "type": "channel"}, {"name": "y", "type": "space", "unit": "micrometer"},
                  {"name": "x", "type": "space", "unit": "micrometer"}],
         "datasets": [{"path": "0", "coordinateTransformations": [{"type": "scale", "scale": [1, 0.5, 0.5]}]}]}]}}
-    (z / "zarr.json").write_text(json.dumps({"zarr_format": 3, "node_type": "group", "attributes": attrs}))
+    (z / "zarr.json").write_text(json.dumps({"zarr_format": 3, "node_type": "group", "attributes": attrs}), encoding="utf-8")
     meta = {"zarr_format": 3, "node_type": "array", "shape": [2, 8, 8], "data_type": "uint8",
             "chunk_grid": {"name": "regular", "configuration": {"chunk_shape": [2, 8, 8]}},
             "chunk_key_encoding": {"name": "default", "configuration": {"separator": "/"}},
             "fill_value": 0, "codecs": [{"name": "bytes"}], "attributes": {}}
     (z / "0").mkdir()
-    (z / "0" / "zarr.json").write_text(json.dumps(meta))
+    (z / "0" / "zarr.json").write_text(json.dumps(meta), encoding="utf-8")
     info = read_info(z, "img.ome.zarr")
     assert info.readable, info.error
     assert info.sizes["C"] == 2 and info.dtype == "uint8" and info.pixel_size_um["x"] == 0.5
@@ -454,12 +454,12 @@ def test_png_jpeg_header_check(tmp_path):
 def test_idr_accepted_study_conventions(idr_dataset):
     """Patterns from accepted IDR studies (idr0052, idr0054, idr0066, idr0101) must not fail."""
     s = idr_dataset / "idrtest-study.txt"
-    text = s.read_text()
+    text = s.read_text(encoding="utf-8")
     text = text.replace("Study Key Words\tnuclei\n", "").replace("Study Organism\tHomo sapiens\n", "Experiment Organism\tHomo sapiens\n")
     text = text.replace("Experiment Assay File\tidrtest-assays.txt", "Experiment Assay File\tidrtest-assays and idrtest-assays.txt")
-    s.write_text(text)
+    s.write_text(text, encoding="utf-8")
     a = idr_dataset / "idrtest-assays.txt"
-    a.write_text(a.read_text().replace("Assay Name", "Comment [x]").replace("Image File\t", "Image Name\t"))
+    a.write_text(a.read_text(encoding="utf-8").replace("Assay Name", "Comment [x]").replace("Image File\t", "Image Name\t"))
     res = run(idr_dataset, "idr")
     assert res["IDR-STUDY-002"].status == "pass"
     assert res["IDR-STUDY-006"].status == "warn"  # keywords missing: recommended only
@@ -471,7 +471,7 @@ def test_idr_accepted_study_conventions(idr_dataset):
 def test_idr_fileset_folder_matches_converted_image(idr_dataset):
     """idr0052: rows list per-plane TIFFs inside a cell folder; the converted image is named after the folder."""
     a = idr_dataset / "idrtest-assays.txt"
-    a.write_text(a.read_text().replace("a.ome.zarr\timages", "plane_T0001.tif\timages/a/rawtif"))
+    a.write_text(a.read_text(encoding="utf-8").replace("a.ome.zarr\timages", "plane_T0001.tif\timages/a/rawtif"))
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-003"].status == "warn"
     assert "only by file-name stem" in res["IDR-ASSAY-003"].messages[0]
@@ -481,7 +481,7 @@ def test_hcs_plate_is_not_checked_rather_than_unreadable(tmp_path, capsys):
     """IDR idr0001A/2551.zarr is a valid plate; it must not be reported as unreadable."""
     p = tmp_path / "plate.zarr"
     p.mkdir()
-    (p / ".zattrs").write_text(json.dumps({"plate": {"wells": [{"path": "A/1"}], "version": "0.4"}}))
+    (p / ".zattrs").write_text(json.dumps({"plate": {"wells": [{"path": "A/1"}], "version": "0.4"}}), encoding="utf-8")
     res = run(tmp_path, "rembi")
     assert res["REMBI-IMG-001"].status == "warn"
     assert "per-image checks are not supported" in res["REMBI-IMG-001"].messages[0]
@@ -492,10 +492,10 @@ def test_ngff_units_typo_accepted_with_note(tmp_path):
     from micro_validate.imageinfo import read_info
 
     z = write_ome_zarr(tmp_path / "a.ome.zarr")
-    attrs = json.loads((z / ".zattrs").read_text())
+    attrs = json.loads((z / ".zattrs").read_text(encoding="utf-8"))
     for ax in attrs["multiscales"][0]["axes"][1:]:
         ax["units"] = ax.pop("unit")
-    (z / ".zattrs").write_text(json.dumps(attrs))
+    (z / ".zattrs").write_text(json.dumps(attrs), encoding="utf-8")
     info = read_info(z, "a.ome.zarr")
     assert info.pixel_size_um["x"] == pytest.approx(0.1)
     assert any("non-standard key 'units'" in n for n in info.notes)
@@ -507,11 +507,11 @@ def test_ngff_units_typo_accepted_with_note(tmp_path):
 def test_idr_curated_annotation_csv_is_the_assay_table(idr_dataset):
     """Most accepted IDR repos publish *-annotation.csv and the study file references it (idr0068)."""
     a = idr_dataset / "idrtest-assays.txt"
-    rows = [line.split("\t") for line in a.read_text().splitlines()]
-    (idr_dataset / "idrtest-experimentA-annotation.csv").write_text("\n".join(",".join(r) for r in rows) + "\n")
+    rows = [line.split("\t") for line in a.read_text(encoding="utf-8").splitlines()]
+    (idr_dataset / "idrtest-experimentA-annotation.csv").write_text("\n".join(",".join(r) for r in rows) + "\n", encoding="utf-8")
     a.unlink()
     s = idr_dataset / "idrtest-study.txt"
-    s.write_text(s.read_text().replace("idrtest-assays.txt", "idrtest-experimentA-annotation"))
+    s.write_text(s.read_text(encoding="utf-8").replace("idrtest-assays.txt", "idrtest-experimentA-annotation"))
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-001"].status == "pass", res["IDR-ASSAY-001"].messages
     assert res["IDR-ASSAY-003"].status == "pass", res["IDR-ASSAY-003"].messages
@@ -519,7 +519,7 @@ def test_idr_curated_annotation_csv_is_the_assay_table(idr_dataset):
 
 def test_annotation_named_data_is_not_an_idr_table_without_study(bia_dataset):
     """BIA data such as '*_manual_annotations.tsv' (no IDR study file) stays a data file."""
-    (bia_dataset / "x_manual_annotations.tsv").write_text("cell\tlabel\n1\ta\n")
+    (bia_dataset / "x_manual_annotations.tsv").write_text("cell\tlabel\n1\ta\n", encoding="utf-8")
     ds = load_dataset(bia_dataset)
     assert "x_manual_annotations.tsv" in ds.data_files and not ds.idr_assays
 
@@ -527,7 +527,7 @@ def test_annotation_named_data_is_not_an_idr_table_without_study(bia_dataset):
 def test_idr_comma_separated_txt_assay(idr_dataset):
     """idr0040's accepted assay file is comma-separated despite '.txt'."""
     a = idr_dataset / "idrtest-assays.txt"
-    a.write_text(a.read_text().replace("\t", ","))
+    a.write_text(a.read_text(encoding="utf-8").replace("\t", ","))
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-003"].status == "pass", res["IDR-ASSAY-003"].messages
     assert res["IDR-ASSAY-002"].status == "warn"
@@ -537,7 +537,7 @@ def test_idr_comma_separated_txt_assay(idr_dataset):
 def test_idr_reference_typo_still_reported(idr_dataset):
     """idr0018/idr0050 study files say '...-assay.txt' for '...-assays.txt': a real, reportable mismatch."""
     s = idr_dataset / "idrtest-study.txt"
-    s.write_text(s.read_text().replace("Experiment Assay File\tidrtest-assays.txt", "Experiment Assay File\tidrtest-assay.txt"))
+    s.write_text(s.read_text(encoding="utf-8").replace("Experiment Assay File\tidrtest-assays.txt", "Experiment Assay File\tidrtest-assay.txt"))
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-001"].status == "warn"  # reported, with the table it most likely means
     assert "'idrtest-assay.txt'" in res["IDR-ASSAY-001"].messages[0]
@@ -549,9 +549,9 @@ def test_idr_plate_described_by_library_plate_column(tmp_path):
     root = tmp_path / "scr"
     p = root / "plate1_1_013.ome.zarr"
     p.mkdir(parents=True)
-    (p / ".zattrs").write_text(json.dumps({"plate": {"wells": [{"path": "A/1"}]}}))
-    (root / "s-study.txt").write_text("Study Title\tT\nStudy Description\tD\nScreen Library File\ts-library.txt\n")
-    (root / "s-library.txt").write_text("Plate\tWell\nplate1_1_013\tA1\n")
+    (p / ".zattrs").write_text(json.dumps({"plate": {"wells": [{"path": "A/1"}]}}), encoding="utf-8")
+    (root / "s-study.txt").write_text("Study Title\tT\nStudy Description\tD\nScreen Library File\ts-library.txt\n", encoding="utf-8")
+    (root / "s-library.txt").write_text("Plate\tWell\nplate1_1_013\tA1\n", encoding="utf-8")
     assert run(root, "idr")["IDR-ASSAY-003"].status == "pass"
 
 
@@ -574,7 +574,7 @@ def test_source_image_inside_container(bia_dataset):
 
     with zipfile.ZipFile(bia_dataset / "PLA4.zarr.zip", "w") as z:
         z.writestr("images/a/.zattrs", "{}")
-    (bia_dataset / "annotation_file_list.tsv").write_text("Files\tsource_image\nPLA4.zarr.zip\tPLA4.zarr.zip/images/a\n")
+    (bia_dataset / "annotation_file_list.tsv").write_text("Files\tsource_image\nPLA4.zarr.zip\tPLA4.zarr.zip/images/a\n", encoding="utf-8")
     assert run(bia_dataset, "bia")["BIA-FL-005"].status == "pass"
 
 
@@ -583,9 +583,9 @@ def test_idr_reference_to_renamed_table_is_a_warning(idr_dataset):
     a = idr_dataset / "idrtest-assays.txt"
     a.rename(idr_dataset / "idrtest-experimentB-annotation.csv")
     t = idr_dataset / "idrtest-experimentB-annotation.csv"
-    t.write_text(t.read_text().replace("\t", ","))
+    t.write_text(t.read_text(encoding="utf-8").replace("\t", ","))
     s = idr_dataset / "idrtest-study.txt"
-    s.write_text(s.read_text().replace("idrtest-assays.txt", "ExperimentB_Assays, idrtest-experimentC-assays.txt"))
+    s.write_text(s.read_text(encoding="utf-8").replace("idrtest-assays.txt", "ExperimentB_Assays, idrtest-experimentC-assays.txt"))
     res = run(idr_dataset, "idr")
     msgs = res["IDR-ASSAY-001"].messages
     assert res["IDR-ASSAY-001"].status == "fail"  # experiment C has no table at all
@@ -596,7 +596,7 @@ def test_idr_reference_to_renamed_table_is_a_warning(idr_dataset):
 def test_idr_single_dangling_reference_pairs_with_single_table(idr_dataset):
     """idr0109: study names 'assayFile_27APR2021.txt'; the one table present is the curated annotation CSV."""
     s = idr_dataset / "idrtest-study.txt"
-    s.write_text(s.read_text().replace("idrtest-assays.txt", "assayFile_27APR2021.txt"))
+    s.write_text(s.read_text(encoding="utf-8").replace("idrtest-assays.txt", "assayFile_27APR2021.txt"))
     res = run(idr_dataset, "idr")
     assert res["IDR-ASSAY-001"].status == "warn"
     assert "'idrtest-assays.txt' looks like the table it means" in res["IDR-ASSAY-001"].messages[0]
@@ -622,7 +622,7 @@ def test_pagetab_organism_taxon_from_valqual(bia_dataset):
     org = page["section"]["subsections"][2][0]["attributes"][0]
     org["valqual"] = [{"name": "Ontology", "value": "NCBITaxon"}, {"name": "TermId", "value": "NCBITaxon_9606"}]
     (bia_dataset / "submission.yaml").unlink()
-    (bia_dataset / "S-BIAD9999.json").write_text(json.dumps(page))
+    (bia_dataset / "S-BIAD9999.json").write_text(json.dumps(page), encoding="utf-8")
     bios = load_dataset(bia_dataset).metadata["biosample"]
     assert bios[0]["organism"][0]["ncbi_taxon"] == "NCBITaxon_9606"
     assert bios[1]["organism"][0]["ncbi_taxon"] is None
@@ -679,7 +679,7 @@ def test_mrc_map_is_an_image(tmp_path):
     assert info.readable and info.sizes["Z"] == 4 and abs(info.pixel_size_um["x"] - 3.5e-4) < 1e-9
     (tmp_path / "short.mrc").write_bytes(bytes(h) + b"\0" * 10)
     assert read_info(tmp_path / "short.mrc", "short.mrc").readable is False
-    (tmp_path / "route.map").write_text("not an image")
+    (tmp_path / "route.map").write_text("not an image", encoding="utf-8")
     assert classify(tmp_path / "route.map") == "other"
 
 
@@ -768,7 +768,7 @@ def test_images_readable_is_needs_review_not_verdict(bia_dataset, capsys):
     assert code == (1 if rep["overall"] == "fail" else 0)
     main([str(bia_dataset), "-t", "bia", "-o", str(bia_dataset.parent / "r")])
     capsys.readouterr()
-    assert "## Needs review (not part of the overall result)" in (bia_dataset.parent / "r.md").read_text()
+    assert "## Needs review (not part of the overall result)" in (bia_dataset.parent / "r.md").read_text(encoding="utf-8")
 
 
 # ------------------------------------------------------------- regressions from ship-bar rounds 5 and 6
@@ -778,7 +778,7 @@ def test_unrecognised_data_files_are_not_no_images(tmp_path):
     """AmiraMesh (.am) volumes are recognised; other unknown data files give a warning, not 'no image files found'."""
     from micro_validate.imageinfo import classify
 
-    (tmp_path / "test.am").write_text("# AmiraMesh BINARY-LITTLE-ENDIAN 2.1\n\ndefine Lattice 4 4 4\n")
+    (tmp_path / "test.am").write_text("# AmiraMesh BINARY-LITTLE-ENDIAN 2.1\n\ndefine Lattice 4 4 4\n", encoding="utf-8")
     assert classify(tmp_path / "test.am") == "vendor"
     (tmp_path / "test.am").unlink()
     (tmp_path / "volume.nrrd").write_bytes(b"NRRD0004\n")
@@ -794,8 +794,8 @@ def test_ome_xml_with_bindata_is_an_image(tmp_path):
            '<Pixels ID="Pixels:0" DimensionOrder="XYZCT" Type="uint8" SizeX="2" SizeY="2" SizeZ="1" SizeC="1" SizeT="1">'
            '<Channel ID="Channel:0"/><BinData xmlns="http://www.openmicroscopy.org/Schemas/BinaryFile/2016-06" '
            'BigEndian="false" Length="4">AAAAAA==</BinData></Pixels></Image></OME>')
-    (tmp_path / "ts.ome.xml").write_text(xml)
-    (tmp_path / "meta.ome.xml").write_text(xml.replace("<BinData", "<!--").replace("</BinData>", "-->"))
+    (tmp_path / "ts.ome.xml").write_text(xml, encoding="utf-8")
+    (tmp_path / "meta.ome.xml").write_text(xml.replace("<BinData", "<!--").replace("</BinData>", "-->"), encoding="utf-8")
     assert classify(tmp_path / "ts.ome.xml") == "ome-xml"
     assert classify(tmp_path / "meta.ome.xml") == "sidecar"
     info = read_info(tmp_path / "ts.ome.xml", "ts.ome.xml")

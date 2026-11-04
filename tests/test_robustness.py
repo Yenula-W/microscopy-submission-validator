@@ -53,13 +53,13 @@ def test_binary_and_non_utf8_tables(tmp_path, capsys):
 @pytest.mark.parametrize("content", ["study: [unclosed", "- just\n- a list\n", "", "{}", "study: 5\nbiosample: [1, 2]"])
 def test_malformed_metadata(tmp_path, capsys, content):
     write_ome_tiff(tmp_path / "a.ome.tif")
-    (tmp_path / "submission.yaml").write_text(content)
+    (tmp_path / "submission.yaml").write_text(content, encoding="utf-8")
     run_all(tmp_path, capsys)
 
 
 def test_malformed_json_metadata(tmp_path, capsys):
     write_ome_tiff(tmp_path / "a.ome.tif")
-    (tmp_path / "submission.json").write_text('{"study": {"title": ')
+    (tmp_path / "submission.json").write_text('{"study": {"title": ', encoding="utf-8")
     run_all(tmp_path, capsys)
 
 
@@ -71,10 +71,10 @@ def test_corrupt_images(tmp_path, capsys):
         pass
     z = tmp_path / "badjson.ome.zarr"
     z.mkdir()
-    (z / ".zattrs").write_text("{not json")
+    (z / ".zattrs").write_text("{not json", encoding="utf-8")
     z2 = tmp_path / "nolevel.ome.zarr"
     z2.mkdir()
-    (z2 / ".zattrs").write_text(json.dumps({"multiscales": [{"datasets": [{"path": "0"}]}]}))
+    (z2 / ".zattrs").write_text(json.dumps({"multiscales": [{"datasets": [{"path": "0"}]}]}), encoding="utf-8")
     z3 = tmp_path / "noattrs.zarr"
     z3.mkdir()
     (tmp_path / "x.czi").write_bytes(b"ZISRAWFILE" + os.urandom(100))
@@ -131,8 +131,8 @@ def test_unicode_paths(tmp_path, capsys):
 def test_unreadable_files_and_dirs(tmp_path, capsys):
     write_ome_tiff(tmp_path / "a.ome.tif")
     locked = write_ome_tiff(tmp_path / "locked.ome.tif")
-    (tmp_path / "file_list.tsv").write_text("Files\na.ome.tif\nlocked.ome.tif\n")
-    (tmp_path / "x-study.txt").write_text("Study Title\tT\n")
+    (tmp_path / "file_list.tsv").write_text("Files\na.ome.tif\nlocked.ome.tif\n", encoding="utf-8")
+    (tmp_path / "x-study.txt").write_text("Study Title\tT\n", encoding="utf-8")
     sub = tmp_path / "private"
     sub.mkdir()
     write_ome_tiff(sub / "b.ome.tif")
@@ -152,9 +152,9 @@ def test_unreadable_files_and_dirs(tmp_path, capsys):
 
 def test_ragged_and_odd_tables(tmp_path, capsys):
     write_ome_zarr(tmp_path / "a.ome.zarr")
-    (tmp_path / "file_list.tsv").write_text("\n\n")
-    (tmp_path / "s-study.txt").write_text("\t\t\n#only comments\n\tvalue without key\n")
-    (tmp_path / "s-assays.txt").write_text("Image File\tChannels\na.ome.zarr\nb\tx\ty\tz\n")
+    (tmp_path / "file_list.tsv").write_text("\n\n", encoding="utf-8")
+    (tmp_path / "s-study.txt").write_text("\t\t\n#only comments\n\tvalue without key\n", encoding="utf-8")
+    (tmp_path / "s-assays.txt").write_text("Image File\tChannels\na.ome.zarr\nb\tx\ty\tz\n", encoding="utf-8")
     run_all(tmp_path, capsys)
 
 

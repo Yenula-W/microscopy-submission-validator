@@ -50,14 +50,14 @@ def write_ome_zarr(path: Path, shape=(2, 16, 16), px=0.1) -> Path:
     import zarr
 
     path.mkdir(parents=True)
-    (path / ".zgroup").write_text(json.dumps({"zarr_format": 2}))
+    (path / ".zgroup").write_text(json.dumps({"zarr_format": 2}), encoding="utf-8")
     attrs = {"multiscales": [{
         "version": "0.4",
         "axes": [{"name": "c", "type": "channel"}, {"name": "y", "type": "space", "unit": "micrometer"},
                  {"name": "x", "type": "space", "unit": "micrometer"}],
         "datasets": [{"path": "0", "coordinateTransformations": [{"type": "scale", "scale": [1, px, px]}]}],
     }], "omero": {"channels": [{"label": f"ch{i}"} for i in range(shape[0])]}}
-    (path / ".zattrs").write_text(json.dumps(attrs))
+    (path / ".zattrs").write_text(json.dumps(attrs), encoding="utf-8")
     arr = zarr.open_array(str(path / "0"), mode="w", shape=shape, chunks=shape, dtype="uint16", zarr_format=2)
     arr[:] = 1
     return path
@@ -65,7 +65,7 @@ def write_ome_zarr(path: Path, shape=(2, 16, 16), px=0.1) -> Path:
 
 def write_file_list(root: Path, files: list[str], name="file_list.tsv", header="Files", extra="condition") -> None:
     lines = [f"{header}\t{extra}"] + [f"{f}\tcontrol" for f in files]
-    (root / name).write_text("\n".join(lines) + "\n")
+    (root / name).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 @pytest.fixture
@@ -74,7 +74,7 @@ def bia_dataset(tmp_path: Path) -> Path:
     files = ["series1/img_01.ome.tif", "series1/img_02.ome.tif"]
     for f in files:
         write_ome_tiff(root / f)
-    (root / "submission.yaml").write_text(yaml.safe_dump(GOOD_META))
+    (root / "submission.yaml").write_text(yaml.safe_dump(GOOD_META), encoding="utf-8")
     write_file_list(root, files)
     return root
 
@@ -103,11 +103,11 @@ def idr_dataset(tmp_path: Path) -> Path:
     root.mkdir()
     write_ome_zarr(root / "images" / "a.ome.zarr")
     write_ome_zarr(root / "images" / "b.ome.zarr")
-    (root / "idrtest-study.txt").write_text(IDR_STUDY)
+    (root / "idrtest-study.txt").write_text(IDR_STUDY, encoding="utf-8")
     header = ["Source Name", "Characteristics [Organism]", "Assay Name", "Dataset Name", "Image File",
               "Comment [Image File Path]", "Channels"]
     rows = [["s1", "Homo sapiens", "a1", "ds1", "a.ome.zarr", "images", "DAPI:DNA;GFP:protein"],
             ["s2", "Homo sapiens", "a2", "ds1", "b.ome.zarr", "images", "DAPI:DNA;GFP:protein"]]
-    (root / "idrtest-assays.txt").write_text("\n".join("\t".join(r) for r in [header] + rows) + "\n")
-    (root / "idrtest-processed.txt").write_text("image\tcount\na.ome.zarr\t3\n")
+    (root / "idrtest-assays.txt").write_text("\n".join("\t".join(r) for r in [header] + rows) + "\n", encoding="utf-8")
+    (root / "idrtest-processed.txt").write_text("image\tcount\na.ome.zarr\t3\n", encoding="utf-8")
     return root
