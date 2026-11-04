@@ -475,7 +475,7 @@ def _read_bioio(path: Path, info: ImageInfo) -> None:
         from bioio import BioImage  # optional extra
     except ImportError:
         info.readable = None
-        info.notes.append("no reader installed for this vendor format; install micro-validate[vendor] and a bioio plugin to check it")
+        info.notes.append("no reader installed for this vendor format; install it with pip install "micro-validate[vendor] @ https://github.com/Yenula-W/microscopy-submission-validator/archive/main.zip" and a bioio plugin to check it")
         return
     try:
         img = BioImage(path)
