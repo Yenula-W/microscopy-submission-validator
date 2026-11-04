@@ -96,6 +96,7 @@ def test_xml_garbage_in_ome_tiff(tmp_path, capsys):
     assert info["readable"] in (True, False)  # either fallback-read or clean failure, never a crash
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows writes sparse files out in full")
 def test_huge_sparse_file_size_rule(tmp_path, capsys):
     f = tmp_path / "big.ome.tif"
     with open(f, "wb") as fh:
