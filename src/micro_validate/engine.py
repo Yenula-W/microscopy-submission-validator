@@ -90,12 +90,12 @@ def list_targets() -> list[str]:
 def load_ruleset(target_or_path: str | Path) -> RuleSet:
     p = Path(target_or_path)
     if p.suffix in (".yaml", ".yml") and p.exists():
-        text = p.read_text()
+        text = p.read_text(encoding="utf-8")
     else:
         f = resources.files("micro_validate").joinpath("rules").joinpath(f"{target_or_path}.yaml")
         if not f.is_file():
             raise ValueError(f"unknown target {target_or_path!r}; known: {', '.join(list_targets())}")
-        text = f.read_text()
+        text = f.read_text(encoding="utf-8")
     data = yaml.safe_load(text)
     sources = data.get("sources", {})
     rules = []

@@ -21,10 +21,12 @@ def _template(target: str) -> str:
             "# (idr0000-study_nonHCS.txt, experimentB/idr0000-experimentB-assays.txt) and place them\n"
             "# in the dataset root as <name>-study.txt and <name>-assays.txt.\n"
         )
-    return resources.files("micro_validate").joinpath("templates").joinpath("submission.yaml").read_text()
+    return resources.files("micro_validate").joinpath("templates").joinpath("submission.yaml").read_text(encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:
+    for stream in (sys.stdout, sys.stderr):  # Windows consoles cannot print every character
+        stream.reconfigure(errors="replace")
     p = argparse.ArgumentParser(
         prog="micro-validate",
         description="Validate a microscopy dataset against repository submission requirements.",
@@ -66,8 +68,8 @@ def main(argv: list[str] | None = None) -> int:
     if a.out:
         out = Path(a.out)
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.with_suffix(".md").write_text(md)
-        out.with_suffix(".json").write_text(json.dumps(report, indent=2, default=str))
+        out.with_suffix(".md").write_text(md, encoding="utf-8")
+        out.with_suffix(".json").write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
         print(f"wrote {out.with_suffix('.md')} and {out.with_suffix('.json')}", file=sys.stderr)
     print(json.dumps(report, indent=2, default=str) if a.json else md)
     if report["overall"] == "fail" or (a.strict and report["overall"] == "warn"):

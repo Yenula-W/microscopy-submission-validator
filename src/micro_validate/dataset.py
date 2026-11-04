@@ -204,7 +204,7 @@ def load_dataset(root: str | Path, metadata: str | Path | None = None, read_pixe
     if meta_path is not None:
         ds.metadata_path = str(meta_path)
         try:
-            text = meta_path.read_text()
+            text = meta_path.read_text(encoding="utf-8")
             ds.metadata = json.loads(text) if meta_path.suffix == ".json" else yaml.safe_load(text)
             if is_pagetab(ds.metadata):
                 ds.metadata = to_rembi(ds.metadata)

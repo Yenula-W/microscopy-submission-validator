@@ -340,7 +340,7 @@ def _apply_ngff(attrs: dict[str, Any], array_meta: dict[str, Any], info: ImageIn
 
 
 def _read_json(p: Path) -> dict[str, Any]:
-    return json.loads(p.read_text())
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 def _read_zarr_dir(path: Path, info: ImageInfo, verify_pixels: bool) -> None:
